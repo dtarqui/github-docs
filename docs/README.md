@@ -35,6 +35,7 @@ Recreación simplificada de GitHub utilizando arquitectura de microservicios, co
 - Colaborar en proyectos
 
 El objetivo principal es demostrar competencias en:
+
 - Diseño de arquitectura de microservicios
 - Contenedorización con Docker
 - Orquestación con Kubernetes
@@ -51,43 +52,43 @@ El objetivo principal es demostrar competencias en:
 
 #### Funcionalidades Incluidas
 
-| Módulo | Alcance | Descripción |
-|--------|---------|-------------|
-| **Autenticación** | Registro y login con email/password | Sistema completo de autenticación con JWT |
-| **Autenticación** | OIDC/SSO con Keycloak | Integración con Keycloak como proveedor principal de identidad |
-| **Repositorios** | CRUD completo | Crear, leer, actualizar y eliminar repositorios |
-| **Repositorios** | Visibilidad | Repositorios públicos y privados |
-| **Archivos** | Gestión básica | Subir, descargar, visualizar y eliminar archivos |
-| **Archivos** | Navegación | Explorador de archivos con estructura de carpetas |
-| **Issues** | CRUD completo | Crear, editar, cerrar y comentar issues |
-| **Issues** | Organización | Labels y asignación de usuarios |
-| **Búsqueda** | Búsqueda básica | Buscar repositorios por nombre y descripción |
-| **Colaboración** | Stars | Dar y quitar estrellas a repositorios |
+| Módulo            | Alcance                             | Descripción                                                    |
+| ----------------- | ----------------------------------- | -------------------------------------------------------------- |
+| **Autenticación** | Registro y login con email/password | Sistema completo de autenticación con JWT                      |
+| **Autenticación** | OIDC/SSO con Keycloak               | Integración con Keycloak como proveedor principal de identidad |
+| **Repositorios**  | CRUD completo                       | Crear, leer, actualizar y eliminar repositorios                |
+| **Repositorios**  | Visibilidad                         | Repositorios públicos y privados                               |
+| **Archivos**      | Gestión básica                      | Subir, descargar, visualizar y eliminar archivos               |
+| **Archivos**      | Navegación                          | Explorador de archivos con estructura de carpetas              |
+| **Issues**        | CRUD completo                       | Crear, editar, cerrar y comentar issues                        |
+| **Issues**        | Organización                        | Labels y asignación de usuarios                                |
+| **Búsqueda**      | Búsqueda básica                     | Buscar repositorios por nombre y descripción                   |
+| **Colaboración**  | Stars                               | Dar y quitar estrellas a repositorios                          |
 
 #### Arquitectura y Tecnología
 
-| Aspecto | Alcance |
-|---------|---------|
-| **Microservicios** | Mínimo 4 servicios independientes y desplegables |
-| **Contenedorización** | 100% de servicios dockerizados |
-| **Orquestación** | Docker Compose (desarrollo) + Kubernetes (producción) |
-| **Bases de datos** | Patrón database-per-service implementado |
-| **Mensajería** | Comunicación asíncrona entre servicios via RabbitMQ |
-| **Caché/Sesiones** | Redis para caché y sesiones de aplicación |
-| **API Gateway** | Punto único de entrada con autenticación centralizada |
-| **Cloud** | Despliegue funcional en al menos un proveedor cloud |
-| **CI/CD** | Soporte externo para el repositorio del equipo (fuera del producto) |
+| Aspecto               | Alcance                                                             |
+| --------------------- | ------------------------------------------------------------------- |
+| **Microservicios**    | Mínimo 4 servicios independientes y desplegables                    |
+| **Contenedorización** | 100% de servicios dockerizados                                      |
+| **Orquestación**      | Docker Compose (desarrollo) + Kubernetes (producción)               |
+| **Bases de datos**    | Patrón database-per-service implementado                            |
+| **Mensajería**        | Comunicación asíncrona entre servicios via RabbitMQ                 |
+| **Caché/Sesiones**    | Redis para caché y sesiones de aplicación                           |
+| **API Gateway**       | Punto único de entrada con autenticación centralizada               |
+| **Cloud**             | Despliegue funcional en al menos un proveedor cloud                 |
+| **CI/CD**             | Soporte externo para el repositorio del equipo (fuera del producto) |
 
 #### Entregables Comprometidos
 
-| Entregable | Descripción |
-|------------|-------------|
-| Código fuente | Repositorio con todo el código del proyecto |
+| Entregable            | Descripción                                               |
+| --------------------- | --------------------------------------------------------- |
+| Código fuente         | Repositorio con todo el código del proyecto               |
 | Documentación técnica | README, diagramas de arquitectura, especificación de APIs |
-| Docker Compose | Configuración para levantar todo el sistema localmente |
-| Manifiestos K8s | Archivos YAML para despliegue en Kubernetes |
-| Demo funcional | Aplicación desplegada y accesible en la nube |
-| Presentación | Slides y demo en vivo del proyecto |
+| Docker Compose        | Configuración para levantar todo el sistema localmente    |
+| Manifiestos K8s       | Archivos YAML para despliegue en Kubernetes               |
+| Demo funcional        | Aplicación desplegada y accesible en la nube              |
+| Presentación          | Slides y demo en vivo del proyecto                        |
 
 ---
 
@@ -95,75 +96,75 @@ El objetivo principal es demostrar competencias en:
 
 #### Funcionalidades Excluidas
 
-| Funcionalidad | Razón de Exclusión | Alternativa Implementada |
-|---------------|--------------------| -------------------------|
-| **Control de versiones Git real** | Complejidad extrema, requiere implementar protocolo Git completo | Simulación con versionado básico de archivos |
-| **Diff y merge de código** | Algoritmos complejos de comparación de texto | Visualización de contenido sin comparación |
-| **Branches reales** | Requiere implementación de árbol de commits | Concepto de branch como etiqueta/tag simple |
-| **Pull Requests** | Flujo complejo de revisión y merge | Sistema de issues como alternativa de discusión |
-| **Code review** | Comentarios en línea, sugerencias de cambios | Comentarios generales en issues |
-| **GitHub Actions/CI interno** | Sistema completo de workflows | CI/CD solo para el proyecto, no para repos de usuarios |
-| **Wikis** | Feature secundaria | README del repositorio |
-| **GitHub Pages** | Hosting de sitios estáticos | No incluido |
-| **Gists** | Snippets de código compartidos | No incluido |
-| **Organizaciones** | Gestión de equipos y permisos complejos | Solo usuarios individuales |
-| **Notificaciones en tiempo real** | WebSockets, SSE | Notificaciones por polling o no incluidas |
-| **GitHub Copilot / AI features** | Integración con modelos de IA | No incluido |
-| **Marketplace / Apps** | Ecosistema de integraciones | No incluido |
-| **Seguridad avanzada** | Escaneo de vulnerabilidades, Dependabot | No incluido |
-| **Insights / Analytics** | Gráficos de contribuciones, traffic | Estadísticas básicas (stars, issues count) |
+| Funcionalidad                     | Razón de Exclusión                                               | Alternativa Implementada                               |
+| --------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------ |
+| **Control de versiones Git real** | Complejidad extrema, requiere implementar protocolo Git completo | Simulación con versionado básico de archivos           |
+| **Diff y merge de código**        | Algoritmos complejos de comparación de texto                     | Visualización de contenido sin comparación             |
+| **Branches reales**               | Requiere implementación de árbol de commits                      | Concepto de branch como etiqueta/tag simple            |
+| **Pull Requests**                 | Flujo complejo de revisión y merge                               | Sistema de issues como alternativa de discusión        |
+| **Code review**                   | Comentarios en línea, sugerencias de cambios                     | Comentarios generales en issues                        |
+| **GitHub Actions/CI interno**     | Sistema completo de workflows                                    | CI/CD solo para el proyecto, no para repos de usuarios |
+| **Wikis**                         | Feature secundaria                                               | README del repositorio                                 |
+| **GitHub Pages**                  | Hosting de sitios estáticos                                      | No incluido                                            |
+| **Gists**                         | Snippets de código compartidos                                   | No incluido                                            |
+| **Organizaciones**                | Gestión de equipos y permisos complejos                          | Solo usuarios individuales                             |
+| **Notificaciones en tiempo real** | WebSockets, SSE                                                  | Notificaciones por polling o no incluidas              |
+| **GitHub Copilot / AI features**  | Integración con modelos de IA                                    | No incluido                                            |
+| **Marketplace / Apps**            | Ecosistema de integraciones                                      | No incluido                                            |
+| **Seguridad avanzada**            | Escaneo de vulnerabilidades, Dependabot                          | No incluido                                            |
+| **Insights / Analytics**          | Gráficos de contribuciones, traffic                              | Estadísticas básicas (stars, issues count)             |
 
 #### Limitaciones Técnicas
 
-| Limitación | Descripción | Impacto |
-|------------|-------------|---------|
-| **Tamaño de archivos** | Máximo 10MB por archivo | Suficiente para código, no para binarios grandes |
-| **Almacenamiento total** | Limitado por tier gratuito del cloud | ~5GB total en el sistema |
-| **Usuarios concurrentes** | Diseñado para ~100 usuarios | Demo académica, no producción |
-| **Disponibilidad** | No hay SLA definido | Puede haber downtime durante desarrollo |
-| **Backups** | No automatizados | Responsabilidad del equipo de desarrollo |
-| **Multi-región** | Despliegue en una sola región | Latencia variable según ubicación |
+| Limitación                | Descripción                          | Impacto                                          |
+| ------------------------- | ------------------------------------ | ------------------------------------------------ |
+| **Tamaño de archivos**    | Máximo 10MB por archivo              | Suficiente para código, no para binarios grandes |
+| **Almacenamiento total**  | Limitado por tier gratuito del cloud | ~5GB total en el sistema                         |
+| **Usuarios concurrentes** | Diseñado para ~100 usuarios          | Demo académica, no producción                    |
+| **Disponibilidad**        | No hay SLA definido                  | Puede haber downtime durante desarrollo          |
+| **Backups**               | No automatizados                     | Responsabilidad del equipo de desarrollo         |
+| **Multi-región**          | Despliegue en una sola región        | Latencia variable según ubicación                |
 
 #### Limitaciones de Seguridad
 
-| Aspecto | Limitación |
-|---------|------------|
-| **Auditoría** | No hay logs de auditoría para compliance |
-| **2FA** | Autenticación de dos factores no implementada |
-| **Encriptación** | Solo HTTPS en tránsito, no encriptación at-rest |
-| **Rate limiting** | Básico, no protección contra DDoS avanzada |
-| **Secrets scanning** | No se escanean secretos en repositorios |
+| Aspecto              | Limitación                                      |
+| -------------------- | ----------------------------------------------- |
+| **Auditoría**        | No hay logs de auditoría para compliance        |
+| **2FA**              | Autenticación de dos factores no implementada   |
+| **Encriptación**     | Solo HTTPS en tránsito, no encriptación at-rest |
+| **Rate limiting**    | Básico, no protección contra DDoS avanzada      |
+| **Secrets scanning** | No se escanean secretos en repositorios         |
 
 #### Limitaciones de Escalabilidad
 
-| Aspecto | Limitación | Solución Futura (No implementada) |
-|---------|------------|-----------------------------------|
-| **Base de datos** | Instancias únicas sin replicación | Réplicas de lectura, sharding |
-| **Caché** | Redis single-node | Redis Cluster |
-| **Búsqueda** | Elasticsearch single-node | Cluster con múltiples nodos |
-| **Storage** | MinIO single-node | Distribución con erasure coding |
+| Aspecto           | Limitación                        | Solución Futura (No implementada) |
+| ----------------- | --------------------------------- | --------------------------------- |
+| **Base de datos** | Instancias únicas sin replicación | Réplicas de lectura, sharding     |
+| **Caché**         | Redis single-node                 | Redis Cluster                     |
+| **Búsqueda**      | Elasticsearch single-node         | Cluster con múltiples nodos       |
+| **Storage**       | MinIO single-node                 | Distribución con erasure coding   |
 
 ---
 
 ### Comparativa: Mini-GitHub vs GitHub Real
 
-| Característica | GitHub Real | Mini-GitHub | Estado |
-|----------------|-------------|-------------|--------|
-| Usuarios registrados | 100M+ | Demo (~100) | Simplificado |
-| Repositorios | Ilimitados | Limitados | Simplificado |
-| Git protocol | Completo | No implementado | Excluido |
-| Push/Pull/Clone | SSH, HTTPS | Upload/Download UI | Alternativa |
-| Branches | Ilimitadas | Simuladas | Simplificado |
-| Commits history | Completo | No incluido | Excluido |
-| Pull Requests | Completo | No incluido | Excluido |
-| Issues | Completo | Básico | Simplificado |
-| Actions (CI/CD) | Completo | No incluido | Excluido |
-| Packages | Registry completo | No incluido | Excluido |
-| Projects | Kanban boards | No incluido | Excluido |
-| Discussions | Foros | No incluido | Excluido |
-| Mobile app | iOS/Android | No incluido | Excluido |
-| API | REST + GraphQL | REST básico | Simplificado |
-| Webhooks | Completo | No incluido | Excluido |
+| Característica       | GitHub Real       | Mini-GitHub        | Estado       |
+| -------------------- | ----------------- | ------------------ | ------------ |
+| Usuarios registrados | 100M+             | Demo (~100)        | Simplificado |
+| Repositorios         | Ilimitados        | Limitados          | Simplificado |
+| Git protocol         | Completo          | No implementado    | Excluido     |
+| Push/Pull/Clone      | SSH, HTTPS        | Upload/Download UI | Alternativa  |
+| Branches             | Ilimitadas        | Simuladas          | Simplificado |
+| Commits history      | Completo          | No incluido        | Excluido     |
+| Pull Requests        | Completo          | No incluido        | Excluido     |
+| Issues               | Completo          | Básico             | Simplificado |
+| Actions (CI/CD)      | Completo          | No incluido        | Excluido     |
+| Packages             | Registry completo | No incluido        | Excluido     |
+| Projects             | Kanban boards     | No incluido        | Excluido     |
+| Discussions          | Foros             | No incluido        | Excluido     |
+| Mobile app           | iOS/Android       | No incluido        | Excluido     |
+| API                  | REST + GraphQL    | REST básico        | Simplificado |
+| Webhooks             | Completo          | No incluido        | Excluido     |
 
 ---
 
@@ -171,23 +172,23 @@ El objetivo principal es demostrar competencias en:
 
 #### Supuestos
 
-| ID | Supuesto |
-|----|----------|
-| SUP-01 | El equipo tiene conocimientos básicos de Docker y contenedores |
-| SUP-02 | Se cuenta con acceso a un proveedor cloud con tier gratuito |
+| ID     | Supuesto                                                        |
+| ------ | --------------------------------------------------------------- |
+| SUP-01 | El equipo tiene conocimientos básicos de Docker y contenedores  |
+| SUP-02 | Se cuenta con acceso a un proveedor cloud con tier gratuito     |
 | SUP-03 | El equipo puede dedicar al menos 20 horas semanales al proyecto |
-| SUP-04 | Se tiene acceso a GitHub para el repositorio y CI/CD |
-| SUP-05 | Los usuarios del sistema tienen conexión a internet estable |
+| SUP-04 | Se tiene acceso a GitHub para el repositorio y CI/CD            |
+| SUP-05 | Los usuarios del sistema tienen conexión a internet estable     |
 
 #### Dependencias Externas
 
-| Dependencia | Tipo | Riesgo si no está disponible |
-|-------------|------|------------------------------|
-| Docker Hub | Imágenes base | Medio - se pueden usar mirrors |
-| npm Registry | Paquetes Node.js | Alto - crítico para el build |
-| Proveedor Cloud | Despliegue | Alto - no hay demo en producción |
-| GitHub | Repositorio y CI/CD | Medio - se puede usar alternativa |
-| MinIO/S3 | Almacenamiento | Alto - archivos no funcionan |
+| Dependencia     | Tipo                | Riesgo si no está disponible      |
+| --------------- | ------------------- | --------------------------------- |
+| Docker Hub      | Imágenes base       | Medio - se pueden usar mirrors    |
+| npm Registry    | Paquetes Node.js    | Alto - crítico para el build      |
+| Proveedor Cloud | Despliegue          | Alto - no hay demo en producción  |
+| GitHub          | Repositorio y CI/CD | Medio - se puede usar alternativa |
+| MinIO/S3        | Almacenamiento      | Alto - archivos no funcionan      |
 
 ---
 
@@ -195,27 +196,27 @@ El objetivo principal es demostrar competencias en:
 
 #### Mínimos para Aprobación
 
-| Criterio | Descripción | Verificación |
-|----------|-------------|--------------|
-| CA-01 | Al menos 4 microservicios funcionando | `docker-compose ps` muestra 4+ servicios healthy |
-| CA-02 | Registro y login de usuarios operativo | Flujo completo en UI sin errores |
-| CA-03 | CRUD de repositorios funcional | Crear, ver, editar, eliminar repos |
-| CA-04 | Upload/download de archivos | Subir archivo y descargarlo exitosamente |
-| CA-05 | Sistema de issues básico | Crear issue, comentar, cerrar |
-| CA-06 | Desplegado en cloud | URL pública accesible |
-| CA-07 | Despliegue del proyecto verificable sin pipeline interno | Evidencia de build/deploy manual o automatizado externo |
-| CA-08 | Documentación completa | README, diagramas, API docs |
+| Criterio | Descripción                                              | Verificación                                            |
+| -------- | -------------------------------------------------------- | ------------------------------------------------------- |
+| CA-01    | Al menos 4 microservicios funcionando                    | `docker-compose ps` muestra 4+ servicios healthy        |
+| CA-02    | Registro y login de usuarios operativo                   | Flujo completo en UI sin errores                        |
+| CA-03    | CRUD de repositorios funcional                           | Crear, ver, editar, eliminar repos                      |
+| CA-04    | Upload/download de archivos                              | Subir archivo y descargarlo exitosamente                |
+| CA-05    | Sistema de issues básico                                 | Crear issue, comentar, cerrar                           |
+| CA-06    | Desplegado en cloud                                      | URL pública accesible                                   |
+| CA-07    | Despliegue del proyecto verificable sin pipeline interno | Evidencia de build/deploy manual o automatizado externo |
+| CA-08    | Documentación completa                                   | README, diagramas, API docs                             |
 
 #### Deseables (Valor Agregado)
 
-| Criterio | Descripción |
-|----------|-------------|
-| CD-01 | SSO con Keycloak funcionando (login federado opcional) |
-| CD-02 | Búsqueda con Elasticsearch |
-| CD-03 | Métricas y health checks expuestos |
-| CD-04 | Tests automatizados (>50% coverage) |
-| CD-05 | Logs centralizados |
-| CD-06 | Kubernetes con auto-scaling configurado |
+| Criterio | Descripción                                            |
+| -------- | ------------------------------------------------------ |
+| CD-01    | SSO con Keycloak funcionando (login federado opcional) |
+| CD-02    | Búsqueda con Elasticsearch                             |
+| CD-03    | Métricas y health checks expuestos                     |
+| CD-04    | Tests automatizados (>50% coverage)                    |
+| CD-05    | Logs centralizados                                     |
+| CD-06    | Kubernetes con auto-scaling configurado                |
 
 ---
 
@@ -287,110 +288,122 @@ El objetivo principal es demostrar competencias en:
 
 ### Patrón de Arquitectura
 
-| Patrón | Descripción |
-|--------|-------------|
-| **Microservicios** | Cada funcionalidad es un servicio independiente |
-| **API Gateway** | Punto único de entrada para todas las peticiones |
+| Patrón                   | Descripción                                      |
+| ------------------------ | ------------------------------------------------ |
+| **Microservicios**       | Cada funcionalidad es un servicio independiente  |
+| **API Gateway**          | Punto único de entrada para todas las peticiones |
 | **Database per Service** | Cada microservicio tiene su propia base de datos |
-| **Event-Driven** | Comunicación asíncrona mediante eventos |
-| **CQRS** | Separación de lecturas y escrituras (búsqueda) |
+| **Event-Driven**         | Comunicación asíncrona mediante eventos          |
+| **CQRS**                 | Separación de lecturas y escrituras (búsqueda)   |
 
 ---
 
 ## Requisitos Funcionales (RF)
 
 ### RF01 - Gestión de Usuarios
-| ID | Requisito | Prioridad |
-|----|-----------|-----------|
-| RF01.1 | El sistema debe permitir el registro de usuarios con email y contraseña | Alta |
-| RF01.2 | El sistema debe permitir autenticación mediante OIDC/SSO con Keycloak | Alta |
-| RF01.3 | El sistema debe permitir la edición del perfil de usuario | Media |
-| RF01.4 | El sistema debe permitir la recuperación de contraseña | Baja |
+
+| ID     | Requisito                                                               | Prioridad |
+| ------ | ----------------------------------------------------------------------- | --------- |
+| RF01.1 | El sistema debe permitir el registro de usuarios con email y contraseña | Alta      |
+| RF01.2 | El sistema debe permitir autenticación mediante OIDC/SSO con Keycloak   | Alta      |
+| RF01.3 | El sistema debe permitir la edición del perfil de usuario               | Media     |
+| RF01.4 | El sistema debe permitir la recuperación de contraseña                  | Baja      |
 
 ### RF02 - Gestión de Repositorios
-| ID | Requisito | Prioridad |
-|----|-----------|-----------|
-| RF02.1 | El sistema debe permitir crear repositorios públicos y privados | Alta |
-| RF02.2 | El sistema debe permitir eliminar repositorios propios | Alta |
-| RF02.3 | El sistema debe permitir editar la información del repositorio | Media |
-| RF02.4 | El sistema debe mostrar la lista de repositorios del usuario | Alta |
-| RF02.5 | El sistema debe permitir hacer fork de repositorios públicos | Baja |
+
+| ID     | Requisito                                                       | Prioridad |
+| ------ | --------------------------------------------------------------- | --------- |
+| RF02.1 | El sistema debe permitir crear repositorios públicos y privados | Alta      |
+| RF02.2 | El sistema debe permitir eliminar repositorios propios          | Alta      |
+| RF02.3 | El sistema debe permitir editar la información del repositorio  | Media     |
+| RF02.4 | El sistema debe mostrar la lista de repositorios del usuario    | Alta      |
+| RF02.5 | El sistema debe permitir hacer fork de repositorios públicos    | Baja      |
 
 ### RF03 - Gestión de Archivos
-| ID | Requisito | Prioridad |
-|----|-----------|-----------|
-| RF03.1 | El sistema debe permitir subir archivos a un repositorio | Alta |
-| RF03.2 | El sistema debe permitir descargar archivos de un repositorio | Alta |
-| RF03.3 | El sistema debe mostrar el contenido de archivos de texto | Alta |
-| RF03.4 | El sistema debe permitir crear carpetas | Media |
-| RF03.5 | El sistema debe permitir eliminar archivos | Alta |
+
+| ID     | Requisito                                                     | Prioridad |
+| ------ | ------------------------------------------------------------- | --------- |
+| RF03.1 | El sistema debe permitir subir archivos a un repositorio      | Alta      |
+| RF03.2 | El sistema debe permitir descargar archivos de un repositorio | Alta      |
+| RF03.3 | El sistema debe mostrar el contenido de archivos de texto     | Alta      |
+| RF03.4 | El sistema debe permitir crear carpetas                       | Media     |
+| RF03.5 | El sistema debe permitir eliminar archivos                    | Alta      |
 
 ### RF04 - Gestión de Issues
-| ID | Requisito | Prioridad |
-|----|-----------|-----------|
-| RF04.1 | El sistema debe permitir crear issues en un repositorio | Alta |
-| RF04.2 | El sistema debe permitir asignar labels a los issues | Media |
-| RF04.3 | El sistema debe permitir comentar en issues | Alta |
-| RF04.4 | El sistema debe permitir cerrar/reabrir issues | Alta |
-| RF04.5 | El sistema debe permitir asignar usuarios a issues | Media |
+
+| ID     | Requisito                                               | Prioridad |
+| ------ | ------------------------------------------------------- | --------- |
+| RF04.1 | El sistema debe permitir crear issues en un repositorio | Alta      |
+| RF04.2 | El sistema debe permitir asignar labels a los issues    | Media     |
+| RF04.3 | El sistema debe permitir comentar en issues             | Alta      |
+| RF04.4 | El sistema debe permitir cerrar/reabrir issues          | Alta      |
+| RF04.5 | El sistema debe permitir asignar usuarios a issues      | Media     |
 
 ### RF05 - Búsqueda
-| ID | Requisito | Prioridad |
-|----|-----------|-----------|
-| RF05.1 | El sistema debe permitir buscar repositorios por nombre | Alta |
-| RF05.2 | El sistema debe permitir buscar usuarios | Media |
-| RF05.3 | El sistema debe permitir filtrar repositorios por lenguaje | Baja |
+
+| ID     | Requisito                                                  | Prioridad |
+| ------ | ---------------------------------------------------------- | --------- |
+| RF05.1 | El sistema debe permitir buscar repositorios por nombre    | Alta      |
+| RF05.2 | El sistema debe permitir buscar usuarios                   | Media     |
+| RF05.3 | El sistema debe permitir filtrar repositorios por lenguaje | Baja      |
 
 ### RF06 - Colaboración
-| ID | Requisito | Prioridad |
-|----|-----------|-----------|
-| RF06.1 | El sistema debe permitir dar "star" a repositorios | Media |
-| RF06.2 | El sistema debe mostrar estadísticas básicas del repo | Media |
+
+| ID     | Requisito                                             | Prioridad |
+| ------ | ----------------------------------------------------- | --------- |
+| RF06.1 | El sistema debe permitir dar "star" a repositorios    | Media     |
+| RF06.2 | El sistema debe mostrar estadísticas básicas del repo | Media     |
 
 ---
 
 ## Requisitos No Funcionales (RNF)
 
 ### Arquitectura y Diseño
-| ID | Requisito | Métrica |
-|----|-----------|---------|
-| RNF01 | El sistema debe implementar arquitectura de microservicios | Mínimo 4 servicios independientes |
-| RNF02 | Cada microservicio debe tener su propia base de datos | 1 BD por servicio |
+
+| ID    | Requisito                                                        | Métrica                             |
+| ----- | ---------------------------------------------------------------- | ----------------------------------- |
+| RNF01 | El sistema debe implementar arquitectura de microservicios       | Mínimo 4 servicios independientes   |
+| RNF02 | Cada microservicio debe tener su propia base de datos            | 1 BD por servicio                   |
 | RNF03 | Los servicios deben comunicarse mediante API REST y/o mensajería | 100% de comunicaciones documentadas |
 
 ### Contenedorización y Orquestación
-| ID | Requisito | Métrica |
-|----|-----------|---------|
-| RNF04 | Todos los servicios deben estar contenedorizados | 100% servicios en Docker |
+
+| ID    | Requisito                                                 | Métrica                      |
+| ----- | --------------------------------------------------------- | ---------------------------- |
+| RNF04 | Todos los servicios deben estar contenedorizados          | 100% servicios en Docker     |
 | RNF05 | El sistema debe usar Docker Compose para desarrollo local | docker-compose.yml funcional |
-| RNF06 | El sistema debe poder desplegarse en Kubernetes | Manifiestos K8s completos |
+| RNF06 | El sistema debe poder desplegarse en Kubernetes           | Manifiestos K8s completos    |
 
 ### Cloud y Despliegue
-| ID | Requisito | Métrica |
-|----|-----------|---------|
-| RNF07 | El sistema debe desplegarse en un proveedor cloud | AWS/GCP/Azure |
-| RNF08 | CI/CD del repositorio del equipo es externo al producto | No bloquea la entrega funcional |
-| RNF09 | El sistema debe tener configuración por variables de entorno | 0 credenciales hardcodeadas |
+
+| ID    | Requisito                                                    | Métrica                         |
+| ----- | ------------------------------------------------------------ | ------------------------------- |
+| RNF07 | El sistema debe desplegarse en un proveedor cloud            | AWS/GCP/Azure                   |
+| RNF08 | CI/CD del repositorio del equipo es externo al producto      | No bloquea la entrega funcional |
+| RNF09 | El sistema debe tener configuración por variables de entorno | 0 credenciales hardcodeadas     |
 
 ### Rendimiento y Escalabilidad
-| ID | Requisito | Métrica |
-|----|-----------|---------|
-| RNF10 | El API Gateway debe responder en menos de 100ms | p95 < 100ms en pruebas con 100 usuarios concurrentes |
-| RNF11 | Los servicios deben poder escalar horizontalmente | Réplicas configurables |
-| RNF12 | El sistema debe soportar al menos 100 usuarios concurrentes | Load test k6 exitoso sin errores criticos |
+
+| ID    | Requisito                                                   | Métrica                                              |
+| ----- | ----------------------------------------------------------- | ---------------------------------------------------- |
+| RNF10 | El API Gateway debe responder en menos de 100ms             | p95 < 100ms en pruebas con 100 usuarios concurrentes |
+| RNF11 | Los servicios deben poder escalar horizontalmente           | Réplicas configurables                               |
+| RNF12 | El sistema debe soportar al menos 100 usuarios concurrentes | Load test k6 exitoso sin errores criticos            |
 
 ### Seguridad
-| ID | Requisito | Métrica |
-|----|-----------|---------|
-| RNF13 | Todas las comunicaciones externas deben usar HTTPS | 100% endpoints HTTPS |
-| RNF14 | La autenticación debe usar JWT con expiración | Access token 15m + refresh token 7d |
-| RNF15 | Las contraseñas deben almacenarse hasheadas | bcrypt con salt |
+
+| ID    | Requisito                                          | Métrica                             |
+| ----- | -------------------------------------------------- | ----------------------------------- |
+| RNF13 | Todas las comunicaciones externas deben usar HTTPS | 100% endpoints HTTPS                |
+| RNF14 | La autenticación debe usar JWT con expiración      | Access token 15m + refresh token 7d |
+| RNF15 | Las contraseñas deben almacenarse hasheadas        | bcrypt con salt                     |
 
 ### Observabilidad
-| ID | Requisito | Métrica |
-|----|-----------|---------|
-| RNF16 | El sistema debe tener logging centralizado | Logs en formato JSON |
-| RNF17 | El sistema debe exponer métricas de salud | Endpoints /health en cada servicio |
+
+| ID    | Requisito                                  | Métrica                            |
+| ----- | ------------------------------------------ | ---------------------------------- |
+| RNF16 | El sistema debe tener logging centralizado | Logs en formato JSON               |
+| RNF17 | El sistema debe exponer métricas de salud  | Endpoints /health en cada servicio |
 
 ---
 
@@ -398,54 +411,54 @@ El objetivo principal es demostrar competencias en:
 
 ### Backend
 
-| Componente | Tecnología | Justificación |
-|------------|------------|---------------|
-| Lenguaje | Node.js (TypeScript) | Ecosistema maduro, async nativo |
-| Framework | Express.js / Fastify | Ligero, flexible, gran comunidad |
-| ORM SQL | Prisma | Type-safe, migraciones automáticas |
-| ODM NoSQL | Mongoose | Estándar para MongoDB |
-| Validación | Zod / Joi | Validación de schemas |
+| Componente    | Tecnología            | Justificación                                   |
+| ------------- | --------------------- | ----------------------------------------------- |
+| Lenguaje      | Node.js (TypeScript)  | Ecosistema maduro, async nativo                 |
+| Framework     | Express.js / Fastify  | Ligero, flexible, gran comunidad                |
+| ORM SQL       | Prisma                | Type-safe, migraciones automáticas              |
+| ODM NoSQL     | Mongoose              | Estándar para MongoDB                           |
+| Validación    | Zod / Joi             | Validación de schemas                           |
 | Autenticación | Keycloak (OIDC) + JWT | SSO estandar, gestion centralizada de identidad |
 
 ### Frontend
 
-| Componente | Tecnología | Justificación |
-|------------|------------|---------------|
-| Framework | React 18 | Componentes, hooks, ecosistema |
-| Lenguaje | TypeScript | Tipado estático, menos errores |
-| State Management | Zustand / Redux Toolkit | Simple y escalable |
-| Styling | Tailwind CSS | Utility-first, rápido desarrollo |
-| HTTP Client | Axios / TanStack Query | Caché, reintentos, estados |
-| Routing | React Router v6 | Estándar de la industria |
+| Componente       | Tecnología              | Justificación                    |
+| ---------------- | ----------------------- | -------------------------------- |
+| Framework        | React 18                | Componentes, hooks, ecosistema   |
+| Lenguaje         | TypeScript              | Tipado estático, menos errores   |
+| State Management | Zustand / Redux Toolkit | Simple y escalable               |
+| Styling          | Tailwind CSS            | Utility-first, rápido desarrollo |
+| HTTP Client      | Axios / TanStack Query  | Caché, reintentos, estados       |
+| Routing          | React Router v6         | Estándar de la industria         |
 
 ### Bases de Datos
 
-| Servicio | Base de Datos | Justificación |
-|----------|---------------|---------------|
-| Auth Service | PostgreSQL | Datos relacionales, ACID |
-| Repo Service | MongoDB | Documentos flexibles, archivos |
-| Issue Service | PostgreSQL | Relaciones complejas |
-| Search Service | Elasticsearch | Full-text search optimizado |
-| Caché | Redis | Sesiones, caché, pub/sub |
+| Servicio       | Base de Datos | Justificación                  |
+| -------------- | ------------- | ------------------------------ |
+| Auth Service   | PostgreSQL    | Datos relacionales, ACID       |
+| Repo Service   | MongoDB       | Documentos flexibles, archivos |
+| Issue Service  | PostgreSQL    | Relaciones complejas           |
+| Search Service | Elasticsearch | Full-text search optimizado    |
+| Caché          | Redis         | Sesiones, caché, pub/sub       |
 
 ### Infraestructura
 
-| Componente | Tecnología | Justificación |
-|------------|------------|---------------|
-| Contenedores | Docker | Estándar de la industria |
-| Orquestación Dev | Docker Compose | Simple para desarrollo |
-| Orquestación Prod | Kubernetes | Escalabilidad, auto-healing |
-| API Gateway | Kong / Nginx | Rate limiting, routing |
-| Message Broker | RabbitMQ | Mensajería confiable |
-| Object Storage | MinIO / AWS S3 | Almacenamiento de archivos |
-| CI/CD (externo) | GitHub Actions | Automatización del repositorio del equipo, fuera del producto |
+| Componente        | Tecnología     | Justificación                                                 |
+| ----------------- | -------------- | ------------------------------------------------------------- |
+| Contenedores      | Docker         | Estándar de la industria                                      |
+| Orquestación Dev  | Docker Compose | Simple para desarrollo                                        |
+| Orquestación Prod | Kubernetes     | Escalabilidad, auto-healing                                   |
+| API Gateway       | Kong / Nginx   | Rate limiting, routing                                        |
+| Message Broker    | RabbitMQ       | Mensajería confiable                                          |
+| Object Storage    | MinIO / AWS S3 | Almacenamiento de archivos                                    |
+| CI/CD (externo)   | GitHub Actions | Automatización del repositorio del equipo, fuera del producto |
 
 ### Cloud (elegir uno)
 
-| Proveedor | Servicios a Usar |
-|-----------|------------------|
-| **AWS** | EKS, RDS, S3, ElastiCache, ECR |
-| **GCP** | GKE, Cloud SQL, Cloud Storage, Memorystore |
+| Proveedor | Servicios a Usar                               |
+| --------- | ---------------------------------------------- |
+| **AWS**   | EKS, RDS, S3, ElastiCache, ECR                 |
+| **GCP**   | GKE, Cloud SQL, Cloud Storage, Memorystore     |
 | **Azure** | AKS, Azure Database, Blob Storage, Azure Cache |
 
 ---
@@ -691,6 +704,7 @@ mini-github/
 ### 1. API Gateway (Puerto 3000)
 
 **Responsabilidades:**
+
 - Punto único de entrada
 - Enrutamiento de peticiones
 - Autenticación/Autorización
@@ -703,6 +717,7 @@ mini-github/
 ### 2. Auth Service (Puerto 3001)
 
 **Responsabilidades:**
+
 - Registro de usuarios
 - Login/Logout
 - Generación y validación de JWT
@@ -712,6 +727,7 @@ mini-github/
 **Base de datos:** PostgreSQL
 
 **Eventos que emite:**
+
 - `user.created`
 - `user.updated`
 - `user.deleted`
@@ -719,6 +735,7 @@ mini-github/
 ### 3. Repo Service (Puerto 3002)
 
 **Responsabilidades:**
+
 - CRUD de repositorios
 - Gestión de archivos
 - Control de permisos
@@ -728,6 +745,7 @@ mini-github/
 **Base de datos:** MongoDB + MinIO (archivos)
 
 **Eventos que emite:**
+
 - `repo.created`
 - `repo.updated`
 - `repo.deleted`
@@ -736,6 +754,7 @@ mini-github/
 ### 4. Issue Service (Puerto 3003)
 
 **Responsabilidades:**
+
 - CRUD de issues
 - Gestión de comentarios
 - Labels y milestones
@@ -744,6 +763,7 @@ mini-github/
 **Base de datos:** PostgreSQL
 
 **Eventos que emite:**
+
 - `issue.created`
 - `issue.updated`
 - `issue.closed`
@@ -752,6 +772,7 @@ mini-github/
 ### 5. Search Service (Puerto 3004)
 
 **Responsabilidades:**
+
 - Indexación de repositorios
 - Búsqueda full-text
 - Filtrado y ordenamiento
@@ -760,6 +781,7 @@ mini-github/
 **Base de datos:** Elasticsearch
 
 **Eventos que consume:**
+
 - `repo.created`
 - `repo.updated`
 - `repo.deleted`
@@ -908,15 +930,15 @@ CREATE TABLE comments (
 
 ### Auth Service
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Registrar nuevo usuario |
-| POST | `/api/auth/login` | Iniciar sesión |
-| POST | `/api/auth/logout` | Cerrar sesión |
-| POST | `/api/auth/refresh` | Refrescar token |
-| GET | `/api/auth/me` | Obtener usuario actual |
-| GET | `/api/auth/login/keycloak` | Iniciar login OIDC con Keycloak |
-| GET | `/api/auth/callback/keycloak` | Callback OIDC de Keycloak |
+| Método | Endpoint                      | Descripción                     |
+| ------ | ----------------------------- | ------------------------------- |
+| POST   | `/api/auth/register`          | Registrar nuevo usuario         |
+| POST   | `/api/auth/login`             | Iniciar sesión                  |
+| POST   | `/api/auth/logout`            | Cerrar sesión                   |
+| POST   | `/api/auth/refresh`           | Refrescar token                 |
+| GET    | `/api/auth/me`                | Obtener usuario actual          |
+| GET    | `/api/auth/login/keycloak`    | Iniciar login OIDC con Keycloak |
+| GET    | `/api/auth/callback/keycloak` | Callback OIDC de Keycloak       |
 
 Nota: el usuario autenticado se deriva del token Bearer y no desde campos `user_id` enviados por el cliente.
 
@@ -947,18 +969,18 @@ POST /api/auth/register
 
 ### Repo Service
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/repos` | Listar repos del usuario |
-| POST | `/api/repos` | Crear repositorio |
-| GET | `/api/repos/:owner/:repo` | Obtener repositorio |
-| PATCH | `/api/repos/:owner/:repo` | Actualizar repositorio |
-| DELETE | `/api/repos/:owner/:repo` | Eliminar repositorio |
-| GET | `/api/repos/:owner/:repo/contents/*path` | Obtener contenido |
-| PUT | `/api/repos/:owner/:repo/contents/*path` | Subir archivo |
-| DELETE | `/api/repos/:owner/:repo/contents/*path` | Eliminar archivo |
-| PUT | `/api/repos/:owner/:repo/star` | Dar star |
-| DELETE | `/api/repos/:owner/:repo/star` | Quitar star |
+| Método | Endpoint                                 | Descripción              |
+| ------ | ---------------------------------------- | ------------------------ |
+| GET    | `/api/repos`                             | Listar repos del usuario |
+| POST   | `/api/repos`                             | Crear repositorio        |
+| GET    | `/api/repos/:owner/:repo`                | Obtener repositorio      |
+| PATCH  | `/api/repos/:owner/:repo`                | Actualizar repositorio   |
+| DELETE | `/api/repos/:owner/:repo`                | Eliminar repositorio     |
+| GET    | `/api/repos/:owner/:repo/contents/*path` | Obtener contenido        |
+| PUT    | `/api/repos/:owner/:repo/contents/*path` | Subir archivo            |
+| DELETE | `/api/repos/:owner/:repo/contents/*path` | Eliminar archivo         |
+| PUT    | `/api/repos/:owner/:repo/star`           | Dar star                 |
+| DELETE | `/api/repos/:owner/:repo/star`           | Quitar star              |
 
 **Ejemplos:**
 
@@ -982,16 +1004,16 @@ Content-Type: multipart/form-data
 
 ### Issue Service
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/repos/:owner/:repo/issues` | Listar issues |
-| POST | `/api/repos/:owner/:repo/issues` | Crear issue |
-| GET | `/api/repos/:owner/:repo/issues/:number` | Obtener issue |
-| PATCH | `/api/repos/:owner/:repo/issues/:number` | Actualizar issue |
-| GET | `/api/repos/:owner/:repo/issues/:number/comments` | Listar comentarios |
-| POST | `/api/repos/:owner/:repo/issues/:number/comments` | Crear comentario |
-| GET | `/api/repos/:owner/:repo/labels` | Listar labels |
-| POST | `/api/repos/:owner/:repo/labels` | Crear label |
+| Método | Endpoint                                          | Descripción        |
+| ------ | ------------------------------------------------- | ------------------ |
+| GET    | `/api/repos/:owner/:repo/issues`                  | Listar issues      |
+| POST   | `/api/repos/:owner/:repo/issues`                  | Crear issue        |
+| GET    | `/api/repos/:owner/:repo/issues/:number`          | Obtener issue      |
+| PATCH  | `/api/repos/:owner/:repo/issues/:number`          | Actualizar issue   |
+| GET    | `/api/repos/:owner/:repo/issues/:number/comments` | Listar comentarios |
+| POST   | `/api/repos/:owner/:repo/issues/:number/comments` | Crear comentario   |
+| GET    | `/api/repos/:owner/:repo/labels`                  | Listar labels      |
+| POST   | `/api/repos/:owner/:repo/labels`                  | Crear label        |
 
 **Ejemplos:**
 
@@ -1007,11 +1029,11 @@ POST /api/repos/johndoe/my-project/issues
 
 ### Search Service
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/search/repositories?q=` | Buscar repositorios |
-| GET | `/api/search/users?q=` | Buscar usuarios |
-| GET | `/api/search/issues?q=` | Buscar issues |
+| Método | Endpoint                      | Descripción         |
+| ------ | ----------------------------- | ------------------- |
+| GET    | `/api/search/repositories?q=` | Buscar repositorios |
+| GET    | `/api/search/users?q=`        | Buscar usuarios     |
+| GET    | `/api/search/issues?q=`       | Buscar issues       |
 
 ---
 
@@ -1133,28 +1155,33 @@ POST /api/repos/johndoe/my-project/issues
 ### Desarrollo Local
 
 1. **Clonar el repositorio**
+
 ```bash
 git clone https://github.com/tu-usuario/mini-github.git
 cd mini-github
 ```
 
 2. **Configurar variables de entorno**
+
 ```bash
 cp .env.example .env
 # Editar .env con tus configuraciones
 ```
 
 3. **Levantar servicios con Docker Compose**
+
 ```bash
 docker-compose up -d
 ```
 
 4. **Verificar que todos los servicios están corriendo**
+
 ```bash
 docker-compose ps
 ```
 
 5. **Acceder a la aplicación**
+
 - Frontend: http://localhost:3000
 - API Gateway: http://localhost:8080
 - RabbitMQ Management: http://localhost:15672
@@ -1217,23 +1244,27 @@ docker-compose -f docker-compose.prod.yml up -d
 ### Kubernetes
 
 1. **Crear namespace**
+
 ```bash
 kubectl apply -f infrastructure/kubernetes/namespace.yaml
 ```
 
 2. **Aplicar ConfigMaps y Secrets**
+
 ```bash
 kubectl apply -f infrastructure/kubernetes/configmaps/
 kubectl apply -f infrastructure/kubernetes/secrets/
 ```
 
 3. **Desplegar servicios**
+
 ```bash
 kubectl apply -f infrastructure/kubernetes/deployments/
 kubectl apply -f infrastructure/kubernetes/services/
 ```
 
 4. **Configurar Ingress**
+
 ```bash
 kubectl apply -f infrastructure/kubernetes/ingress/
 ```
@@ -1250,14 +1281,15 @@ Si el equipo decide usar GitHub Actions u otra herramienta para su flujo interno
 
 ### Semana 1: Fundamentos y Auth Service
 
-| Día | Tareas |
-|-----|--------|
+| Día | Tareas                                                          |
+| --- | --------------------------------------------------------------- |
 | 1-2 | Setup del proyecto, estructura de carpetas, Docker Compose base |
-| 3-4 | Auth Service: registro, login, JWT |
-| 5 | API Gateway básico con routing |
-| 6-7 | Frontend: páginas de login/registro |
+| 3-4 | Auth Service: registro, login, JWT                              |
+| 5   | API Gateway básico con routing                                  |
+| 6-7 | Frontend: páginas de login/registro                             |
 
 **Entregables:**
+
 - [ ] Estructura del proyecto
 - [ ] Auth Service funcionando
 - [ ] API Gateway con autenticación
@@ -1265,42 +1297,45 @@ Si el equipo decide usar GitHub Actions u otra herramienta para su flujo interno
 
 ### Semana 2: Repo Service y Archivos
 
-| Día | Tareas |
-|-----|--------|
-| 1-2 | Repo Service: CRUD de repositorios |
-| 3-4 | Integración con MinIO para archivos |
-| 5 | Upload/download de archivos |
+| Día | Tareas                                                  |
+| --- | ------------------------------------------------------- |
+| 1-2 | Repo Service: CRUD de repositorios                      |
+| 3-4 | Integración con MinIO para archivos                     |
+| 5   | Upload/download de archivos                             |
 | 6-7 | Frontend: dashboard, crear repo, explorador de archivos |
 
 **Entregables:**
+
 - [ ] CRUD de repositorios
 - [ ] Gestión de archivos
 - [ ] UI de repositorios
 
 ### Semana 3: Issues y Búsqueda
 
-| Día | Tareas |
-|-----|--------|
-| 1-2 | Issue Service: CRUD de issues |
-| 3 | Comentarios en issues |
+| Día | Tareas                           |
+| --- | -------------------------------- |
+| 1-2 | Issue Service: CRUD de issues    |
+| 3   | Comentarios en issues            |
 | 4-5 | Search Service con Elasticsearch |
-| 6-7 | Frontend: issues, búsqueda |
+| 6-7 | Frontend: issues, búsqueda       |
 
 **Entregables:**
+
 - [ ] Sistema de issues completo
 - [ ] Búsqueda funcionando
 - [ ] UI de issues y búsqueda
 
 ### Semana 4: Cloud, Despliegue y Documentación
 
-| Día | Tareas |
-|-----|--------|
-| 1-2 | Manifiestos Kubernetes |
+| Día | Tareas                                                                             |
+| --- | ---------------------------------------------------------------------------------- |
+| 1-2 | Manifiestos Kubernetes                                                             |
 | 3-4 | Preparación de despliegue y validación operativa (sin pipeline CI/CD del producto) |
-| 5 | Despliegue en cloud (AWS/GCP/Azure) |
-| 6-7 | Testing, documentación, presentación |
+| 5   | Despliegue en cloud (AWS/GCP/Azure)                                                |
+| 6-7 | Testing, documentación, presentación                                               |
 
 **Entregables:**
+
 - [ ] Aplicación desplegada en cloud
 - [ ] Despliegue validado (sin pipeline CI/CD del producto)
 - [ ] Documentación completa
@@ -1310,13 +1345,13 @@ Si el equipo decide usar GitHub Actions u otra herramienta para su flujo interno
 
 ## Equipo
 
-| Rol | Responsabilidades |
-|-----|-------------------|
-| **Backend Developer 1** | Auth Service, API Gateway |
-| **Backend Developer 2** | Repo Service, File Storage |
-| **Backend Developer 3** | Issue Service, Search Service |
-| **Frontend Developer** | React App, integración con APIs |
-| **DevOps** | Docker, Kubernetes, CI/CD, Cloud |
+| Rol                     | Responsabilidades                |
+| ----------------------- | -------------------------------- |
+| **Backend Developer 1** | Auth Service, API Gateway        |
+| **Backend Developer 2** | Repo Service, File Storage       |
+| **Backend Developer 3** | Issue Service, Search Service    |
+| **Frontend Developer**  | React App, integración con APIs  |
+| **DevOps**              | Docker, Kubernetes, CI/CD, Cloud |
 
 > **Nota:** Los roles pueden solaparse según el tamaño del equipo
 

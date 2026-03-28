@@ -13,7 +13,7 @@ Users (
   bio               TEXT,
   location          VARCHAR(100),
   website           VARCHAR(255),
-  CreatedAt         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP 
+  CreatedAt         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
    updated_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -169,7 +169,8 @@ Comments (
 );
 
 CREATE INDEX idx_comments_issue_id ON comments (issue_id);
-````
+```
+
 ---
 
 # Diagrama de Relaciones (por servicio)

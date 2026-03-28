@@ -1,4 +1,4 @@
-# Mini GitHub - Entidades Principales 
+# Mini GitHub - Entidades Principales
 
 ## Descripción del Sistema
 
@@ -29,18 +29,18 @@ El modelo de datos se enfoca en:
 
 ## Tabla de Entidades por Servicio
 
-| Entidad | Servicio | Base de Datos |
-|---|---|---|
-| `users` | Auth Service | PostgreSQL |
-| `oauth_accounts` | Auth Service | PostgreSQL |
-| `sessions` | Auth Service | PostgreSQL |
-| `repositories` | Repo Service | MongoDB |
-| `files` | Repo Service | MongoDB |
-| `stars` | Repo Service | MongoDB |
-| `issues` | Issue Service | PostgreSQL |
-| `labels` | Issue Service | PostgreSQL |
-| `issue_labels` | Issue Service | PostgreSQL |
-| `comments` | Issue Service | PostgreSQL |
+| Entidad          | Servicio      | Base de Datos |
+| ---------------- | ------------- | ------------- |
+| `users`          | Auth Service  | PostgreSQL    |
+| `oauth_accounts` | Auth Service  | PostgreSQL    |
+| `sessions`       | Auth Service  | PostgreSQL    |
+| `repositories`   | Repo Service  | MongoDB       |
+| `files`          | Repo Service  | MongoDB       |
+| `stars`          | Repo Service  | MongoDB       |
+| `issues`         | Issue Service | PostgreSQL    |
+| `labels`         | Issue Service | PostgreSQL    |
+| `issue_labels`   | Issue Service | PostgreSQL    |
+| `comments`       | Issue Service | PostgreSQL    |
 
 ---
 
@@ -49,18 +49,18 @@ El modelo de datos se enfoca en:
 Representa a los usuarios registrados en la plataforma.
 **Servicio:** Auth Service | **Base de datos:** PostgreSQL (`auth_db`)
 
-| Campo | Tipo |
-|------|------|
-| Id | UUID (PK) |
-| Username | VARCHAR(50) UNIQUE NOT NULL |
-| Email | VARCHAR(255) UNIQUE NOT NULL |
-| PasswordHash | VARCHAR(255) NOT NULL — bcrypt con salt |
-| avatar_url | VARCHAR(500) |
-| bio | TEXT |
-| location | VARCHAR(100) |
-| website | VARCHAR(255) |
-| CreatedAt | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
-| updated_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
+| Campo        | Tipo                                         |
+| ------------ | -------------------------------------------- |
+| Id           | UUID (PK)                                    |
+| Username     | VARCHAR(50) UNIQUE NOT NULL                  |
+| Email        | VARCHAR(255) UNIQUE NOT NULL                 |
+| PasswordHash | VARCHAR(255) NOT NULL — bcrypt con salt      |
+| avatar_url   | VARCHAR(500)                                 |
+| bio          | TEXT                                         |
+| location     | VARCHAR(100)                                 |
+| website      | VARCHAR(255)                                 |
+| CreatedAt    | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
+| updated_at   | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
 
 ---
 
@@ -69,16 +69,16 @@ Representa a los usuarios registrados en la plataforma.
 Vincula cuentas externas (GitHub, Google) a un usuario local.  
 **Servicio:** Auth Service | **Base de datos:** PostgreSQL (`auth_db`)
 
-| Campo | Tipo |
-|------|------|
-| id | UUID (PK) |
-| user_id | UUID (FK → users) ON DELETE CASCADE |
-| provider | VARCHAR(50) — 'github' \| 'google' |
-| provider_account_id | VARCHAR(255) NOT NULL |
-| access_token | TEXT |
-| refresh_token | TEXT |
-| expires_at | TIMESTAMP |
-| created_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
+| Campo               | Tipo                                         |
+| ------------------- | -------------------------------------------- |
+| id                  | UUID (PK)                                    |
+| user_id             | UUID (FK → users) ON DELETE CASCADE          |
+| provider            | VARCHAR(50) — 'github' \| 'google'           |
+| provider_account_id | VARCHAR(255) NOT NULL                        |
+| access_token        | TEXT                                         |
+| refresh_token       | TEXT                                         |
+| expires_at          | TIMESTAMP                                    |
+| created_at          | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
 
 ---
 
@@ -87,29 +87,28 @@ Vincula cuentas externas (GitHub, Google) a un usuario local.
 Gestiona los tokens JWT activos para control de sesiones.  
 **Servicio:** Auth Service | **Base de datos:** PostgreSQL (`auth_db`)
 
-| Campo | Tipo |
-|------|------|
-| id | UUID (PK) |
-| user_id | UUID (FK → users) ON DELETE CASCADE |
-| token | VARCHAR(500) UNIQUE NOT NULL |
-| expires_at | TIMESTAMP NOT NULL |
+| Campo      | Tipo                                         |
+| ---------- | -------------------------------------------- |
+| id         | UUID (PK)                                    |
+| user_id    | UUID (FK → users) ON DELETE CASCADE          |
+| token      | VARCHAR(500) UNIQUE NOT NULL                 |
+| expires_at | TIMESTAMP NOT NULL                           |
 | created_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
 
 ---
-
 
 ## Repository (Repositorio)
 
 Representa un repositorio Git creado por un usuario.
 
-| Campo | Tipo |
-|------|------|
-| Id | INT (PK) |
-| Name | VARCHAR |
-| Description | TEXT |
-| IsPrivate | BIT |
-| OwnerId | INT (FK → User) |
-| CreatedAt | DATETIME |
+| Campo       | Tipo            |
+| ----------- | --------------- |
+| Id          | INT (PK)        |
+| Name        | VARCHAR         |
+| Description | TEXT            |
+| IsPrivate   | BIT             |
+| OwnerId     | INT (FK → User) |
+| CreatedAt   | DATETIME        |
 
 ---
 
@@ -117,12 +116,12 @@ Representa un repositorio Git creado por un usuario.
 
 Define los niveles de acceso de los usuarios a un repositorio.
 
-| Campo | Tipo |
-|------|------|
-| Id | INT (PK) |
-| UserId | INT (FK → User) |
-| RepositoryId | INT (FK → Repository) |
-| Role | VARCHAR (Owner, Write, Read) |
+| Campo        | Tipo                         |
+| ------------ | ---------------------------- |
+| Id           | INT (PK)                     |
+| UserId       | INT (FK → User)              |
+| RepositoryId | INT (FK → Repository)        |
+| Role         | VARCHAR (Owner, Write, Read) |
 
 ---
 
@@ -130,12 +129,12 @@ Define los niveles de acceso de los usuarios a un repositorio.
 
 Representa las ramas dentro de un repositorio.
 
-| Campo | Tipo |
-|------|------|
-| Id | INT (PK) |
-| Name | VARCHAR |
+| Campo        | Tipo     |
+| ------------ | -------- |
+| Id           | INT (PK) |
+| Name         | VARCHAR  |
 | RepositoryId | INT (FK) |
-| IsDefault | BIT |
+| IsDefault    | BIT      |
 
 ---
 
@@ -143,14 +142,14 @@ Representa las ramas dentro de un repositorio.
 
 Representa los commits realizados en el repositorio.
 
-| Campo | Tipo |
-|------|------|
-| Id | VARCHAR (PK) |
-| Message | TEXT |
-| AuthorId | INT (FK → User) |
-| RepositoryId | INT (FK) |
-| BranchId | INT (FK) |
-| CreatedAt | DATETIME |
+| Campo        | Tipo            |
+| ------------ | --------------- |
+| Id           | VARCHAR (PK)    |
+| Message      | TEXT            |
+| AuthorId     | INT (FK → User) |
+| RepositoryId | INT (FK)        |
+| BranchId     | INT (FK)        |
+| CreatedAt    | DATETIME        |
 
 ---
 
@@ -158,11 +157,11 @@ Representa los commits realizados en el repositorio.
 
 Representa los archivos versionados en un commit.
 
-| Campo | Tipo |
-|------|------|
-| Id | INT (PK) |
-| Path | VARCHAR |
-| Content | TEXT |
+| Campo    | Tipo                  |
+| -------- | --------------------- |
+| Id       | INT (PK)              |
+| Path     | VARCHAR               |
+| Content  | TEXT                  |
 | CommitId | VARCHAR (FK → Commit) |
 
 ---
@@ -171,15 +170,15 @@ Representa los archivos versionados en un commit.
 
 Permite proponer cambios entre ramas.
 
-| Campo | Tipo |
-|------|------|
-| Id | INT (PK) |
-| Title | VARCHAR |
-| Description | TEXT |
-| SourceBranchId | INT |
-| TargetBranchId | INT |
-| AuthorId | INT |
-| Status | VARCHAR (Open, Closed, Merged) |
+| Campo          | Tipo                           |
+| -------------- | ------------------------------ |
+| Id             | INT (PK)                       |
+| Title          | VARCHAR                        |
+| Description    | TEXT                           |
+| SourceBranchId | INT                            |
+| TargetBranchId | INT                            |
+| AuthorId       | INT                            |
+| Status         | VARCHAR (Open, Closed, Merged) |
 
 ---
 
@@ -188,22 +187,22 @@ Permite proponer cambios entre ramas.
 Permite registrar tareas, bugs o mejoras.
 **Servicio:** Issue Service | **Base de datos:** PostgreSQL (`issues_db`)
 
-| Campo | Tipo |
-|------|------|
-| Id | UUID (PK) |
-| repo_id | VARCHAR(50) NOT NULL — ID del repo (Mongo ObjectId como texto o postgres) |
-| number | INTEGER NOT NULL — número secuencial por repo |
-| Title | VARCHAR(255) NOT NULL |
-| body | TEXT |
-| state | VARCHAR(20) NOT NULL DEFAULT 'open' — 'open' \| 'closed' |
-| Description | TEXT |
-| RepositoryId | INT |
-| AuthorId | INT |
-| Status | VARCHAR (Open, Closed) |
-| assignee_id | UUID — user_id de Auth Service (nullable) |
-| created_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
-| updated_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
-| closed_at | TIMESTAMP |
+| Campo        | Tipo                                                                      |
+| ------------ | ------------------------------------------------------------------------- |
+| Id           | UUID (PK)                                                                 |
+| repo_id      | VARCHAR(50) NOT NULL — ID del repo (Mongo ObjectId como texto o postgres) |
+| number       | INTEGER NOT NULL — número secuencial por repo                             |
+| Title        | VARCHAR(255) NOT NULL                                                     |
+| body         | TEXT                                                                      |
+| state        | VARCHAR(20) NOT NULL DEFAULT 'open' — 'open' \| 'closed'                  |
+| Description  | TEXT                                                                      |
+| RepositoryId | INT                                                                       |
+| AuthorId     | INT                                                                       |
+| Status       | VARCHAR (Open, Closed)                                                    |
+| assignee_id  | UUID — user_id de Auth Service (nullable)                                 |
+| created_at   | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                              |
+| updated_at   | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                              |
+| closed_at    | TIMESTAMP                                                                 |
 
 ---
 
@@ -212,13 +211,13 @@ Permite registrar tareas, bugs o mejoras.
 Etiquetas reutilizables dentro de un repositorio (bug, feature, etc.).  
 **Servicio:** Issue Service | **Base de datos:** PostgreSQL (`issues_db`)
 
-| Campo | Tipo |
-|------|------|
-| id | UUID (PK) |
-| repo_id | VARCHAR(50) NOT NULL |
-| name | VARCHAR(50) NOT NULL |
-| color | CHAR(7) NOT NULL — "#ff0000" |
-| description | VARCHAR(255) |
+| Campo       | Tipo                         |
+| ----------- | ---------------------------- |
+| id          | UUID (PK)                    |
+| repo_id     | VARCHAR(50) NOT NULL         |
+| name        | VARCHAR(50) NOT NULL         |
+| color       | CHAR(7) NOT NULL — "#ff0000" |
+| description | VARCHAR(255)                 |
 
 ---
 
@@ -226,8 +225,8 @@ Etiquetas reutilizables dentro de un repositorio (bug, feature, etc.).
 
 **Servicio:** Issue Service | **Base de datos:** PostgreSQL (`issues_db`)
 
-| Campo | Tipo |
-|------|------|
+| Campo    | Tipo                                 |
+| -------- | ------------------------------------ |
 | issue_id | UUID (FK → issues) ON DELETE CASCADE |
 | label_id | UUID (FK → labels) ON DELETE CASCADE |
 
@@ -237,15 +236,15 @@ Etiquetas reutilizables dentro de un repositorio (bug, feature, etc.).
 
 Permite comentar en Issues y Pull Requests.
 
-| Campo | Tipo |
-|------|------|
-| Id | UUID (PK) |
-| body | TEXT NOT NULL |
-| AuthorId | UUID NOT NULL — user_id de Auth Service |
-| IssueId | UUID (FK → issues) ON DELETE CASCADE |
-| PullRequestId | INT (NULLABLE) |
-| CreatedAt | DATETIME |
-| updated_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
+| Campo         | Tipo                                         |
+| ------------- | -------------------------------------------- |
+| Id            | UUID (PK)                                    |
+| body          | TEXT NOT NULL                                |
+| AuthorId      | UUID NOT NULL — user_id de Auth Service      |
+| IssueId       | UUID (FK → issues) ON DELETE CASCADE         |
+| PullRequestId | INT (NULLABLE)                               |
+| CreatedAt     | DATETIME                                     |
+| updated_at    | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
 
 ---
 
@@ -269,7 +268,4 @@ User ──< Session
 Repository ──< Star
 Issue >──< Label (via IssueLabel)
 
-````
-
-
-
+```

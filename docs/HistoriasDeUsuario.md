@@ -690,4 +690,4 @@
 
 ---
 
-*28 historias de usuario · 6 épicas*
+_28 historias de usuario · 6 épicas_
