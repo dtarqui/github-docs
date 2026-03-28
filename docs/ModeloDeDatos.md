@@ -13,7 +13,7 @@ Users (
   bio               TEXT,
   location          VARCHAR(100),
   website           VARCHAR(255),
-  CreatedAt         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  CreatedAt         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
    updated_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -49,87 +49,69 @@ CREATE INDEX idx_sessions_user_id    ON sessions (user_id);
 CREATE INDEX idx_sessions_expires_at ON sessions (expires_at);
 
 -- REPOSITORIES
-Repositories (
-  Id INT PRIMARY KEY,
-  Name VARCHAR(150),
-  Description TEXT,
-  IsPrivate BIT,
-  OwnerId INT,
-  CreatedAt DATETIME,
-  FOREIGN KEY (OwnerId) REFERENCES Users(Id)
+CREATE TABLE repositories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(150) NOT NULL,
+  description TEXT,
+  is_private BOOLEAN,
+  owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- PERMISSIONS
-RepositoryPermissions (
-  Id INT PRIMARY KEY,
-  UserId INT,
-  RepositoryId INT,
-  Role VARCHAR(50),
-  FOREIGN KEY (UserId) REFERENCES Users(Id),
-  FOREIGN KEY (RepositoryId) REFERENCES Repositories(Id)
+CREATE TABLE repository_permissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  repository_id UUID NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
+  role VARCHAR(50) NOT NULL,
+  
+  CONSTRAINT uq_repo_user_role UNIQUE (repository_id, user_id)
 );
 
 -- BRANCHES
-Branches (
-  Id INT PRIMARY KEY,
-  Name VARCHAR(100),
-  RepositoryId INT,
-  IsDefault BIT,
-  FOREIGN KEY (RepositoryId) REFERENCES Repositories(Id)
+CREATE TABLE branches (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(100) NOT NULL,
+  repository_id UUID NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
+  is_default BOOLEAN DEFAULT false,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- COMMITS
-Commits (
-  Id VARCHAR(100) PRIMARY KEY,
-  Message TEXT,
-  AuthorId INT,
-  RepositoryId INT,
-  BranchId INT,
-  CreatedAt DATETIME,
-  FOREIGN KEY (AuthorId) REFERENCES Users(Id),
-  FOREIGN KEY (RepositoryId) REFERENCES Repositories(Id),
-  FOREIGN KEY (BranchId) REFERENCES Branches(Id)
+CREATE TABLE commits (
+  id VARCHAR(100) PRIMARY KEY,
+  message TEXT NOT NULL,
+  author_id UUID NOT NULL REFERENCES users(id),
+  repository_id UUID NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
+  branch_id UUID REFERENCES branches(id) ON DELETE SET NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- FILES
-Files (
-  Id INT PRIMARY KEY,
-  Path VARCHAR(255),
-  Content TEXT,
-  CommitId VARCHAR(100),
-  FOREIGN KEY (CommitId) REFERENCES Commits(Id)
-);
-
--- PULL REQUESTS
-PullRequests (
-  Id INT PRIMARY KEY,
-  Title VARCHAR(150),
-  Description TEXT,
-  SourceBranchId INT,
-  TargetBranchId INT,
-  AuthorId INT,
-  Status VARCHAR(50)
+CREATE TABLE files (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  path VARCHAR(255) NOT NULL,
+  content TEXT,
+  commit_id VARCHAR(100) NOT NULL REFERENCES commits(id) ON DELETE CASCADE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ISSUES
-Issues (
-  Id           UUID   PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE issues (
+  id           UUID   PRIMARY KEY DEFAULT gen_random_uuid(),
   repo_id      VARCHAR(50) NOT NULL,
   number       INTEGER     NOT NULL,
-  Title        VARCHAR(255) NOT NULL,
+  title        VARCHAR(255) NOT NULL,
   body         TEXT,
   state        VARCHAR(20)  NOT NULL DEFAULT 'open',
-  Description  TEXT,
-  RepositoryId INT,
-  AuthorId     UUID  NOT NULL,,
-  Status       VARCHAR(50)
-  assignee_id UUID,
-    created_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    closed_at   TIMESTAMP,
+  author_id    UUID  NOT NULL REFERENCES users(id),
+  assignee_id  UUID REFERENCES users(id),
+  created_at   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  closed_at    TIMESTAMP,
 
-    CONSTRAINT uq_issue_repo_number UNIQUE (repo_id, number),
-    CONSTRAINT chk_issue_state CHECK (state IN ('open', 'closed'))
+  CONSTRAINT uq_issue_repo_number UNIQUE (repo_id, number),
+  CONSTRAINT chk_issue_state CHECK (state IN ('open', 'closed'))
 );
 
 CREATE INDEX idx_issues_repo_id    ON issues (repo_id);
@@ -158,14 +140,13 @@ CREATE TABLE issue_labels (
 );
 
 -- COMMENTS
-Comments (
-  Id          UUID  PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE comments (
+  id          UUID  PRIMARY KEY DEFAULT gen_random_uuid(),
   body        TEXT  NOT NULL,
-  AuthorId    UUID  NOT NULL,
-  IssueId     UUID  NOT NULL REFERENCES issues(id) ON DELETE CASCADE,
-  PullRequestId INT NULL,
-  CreatedAt DATETIME,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  author_id   UUID  NOT NULL REFERENCES users(id),
+  issue_id    UUID  NOT NULL REFERENCES issues(id) ON DELETE CASCADE,
+  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_comments_issue_id ON comments (issue_id);

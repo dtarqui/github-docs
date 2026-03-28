@@ -349,10 +349,11 @@ El objetivo principal es demostrar competencias en:
 
 ### RF06 - Colaboración
 
-| ID     | Requisito                                             | Prioridad |
-| ------ | ----------------------------------------------------- | --------- |
-| RF06.1 | El sistema debe permitir dar "star" a repositorios    | Media     |
-| RF06.2 | El sistema debe mostrar estadísticas básicas del repo | Media     |
+| ID     | Requisito                                                                                              | Prioridad |
+| ------ | ------------------------------------------------------------------------------------------------------ | --------- |
+| RF06.1 | El sistema debe permitir dar "star" a repositorios                                                     | Media     |
+| RF06.2 | El sistema debe mostrar estadísticas básicas del repo                                                  | Media     |
+| RF06.3 | El sistema debe permitir gestionar colaboradores de un repositorio con roles (Owner, Developer, Reporter) | Media  |
 
 ---
 

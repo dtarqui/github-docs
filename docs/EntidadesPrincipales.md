@@ -7,9 +7,8 @@ El sistema a desarrollar es una plataforma web tipo “Mini GitHub” que permit
 - Gestión de usuarios
 - Creación de repositorios Git
 - Control de acceso a repositorios
-- Manejo básico de ramas y commits
-- Visualización de archivos
-- Colaboración mediante Issues y Pull Requests
+- Subida, descarga y visualización de archivos
+- Colaboración mediante Issues y comentarios
 
 El sistema será implementado con Git como motor externo.
 
@@ -166,43 +165,24 @@ Representa los archivos versionados en un commit.
 
 ---
 
-## PullRequest (Solicitud de Cambio)
-
-Permite proponer cambios entre ramas.
-
-| Campo          | Tipo                           |
-| -------------- | ------------------------------ |
-| Id             | INT (PK)                       |
-| Title          | VARCHAR                        |
-| Description    | TEXT                           |
-| SourceBranchId | INT                            |
-| TargetBranchId | INT                            |
-| AuthorId       | INT                            |
-| Status         | VARCHAR (Open, Closed, Merged) |
-
----
-
 ## Issue (Incidencia)
 
 Permite registrar tareas, bugs o mejoras.
 **Servicio:** Issue Service | **Base de datos:** PostgreSQL (`issues_db`)
 
-| Campo        | Tipo                                                                      |
-| ------------ | ------------------------------------------------------------------------- |
-| Id           | UUID (PK)                                                                 |
-| repo_id      | VARCHAR(50) NOT NULL — ID del repo (Mongo ObjectId como texto o postgres) |
-| number       | INTEGER NOT NULL — número secuencial por repo                             |
-| Title        | VARCHAR(255) NOT NULL                                                     |
-| body         | TEXT                                                                      |
-| state        | VARCHAR(20) NOT NULL DEFAULT 'open' — 'open' \| 'closed'                  |
-| Description  | TEXT                                                                      |
-| RepositoryId | INT                                                                       |
-| AuthorId     | INT                                                                       |
-| Status       | VARCHAR (Open, Closed)                                                    |
-| assignee_id  | UUID — user_id de Auth Service (nullable)                                 |
-| created_at   | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                              |
-| updated_at   | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                              |
-| closed_at    | TIMESTAMP                                                                 |
+| Campo       | Tipo                                                                      |
+| ----------- | ------------------------------------------------------------------------- |
+| id          | UUID (PK)                                                                 |
+| repo_id     | VARCHAR(50) NOT NULL — ID del repo (Mongo ObjectId como texto)            |
+| number      | INTEGER NOT NULL — número secuencial por repo                            |
+| title       | VARCHAR(255) NOT NULL                                                     |
+| body        | TEXT                                                                      |
+| state       | VARCHAR(20) NOT NULL DEFAULT 'open' — 'open' \| 'closed'                  |
+| author_id   | UUID NOT NULL — user_id de Auth Service                                   |
+| assignee_id | UUID — user_id de Auth Service (nullable)                                 |
+| created_at  | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                              |
+| updated_at  | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                              |
+| closed_at   | TIMESTAMP                                                                 |
 
 ---
 
@@ -234,17 +214,30 @@ Etiquetas reutilizables dentro de un repositorio (bug, feature, etc.).
 
 ## Comment (Comentario)
 
-Permite comentar en Issues y Pull Requests.
+Permite comentar en Issues.
 
-| Campo         | Tipo                                         |
-| ------------- | -------------------------------------------- |
-| Id            | UUID (PK)                                    |
-| body          | TEXT NOT NULL                                |
-| AuthorId      | UUID NOT NULL — user_id de Auth Service      |
-| IssueId       | UUID (FK → issues) ON DELETE CASCADE         |
-| PullRequestId | INT (NULLABLE)                               |
-| CreatedAt     | DATETIME                                     |
-| updated_at    | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
+| Campo      | Tipo                                         |
+| ---------- | -------------------------------------------- |
+| Id         | UUID (PK)                                    |
+| body       | TEXT NOT NULL                                |
+| AuthorId   | UUID NOT NULL — user_id de Auth Service      |
+| IssueId    | UUID (FK → issues) ON DELETE CASCADE         |
+| CreatedAt  | DATETIME                                     |
+| updated_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
+
+---
+
+## Star (Estrella)
+
+Registra que un usuario marcó un repositorio como favorito.  
+**Servicio:** Repo Service | **Base de datos:** MongoDB
+
+| Campo      | Tipo                                         |
+| ---------- | -------------------------------------------- |
+| id         | ObjectId (PK)                                |
+| repo_id    | ObjectId (FK → repositories)                 |
+| user_id    | VARCHAR(50) NOT NULL — user_id de Auth Service |
+| created_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
 
 ---
 
@@ -255,12 +248,7 @@ Permite comentar en Issues y Pull Requests.
 User ──< Repository
 User ──< RepositoryPermission >── Repository
 
-Repository ──< Branch
-Branch ──< Commit
-Commit ──< File
-
 Repository ──< Issue ──< Comment
-Repository ──< PullRequest ──< Comment
 
 User ──< OAuthAccount
 User ──< Session

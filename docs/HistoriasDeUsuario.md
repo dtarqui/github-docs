@@ -5,7 +5,7 @@
 - [Épica 1: Autenticación y Gestión de Usuarios](#épica-1-autenticación-y-gestión-de-usuarios)
 - [Épica 2: Gestión de Repositorios](#épica-2-gestión-de-repositorios)
 - [Épica 3: Operaciones Git y Archivos](#épica-3-operaciones-git-y-archivos)
-- [Épica 4: Pull Requests y Colaboración](#épica-4-pull-requests-y-colaboración)
+- [Épica 4: Colaboración](#épica-4-colaboración)
 - [Épica 5: Búsqueda y Notificaciones](#épica-5-búsqueda-y-notificaciones)
 - [Épica 6: Documentación y Calidad](#épica-6-documentación-y-calidad)
 
@@ -65,28 +65,31 @@
 
 ---
 
-### HU-03: Autenticación con OAuth (GitHub/Google)
+### HU-03: Autenticación con SSO vía Keycloak con federación de proveedores
 
 > **Como** usuario
-> **Quiero** poder iniciar sesión con mi cuenta de GitHub o Google
-> **Para** no tener que recordar otra contraseña
+> **Quiero** poder iniciar sesión mediante SSO a través de Keycloak usando mi cuenta de GitHub, Google o credenciales locales
+> **Para** acceder sin tener que recordar otra contraseña y poder usar más de una forma de autenticación
 
 **Criterios de aceptación:**
 
-- [ ] Botones "Login with GitHub" y "Login with Google".
-- [ ] Redirección al proveedor OAuth y callback de retorno.
-- [ ] Creación automática de usuario si no existe.
-- [ ] Generación de JWT tras autenticación exitosa.
+- [ ] Botón "Login with SSO" en la pantalla de acceso.
+- [ ] Keycloak muestra opciones para: usuario/contraseña local, login con GitHub, login con Google.
+- [ ] Federación de identidades de GitHub y Google configurada en el realm de Keycloak.
+- [ ] Redirección al servidor Keycloak y callback de retorno con token OIDC.
+- [ ] Creación automática de usuario local si no existe (a partir del perfil federado).
+- [ ] Generación de JWT de la plataforma tras autenticación OIDC exitosa.
 
 **Checklist de tareas:**
 
-- [ ] Registrar aplicación en GitHub OAuth y Google Cloud.
-- [ ] Configurar variables de entorno para client IDs y secrets.
-- [ ] Implementar endpoints `/api/auth/github` y `/api/auth/google`.
-- [ ] Crear lógica de callback y creación/actualización de usuario.
-- [ ] Generar JWT y redirigir al frontend con token.
-- [ ] Agregar botones de OAuth en frontend.
-- [ ] Probar flujo completo en entorno local y producción.
+- [ ] Configurar realm y cliente en Keycloak.
+- [ ] Registrar y configurar identity providers: GitHub OAuth, Google OAuth en Keycloak.
+- [ ] Configurar variables de entorno (`KEYCLOAK_URL`, `CLIENT_ID`, `CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`).
+- [ ] Implementar endpoint `/api/auth/sso` y callback `/api/auth/sso/callback`.
+- [ ] Crear lógica de callback y creación/actualización de usuario local.
+- [ ] Generar JWT de la plataforma y redirigir al frontend con token.
+- [ ] Agregar botón de SSO en frontend que redirija a pantalla de login de Keycloak.
+- [ ] Probar flujo completo en entorno local y producción (usuario local, GitHub, Google).
 
 ---
 
@@ -212,7 +215,34 @@
 
 ---
 
-### HU-09: Eliminar repositorio
+### HU-10: Hacer fork de un repositorio público
+
+> **Como** usuario
+> **Quiero** hacer fork de un repositorio público para tener mi propia copia
+> **Para** trabajar en el proyecto de forma independiente
+
+**Criterios de aceptación:**
+
+- [ ] Botón "Fork" visible en repositorios públicos.
+- [ ] Creación de copia exacta del repositorio con nuevo dueño (el usuario).
+- [ ] Mantener referencia al repositorio original (upstream).
+- [ ] El fork aparece en la lista de repositorios del usuario.
+- [ ] Cambios en el fork no afectan al original.
+
+**Checklist de tareas:**
+
+- [ ] Crear endpoint `POST /api/repos/:repoId/fork`.
+- [ ] Validar que el repositorio sea público.
+- [ ] Copiar estructura del repositorio (metadata, files, issues, labels).
+- [ ] Asignar nuevo owner al fork (usuario autenticado).
+- [ ] Almacenar referencia al repositorio padre en la BD.
+- [ ] Agregar botón de fork en UI del repositorio.
+- [ ] Mostrar badge "forked from <original repo>" en la página del fork.
+- [ ] Redirigir al usuario al fork creado.
+
+---
+
+### HU-10: Eliminar repositorio
 
 > **Como** usuario propietario
 > **Quiero** eliminar un repositorio que ya no necesito
@@ -237,7 +267,7 @@
 
 ## Épica 3: Operaciones Git y Archivos
 
-### HU-10: Clonar repositorio vía HTTPS
+### HU-11: Clonar repositorio vía HTTPS
 
 > **Como** usuario
 > **Quiero** clonar un repositorio remoto usando HTTPS con mis credenciales o token
@@ -260,7 +290,7 @@
 
 ---
 
-### HU-11: Push/Pull vía HTTPS
+### HU-12: Push/Pull vía HTTPS
 
 > **Como** usuario
 > **Quiero** hacer push y pull de cambios usando HTTPS
@@ -283,7 +313,7 @@
 
 ---
 
-### HU-12: Navegación de archivos y carpetas
+### HU-13: Navegación de archivos y carpetas
 
 > **Como** usuario
 > **Quiero** explorar la estructura de archivos y carpetas de un repositorio desde el navegador
@@ -306,7 +336,7 @@
 
 ---
 
-### HU-13: Subir archivos directamente desde la web
+### HU-14: Subir archivos directamente desde la web
 
 > **Como** usuario
 > **Quiero** subir archivos nuevos a un repositorio sin usar Git
@@ -329,7 +359,7 @@
 
 ---
 
-### HU-14: Eliminar archivos desde la web
+### HU-15: Eliminar archivos desde la web
 
 > **Como** usuario
 > **Quiero** eliminar archivos de un repositorio desde el navegador
@@ -352,7 +382,7 @@
 
 ---
 
-### HU-15: Descargar archivos del repositorio
+### HU-16: Descargar archivos del repositorio
 
 > **Como** usuario
 > **Quiero** descargar archivos individuales o el repositorio completo como ZIP
@@ -376,7 +406,7 @@
 
 ---
 
-### HU-16: Crear carpetas en el repositorio
+### HU-17: Crear carpetas en el repositorio
 
 > **Como** usuario
 > **Quiero** crear carpetas nuevas en el repositorio desde la interfaz web
@@ -401,7 +431,7 @@
 
 ---
 
-### HU-17: Ver historial de commits
+### HU-18: Ver historial de commits
 
 > **Como** usuario
 > **Quiero** ver el historial de commits de un repositorio con fecha, autor y mensaje
@@ -427,7 +457,7 @@
 
 ---
 
-### HU-18: Gestión de branches
+### HU-19: Gestión de branches
 
 > **Como** usuario
 > **Quiero** ver, crear y cambiar entre branches
@@ -450,79 +480,9 @@
 
 ---
 
-## Épica 4: Pull Requests y Colaboración
+## Épica 4: Colaboración
 
-### HU-19: Crear Pull Request
-
-> **Como** colaborador
-> **Quiero** crear un Pull Request entre dos branches
-> **Para** proponer cambios para revisión
-
-**Criterios de aceptación:**
-
-- [ ] Formulario con branch origen, branch destino, título, descripción.
-- [ ] Mostrar commits incluidos y diff completo.
-- [ ] Detectar conflictos automáticamente al crear.
-- [ ] Guardar PR con estado "abierto".
-
-**Checklist de tareas:**
-
-- [ ] Endpoint `POST /api/repos/:repoId/pull-requests`.
-- [ ] Calcular diff y lista de commits entre branches.
-- [ ] Detectar conflictos (simular merge en seco).
-- [ ] Almacenar PR en BD.
-- [ ] Diseñar formulario de creación con preview de cambios.
-- [ ] Mostrar estado de conflictos.
-
----
-
-### HU-20: Revisar Pull Request con comentarios
-
-> **Como** reviewer asignado
-> **Quiero** poder comentar líneas específicas del diff y aprobar o solicitar cambios
-> **Para** dar feedback estructurado
-
-**Criterios de aceptación:**
-
-- [ ] Vista del PR con diff en línea.
-- [ ] Campo para comentarios generales y por línea.
-- [ ] Botones "Aprobar" y "Solicitar cambios".
-- [ ] Historial de comentarios y actividades.
-
-**Checklist de tareas:**
-
-- [ ] Endpoint `POST /api/repos/:repoId/pull-requests/:prId/comments`.
-- [ ] Asociar comentarios a líneas de archivos.
-- [ ] Endpoint `PATCH /api/repos/:repoId/pull-requests/:prId/review`.
-- [ ] UI con diff side-by-side y áreas de comentario.
-- [ ] Actualizar estado del PR según revisiones.
-
----
-
-### HU-21: Merge de Pull Request
-
-> **Como** usuario con permisos
-> **Quiero** hacer merge de un PR aprobado
-> **Para** integrar los cambios a la rama destino
-
-**Criterios de aceptación:**
-
-- [ ] Botón "Merge" habilitado solo si PR está aprobado y sin conflictos.
-- [ ] Opciones de merge: merge commit, squash, rebase (básico).
-- [ ] Ejecutar merge en el repositorio Git.
-- [ ] Cerrar PR automáticamente.
-
-**Checklist de tareas:**
-
-- [ ] Endpoint `POST /api/repos/:repoId/pull-requests/:prId/merge`.
-- [ ] Verificar ausencia de conflictos y aprobación.
-- [ ] Realizar merge usando librería Git.
-- [ ] Cerrar PR y actualizar estado.
-- [ ] Notificar por email a participantes.
-
----
-
-### HU-22: Gestión de colaboradores con roles
+### HU-20: Gestión de colaboradores con roles
 
 > **Como** owner de un repositorio
 > **Quiero** invitar a otros usuarios con roles específicos (Developer, Reporter)
@@ -534,7 +494,7 @@
 - [ ] Asignación de rol: Owner, Developer, Reporter.
 - [ ] Permisos por rol:
   - **Owner:** acceso total.
-  - **Developer:** push, crear branches, PRs.
+  - **Developer:** subir archivos, crear issues, comentar.
   - **Reporter:** solo lectura.
 - [ ] Listado de colaboradores.
 
@@ -548,7 +508,7 @@
 
 ---
 
-### HU-23: Dar estrella a repositorios
+### HU-21: Dar estrella a repositorios
 
 > **Como** usuario
 > **Quiero** marcar repositorios como favoritos
@@ -572,7 +532,7 @@
 
 ## Épica 5: Búsqueda y Notificaciones
 
-### HU-24: Buscar repositorios por nombre
+### HU-22: Buscar repositorios por nombre
 
 > **Como** usuario
 > **Quiero** buscar repositorios públicos por su nombre
@@ -595,7 +555,7 @@
 
 ---
 
-### HU-25: Buscar usuarios
+### HU-23: Buscar usuarios
 
 > **Como** usuario
 > **Quiero** buscar otros usuarios por nombre de usuario
@@ -616,7 +576,7 @@
 
 ---
 
-### HU-26: Notificaciones por email
+### HU-24: Notificaciones por email
 
 > **Como** usuario
 > **Quiero** recibir correos cuando ocurran eventos clave (PR creado, revisión, merge)
@@ -645,7 +605,7 @@
 
 ## Épica 6: Documentación y Calidad
 
-### HU-27: Documentación de API con Swagger
+### HU-25: Documentación de API con Swagger
 
 > **Como** desarrollador que integra con la plataforma
 > **Quiero** tener una documentación interactiva de la API
@@ -667,7 +627,7 @@
 
 ---
 
-### HU-28: Interfaz como Progressive Web App (PWA)
+### HU-26: Interfaz como Progressive Web App (PWA)
 
 > **Como** usuario
 > **Quiero** poder instalar la aplicación en mi dispositivo móvil
@@ -690,4 +650,4 @@
 
 ---
 
-_28 historias de usuario · 6 épicas_
+_26 historias de usuario · 6 épicas_
