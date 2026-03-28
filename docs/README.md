@@ -40,6 +40,8 @@ El objetivo principal es demostrar competencias en:
 - Orquestación con Kubernetes
 - Despliegue en servicios cloud
 - Patrones de comunicación entre servicios
+- AuthN/AuthZ con OIDC usando Keycloak
+- Diseño de contratos API con Smithy
 
 ---
 
@@ -52,7 +54,7 @@ El objetivo principal es demostrar competencias en:
 | Módulo | Alcance | Descripción |
 |--------|---------|-------------|
 | **Autenticación** | Registro y login con email/password | Sistema completo de autenticación con JWT |
-| **Autenticación** | OAuth básico | Integración con al menos un proveedor (GitHub o Google) |
+| **Autenticación** | OIDC/SSO con Keycloak | Integración con Keycloak como proveedor principal de identidad |
 | **Repositorios** | CRUD completo | Crear, leer, actualizar y eliminar repositorios |
 | **Repositorios** | Visibilidad | Repositorios públicos y privados |
 | **Archivos** | Gestión básica | Subir, descargar, visualizar y eliminar archivos |
@@ -71,9 +73,10 @@ El objetivo principal es demostrar competencias en:
 | **Orquestación** | Docker Compose (desarrollo) + Kubernetes (producción) |
 | **Bases de datos** | Patrón database-per-service implementado |
 | **Mensajería** | Comunicación asíncrona entre servicios via RabbitMQ |
+| **Caché/Sesiones** | Redis para caché y sesiones de aplicación |
 | **API Gateway** | Punto único de entrada con autenticación centralizada |
 | **Cloud** | Despliegue funcional en al menos un proveedor cloud |
-| **CI/CD** | Pipeline automatizado con GitHub Actions |
+| **CI/CD** | Soporte externo para el repositorio del equipo (fuera del producto) |
 
 #### Entregables Comprometidos
 
@@ -200,14 +203,14 @@ El objetivo principal es demostrar competencias en:
 | CA-04 | Upload/download de archivos | Subir archivo y descargarlo exitosamente |
 | CA-05 | Sistema de issues básico | Crear issue, comentar, cerrar |
 | CA-06 | Desplegado en cloud | URL pública accesible |
-| CA-07 | Pipeline CI/CD ejecutándose | Build y deploy automático en push |
+| CA-07 | Despliegue del proyecto verificable sin pipeline interno | Evidencia de build/deploy manual o automatizado externo |
 | CA-08 | Documentación completa | README, diagramas, API docs |
 
 #### Deseables (Valor Agregado)
 
 | Criterio | Descripción |
 |----------|-------------|
-| CD-01 | OAuth funcionando con GitHub |
+| CD-01 | SSO con Keycloak funcionando (login federado opcional) |
 | CD-02 | Búsqueda con Elasticsearch |
 | CD-03 | Métricas y health checks expuestos |
 | CD-04 | Tests automatizados (>50% coverage) |
@@ -249,7 +252,7 @@ El objetivo principal es demostrar competencias en:
 │ - Registro        │ │ - CRUD repos  │ │ - CRUD issues │ │ - Elasticsearch   │
 │ - Login/Logout    │ │ - Permisos    │ │ - Comentarios │ │ - Indexación      │
 │ - JWT tokens      │ │ - Branches    │ │ - Labels      │ │ - Búsqueda repos  │
-│ - OAuth (GitHub)  │ │ - Archivos    │ │ - Asignados   │ │ - Búsqueda código │
+│ - OIDC (Keycloak) │ │ - Archivos    │ │ - Asignados   │ │ - Búsqueda código │
 │                   │ │               │ │               │ │                   │
 │ Puerto: 3001      │ │ Puerto: 3002  │ │ Puerto: 3003  │ │ Puerto: 3004      │
 └────────┬──────────┘ └───────┬───────┘ └───────┬───────┘ └─────────┬─────────┘
@@ -272,12 +275,13 @@ El objetivo principal es demostrar competencias en:
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           MESSAGE BROKER                                     │
-│                         (RabbitMQ / Redis)                                   │
+│                         (RabbitMQ + Redis)                                   │
 │                                                                              │
 │  Comunicación asíncrona entre servicios:                                     │
 │  - Eventos de creación de repos                                              │
 │  - Notificaciones                                                            │
 │  - Indexación de búsqueda                                                    │
+│  Redis se usa para caché/sesiones (no como broker principal de eventos).     │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -299,7 +303,7 @@ El objetivo principal es demostrar competencias en:
 | ID | Requisito | Prioridad |
 |----|-----------|-----------|
 | RF01.1 | El sistema debe permitir el registro de usuarios con email y contraseña | Alta |
-| RF01.2 | El sistema debe permitir autenticación mediante OAuth (GitHub/Google) | Media |
+| RF01.2 | El sistema debe permitir autenticación mediante OIDC/SSO con Keycloak | Alta |
 | RF01.3 | El sistema debe permitir la edición del perfil de usuario | Media |
 | RF01.4 | El sistema debe permitir la recuperación de contraseña | Baja |
 
@@ -365,21 +369,21 @@ El objetivo principal es demostrar competencias en:
 | ID | Requisito | Métrica |
 |----|-----------|---------|
 | RNF07 | El sistema debe desplegarse en un proveedor cloud | AWS/GCP/Azure |
-| RNF08 | Debe existir un pipeline CI/CD | GitHub Actions configurado |
+| RNF08 | CI/CD del repositorio del equipo es externo al producto | No bloquea la entrega funcional |
 | RNF09 | El sistema debe tener configuración por variables de entorno | 0 credenciales hardcodeadas |
 
 ### Rendimiento y Escalabilidad
 | ID | Requisito | Métrica |
 |----|-----------|---------|
-| RNF10 | El API Gateway debe responder en menos de 100ms | p95 < 100ms |
+| RNF10 | El API Gateway debe responder en menos de 100ms | p95 < 100ms en pruebas con 100 usuarios concurrentes |
 | RNF11 | Los servicios deben poder escalar horizontalmente | Réplicas configurables |
-| RNF12 | El sistema debe soportar al menos 100 usuarios concurrentes | Load test exitoso |
+| RNF12 | El sistema debe soportar al menos 100 usuarios concurrentes | Load test k6 exitoso sin errores criticos |
 
 ### Seguridad
 | ID | Requisito | Métrica |
 |----|-----------|---------|
 | RNF13 | Todas las comunicaciones externas deben usar HTTPS | 100% endpoints HTTPS |
-| RNF14 | La autenticación debe usar JWT con expiración | Tokens con TTL de 24h |
+| RNF14 | La autenticación debe usar JWT con expiración | Access token 15m + refresh token 7d |
 | RNF15 | Las contraseñas deben almacenarse hasheadas | bcrypt con salt |
 
 ### Observabilidad
@@ -401,7 +405,7 @@ El objetivo principal es demostrar competencias en:
 | ORM SQL | Prisma | Type-safe, migraciones automáticas |
 | ODM NoSQL | Mongoose | Estándar para MongoDB |
 | Validación | Zod / Joi | Validación de schemas |
-| Autenticación | Passport.js + JWT | Flexible, múltiples estrategias |
+| Autenticación | Keycloak (OIDC) + JWT | SSO estandar, gestion centralizada de identidad |
 
 ### Frontend
 
@@ -434,7 +438,7 @@ El objetivo principal es demostrar competencias en:
 | API Gateway | Kong / Nginx | Rate limiting, routing |
 | Message Broker | RabbitMQ | Mensajería confiable |
 | Object Storage | MinIO / AWS S3 | Almacenamiento de archivos |
-| CI/CD | GitHub Actions | Integración nativa con GitHub |
+| CI/CD (externo) | GitHub Actions | Automatización del repositorio del equipo, fuera del producto |
 
 ### Cloud (elegir uno)
 
@@ -702,7 +706,7 @@ mini-github/
 - Registro de usuarios
 - Login/Logout
 - Generación y validación de JWT
-- OAuth con proveedores externos
+- Integración OIDC/SSO con Keycloak
 - Gestión de sesiones
 
 **Base de datos:** PostgreSQL
@@ -911,8 +915,10 @@ CREATE TABLE comments (
 | POST | `/api/auth/logout` | Cerrar sesión |
 | POST | `/api/auth/refresh` | Refrescar token |
 | GET | `/api/auth/me` | Obtener usuario actual |
-| GET | `/api/auth/oauth/:provider` | Iniciar OAuth |
-| GET | `/api/auth/oauth/:provider/callback` | Callback OAuth |
+| GET | `/api/auth/login/keycloak` | Iniciar login OIDC con Keycloak |
+| GET | `/api/auth/callback/keycloak` | Callback OIDC de Keycloak |
+
+Nota: el usuario autenticado se deriva del token Bearer y no desde campos `user_id` enviados por el cliente.
 
 **Ejemplos:**
 
@@ -1165,6 +1171,12 @@ LOG_LEVEL=debug
 API_GATEWAY_PORT=8080
 JWT_SECRET=your-super-secret-jwt-key
 
+# Keycloak (SSO/OIDC)
+KEYCLOAK_BASE_URL=http://keycloak:8080
+KEYCLOAK_REALM=mini-github
+KEYCLOAK_CLIENT_ID=mini-github-web
+KEYCLOAK_CLIENT_SECRET=change-me
+
 # Auth Service
 AUTH_SERVICE_PORT=3001
 AUTH_DATABASE_URL=postgresql://user:pass@postgres:5432/auth_db
@@ -1226,12 +1238,11 @@ kubectl apply -f infrastructure/kubernetes/services/
 kubectl apply -f infrastructure/kubernetes/ingress/
 ```
 
-### CI/CD con GitHub Actions
+### CI/CD (Fuera del Alcance del Producto)
 
-El pipeline incluye:
-- **CI**: Lint, tests, build de imágenes Docker
-- **CD Staging**: Deploy automático en push a `develop`
-- **CD Production**: Deploy manual con aprobación en push a `main`
+Para esta implementación de Mini-GitHub no se codificará un pipeline CI/CD como funcionalidad del sistema.
+
+Si el equipo decide usar GitHub Actions u otra herramienta para su flujo interno de trabajo, se considera soporte externo al producto.
 
 ---
 
@@ -1280,18 +1291,18 @@ El pipeline incluye:
 - [ ] Búsqueda funcionando
 - [ ] UI de issues y búsqueda
 
-### Semana 4: Cloud, CI/CD y Documentación
+### Semana 4: Cloud, Despliegue y Documentación
 
 | Día | Tareas |
 |-----|--------|
 | 1-2 | Manifiestos Kubernetes |
-| 3-4 | Pipeline CI/CD con GitHub Actions |
+| 3-4 | Preparación de despliegue y validación operativa (sin pipeline CI/CD del producto) |
 | 5 | Despliegue en cloud (AWS/GCP/Azure) |
 | 6-7 | Testing, documentación, presentación |
 
 **Entregables:**
 - [ ] Aplicación desplegada en cloud
-- [ ] CI/CD funcionando
+- [ ] Despliegue validado (sin pipeline CI/CD del producto)
 - [ ] Documentación completa
 - [ ] Demo funcional
 
