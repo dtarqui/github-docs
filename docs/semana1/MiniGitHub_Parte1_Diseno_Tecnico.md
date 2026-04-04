@@ -24,9 +24,10 @@ Finalmente, cabe señalar que los usuarios finales del sistema —estudiantes, d
 
 1. Se asume la disponibilidad de un proveedor **cloud** (p. ej. AWS) con permisos suficientes para desplegar EKS, RDS y recursos de red asociados, o bien un entorno local equivalente (p. ej. Docker Compose) para desarrollo.
 2. Se asume que **Keycloak** queda operativo —ya sea mediante el stack CDK de referencia o un despliegue equivalente— con *realm* y clientes configurados para el flujo OIDC descrito en este documento.
-3. Se asume que cada microservicio de aplicación posee **su propia base PostgreSQL** (`auth_db`, `repos_db`, `issues_db`), coherente con `ModeloDeDatos.md`, salvo decisión documentada en contrario.
-4. Se asume que **no** forma parte del alcance funcional del producto la implementación de **CI/CD interno** (L-01), de modo que el despliegue se documenta como proceso manual o externo al código entregable.
-5. Se asume que el equipo dispone del repositorio **Github-Smithy** compilable (`./gradlew build`, `./gradlew smithyBuild`) para obtener el artefacto OpenAPI canónico.
+3. Se asume que el equipo dispone del repositorio **Github-Smithy** compilable (`./gradlew build`, `./gradlew smithyBuild`) para obtener el artefacto OpenAPI canónico.
+4. Se asume que se desarrollara el proyecto en 4 semanas
+5. Se asume que los integrantes cuentan con disponibilidad necesaria para seguir el marco del proyecto de metodologia agil.
+
 
 ---
 
