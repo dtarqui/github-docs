@@ -99,7 +99,7 @@ CREATE TABLE files (
 -- ISSUES
 CREATE TABLE issues (
   id           UUID   PRIMARY KEY DEFAULT gen_random_uuid(),
-  repo_id      VARCHAR(50) NOT NULL,
+  repo_id      UUID   NOT NULL,
   number       INTEGER     NOT NULL,
   title        VARCHAR(255) NOT NULL,
   body         TEXT,
@@ -121,7 +121,7 @@ CREATE INDEX idx_issues_state      ON issues (state);
 -- LABELS
 CREATE TABLE labels (
     id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-    repo_id     VARCHAR(50) NOT NULL,
+    repo_id     UUID        NOT NULL,
     name        VARCHAR(50) NOT NULL,
     color       CHAR(7)     NOT NULL,
     description VARCHAR(255),
@@ -195,6 +195,12 @@ AUTH SERVICE (PostgreSQL)
 │ ...      │◄──────│ ...             │       │ ...      │
 └──────────┘       └─────────────────┘       └──────────┘
 
+
+REPO SERVICE (PostgreSQL)
+  repositories ──< branches
+  repositories ──< commits ──< files
+  repositories ──< stars
+  repositories ──< pull_requests
 
 ISSUE SERVICE (PostgreSQL)
 ┌──────────┐       ┌──────────────┐       ┌──────────┐

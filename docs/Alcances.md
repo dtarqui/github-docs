@@ -9,5 +9,4 @@ El proyecto incluye las siguientes funcionalidades:
 - **Issues:** Crear, comentar, etiquetar, asignar y cerrar issues dentro de un repositorio.
 - **Búsqueda:** Búsqueda de repositorios por nombre y usuarios por username.
 - **Colaboración:** Dar/quitar estrellas a repositorios, gestión de colaboradores con roles por repositorio.
-- **Notificaciones por email:** Alertas en eventos clave como nuevos issues, PRs creados, revisiones, merge e invitaciones a colaboradores.
 - **API REST documentada:** Endpoints documentados con Swagger UI.
