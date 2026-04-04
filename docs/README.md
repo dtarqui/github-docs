@@ -62,6 +62,7 @@ El objetivo principal es demostrar competencias en:
 | **Archivos**      | Navegación                          | Explorador de archivos con estructura de carpetas              |
 | **Issues**        | CRUD completo                       | Crear, editar, cerrar y comentar issues                        |
 | **Issues**        | Organización                        | Labels y asignación de usuarios                                |
+| **Pull Requests** | Gestión básica                      | Crear PRs, revisar con comentarios, aprobar y merge            |
 | **Búsqueda**      | Búsqueda básica                     | Buscar repositorios por nombre y descripción                   |
 | **Colaboración**  | Stars                               | Dar y quitar estrellas a repositorios                          |
 
@@ -96,23 +97,22 @@ El objetivo principal es demostrar competencias en:
 
 #### Funcionalidades Excluidas
 
-| Funcionalidad                     | Razón de Exclusión                                               | Alternativa Implementada                               |
-| --------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------ |
-| **Control de versiones Git real** | Complejidad extrema, requiere implementar protocolo Git completo | Simulación con versionado básico de archivos           |
-| **Diff y merge de código**        | Algoritmos complejos de comparación de texto                     | Visualización de contenido sin comparación             |
-| **Branches reales**               | Requiere implementación de árbol de commits                      | Concepto de branch como etiqueta/tag simple            |
-| **Pull Requests**                 | Flujo complejo de revisión y merge                               | Sistema de issues como alternativa de discusión        |
-| **Code review**                   | Comentarios en línea, sugerencias de cambios                     | Comentarios generales en issues                        |
-| **GitHub Actions/CI interno**     | Sistema completo de workflows                                    | CI/CD solo para el proyecto, no para repos de usuarios |
-| **Wikis**                         | Feature secundaria                                               | README del repositorio                                 |
-| **GitHub Pages**                  | Hosting de sitios estáticos                                      | No incluido                                            |
-| **Gists**                         | Snippets de código compartidos                                   | No incluido                                            |
-| **Organizaciones**                | Gestión de equipos y permisos complejos                          | Solo usuarios individuales                             |
-| **Notificaciones en tiempo real** | WebSockets, SSE                                                  | Notificaciones por polling o no incluidas              |
-| **GitHub Copilot / AI features**  | Integración con modelos de IA                                    | No incluido                                            |
-| **Marketplace / Apps**            | Ecosistema de integraciones                                      | No incluido                                            |
-| **Seguridad avanzada**            | Escaneo de vulnerabilidades, Dependabot                          | No incluido                                            |
-| **Insights / Analytics**          | Gráficos de contribuciones, traffic                              | Estadísticas básicas (stars, issues count)             |
+| Funcionalidad                     | Razón de Exclusión                                                  | Alternativa Implementada                               |
+| --------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
+| **Control de versiones Git real** | Complejidad extrema, requiere implementar protocolo Git completo    | Simulación con versionado básico de archivos           |
+| **Diff y merge de código**        | Algoritmos complejos de comparación de texto                        | Visualización de contenido sin comparación             |
+| **Branches reales**               | Requiere implementación de árbol de commits                         | Concepto de branch como etiqueta/tag simple            |
+| **Code review avanzado**          | Comentarios en línea con sugerencias automáticas y flujos complejos | Comentarios en PR e issues (básico)                    |
+| **GitHub Actions/CI interno**     | Sistema completo de workflows                                       | CI/CD solo para el proyecto, no para repos de usuarios |
+| **Wikis**                         | Feature secundaria                                                  | README del repositorio                                 |
+| **GitHub Pages**                  | Hosting de sitios estáticos                                         | No incluido                                            |
+| **Gists**                         | Snippets de código compartidos                                      | No incluido                                            |
+| **Organizaciones**                | Gestión de equipos y permisos complejos                             | Solo usuarios individuales                             |
+| **Notificaciones en tiempo real** | WebSockets, SSE                                                     | Notificaciones por polling o no incluidas              |
+| **GitHub Copilot / AI features**  | Integración con modelos de IA                                       | No incluido                                            |
+| **Marketplace / Apps**            | Ecosistema de integraciones                                         | No incluido                                            |
+| **Seguridad avanzada**            | Escaneo de vulnerabilidades, Dependabot                             | No incluido                                            |
+| **Insights / Analytics**          | Gráficos de contribuciones, traffic                                 | Estadísticas básicas (stars, issues count)             |
 
 #### Limitaciones Técnicas
 
@@ -156,7 +156,7 @@ El objetivo principal es demostrar competencias en:
 | Push/Pull/Clone      | SSH, HTTPS        | Upload/Download UI | Alternativa  |
 | Branches             | Ilimitadas        | Simuladas          | Simplificado |
 | Commits history      | Completo          | No incluido        | Excluido     |
-| Pull Requests        | Completo          | No incluido        | Excluido     |
+| Pull Requests        | Completo          | Básico             | Simplificado |
 | Issues               | Completo          | Básico             | Simplificado |
 | Actions (CI/CD)      | Completo          | No incluido        | Excluido     |
 | Packages             | Registry completo | No incluido        | Excluido     |
@@ -317,7 +317,8 @@ El objetivo principal es demostrar competencias en:
 | RF02.2 | El sistema debe permitir eliminar repositorios propios          | Alta      |
 | RF02.3 | El sistema debe permitir editar la información del repositorio  | Media     |
 | RF02.4 | El sistema debe mostrar la lista de repositorios del usuario    | Alta      |
-| RF02.5 | El sistema debe permitir hacer fork de repositorios públicos    | Baja      |
+| RF02.5 | El sistema debe permitir gestionar branches de repositorios     | Media     |
+| RF02.6 | El sistema debe permitir hacer fork de repositorios públicos    | Baja      |
 
 ### RF03 - Gestión de Archivos
 
@@ -349,11 +350,19 @@ El objetivo principal es demostrar competencias en:
 
 ### RF06 - Colaboración
 
-| ID     | Requisito                                                                                              | Prioridad |
-| ------ | ------------------------------------------------------------------------------------------------------ | --------- |
-| RF06.1 | El sistema debe permitir dar "star" a repositorios                                                     | Media     |
-| RF06.2 | El sistema debe mostrar estadísticas básicas del repo                                                  | Media     |
-| RF06.3 | El sistema debe permitir gestionar colaboradores de un repositorio con roles (Owner, Developer, Reporter) | Media  |
+| ID     | Requisito                                                                                                 | Prioridad |
+| ------ | --------------------------------------------------------------------------------------------------------- | --------- |
+| RF06.1 | El sistema debe permitir dar "star" a repositorios                                                        | Media     |
+| RF06.2 | El sistema debe mostrar estadísticas básicas del repo                                                     | Media     |
+| RF06.3 | El sistema debe permitir gestionar colaboradores de un repositorio con roles (Owner, Developer, Reporter) | Media     |
+
+### RF07 - Pull Requests
+
+| ID     | Requisito                                                                | Prioridad |
+| ------ | ------------------------------------------------------------------------ | --------- |
+| RF07.1 | El usuario puede crear Pull Requests entre branches                      | Media     |
+| RF07.2 | Los reviewers pueden aprobar o solicitar cambios en Pull Requests        | Media     |
+| RF07.3 | El sistema debe detectar conflictos antes del merge y bloquear si aplica | Media     |
 
 ---
 

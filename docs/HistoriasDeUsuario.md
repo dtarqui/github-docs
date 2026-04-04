@@ -5,7 +5,7 @@
 - [Épica 1: Autenticación y Gestión de Usuarios](#épica-1-autenticación-y-gestión-de-usuarios)
 - [Épica 2: Gestión de Repositorios](#épica-2-gestión-de-repositorios)
 - [Épica 3: Operaciones Git y Archivos](#épica-3-operaciones-git-y-archivos)
-- [Épica 4: Colaboración](#épica-4-colaboración)
+- [Épica 4: Pull Requests y Colaboración](#épica-4-pull-requests-y-colaboración)
 - [Épica 5: Búsqueda y Notificaciones](#épica-5-búsqueda-y-notificaciones)
 - [Épica 6: Documentación y Calidad](#épica-6-documentación-y-calidad)
 
@@ -215,7 +215,7 @@
 
 ---
 
-### HU-10: Hacer fork de un repositorio público
+### HU-09: Hacer fork de un repositorio público
 
 > **Como** usuario
 > **Quiero** hacer fork de un repositorio público para tener mi propia copia
@@ -480,9 +480,79 @@
 
 ---
 
-## Épica 4: Colaboración
+## Épica 4: Pull Requests y Colaboración
 
-### HU-20: Gestión de colaboradores con roles
+### HU-20: Crear Pull Request
+
+> **Como** colaborador
+> **Quiero** crear un Pull Request entre dos branches
+> **Para** proponer cambios para revisión
+
+**Criterios de aceptación:**
+
+- [ ] Formulario con branch origen, branch destino, título, descripción.
+- [ ] Mostrar commits incluidos y diff completo.
+- [ ] Detectar conflictos automáticamente al crear.
+- [ ] Guardar PR con estado "abierto".
+
+**Checklist de tareas:**
+
+- [ ] Endpoint `POST /api/repos/:repoId/pull-requests`.
+- [ ] Calcular diff y lista de commits entre branches.
+- [ ] Detectar conflictos (simular merge en seco).
+- [ ] Almacenar PR en BD.
+- [ ] Diseñar formulario de creación con preview de cambios.
+- [ ] Mostrar estado de conflictos.
+
+---
+
+### HU-21: Revisar Pull Request con comentarios
+
+> **Como** reviewer asignado
+> **Quiero** poder comentar líneas específicas del diff y aprobar o solicitar cambios
+> **Para** dar feedback estructurado
+
+**Criterios de aceptación:**
+
+- [ ] Vista del PR con diff en línea.
+- [ ] Campo para comentarios generales y por línea.
+- [ ] Botones "Aprobar" y "Solicitar cambios".
+- [ ] Historial de comentarios y actividades.
+
+**Checklist de tareas:**
+
+- [ ] Endpoint `POST /api/repos/:repoId/pull-requests/:prId/comments`.
+- [ ] Asociar comentarios a líneas de archivos.
+- [ ] Endpoint `PATCH /api/repos/:repoId/pull-requests/:prId/review`.
+- [ ] UI con diff side-by-side y áreas de comentario.
+- [ ] Actualizar estado del PR según revisiones.
+
+---
+
+### HU-22: Merge de Pull Request
+
+> **Como** usuario con permisos
+> **Quiero** hacer merge de un PR aprobado
+> **Para** integrar los cambios a la rama destino
+
+**Criterios de aceptación:**
+
+- [ ] Botón "Merge" habilitado solo si PR está aprobado y sin conflictos.
+- [ ] Opciones de merge: merge commit, squash, rebase (básico).
+- [ ] Ejecutar merge en el repositorio Git.
+- [ ] Cerrar PR automáticamente.
+
+**Checklist de tareas:**
+
+- [ ] Endpoint `POST /api/repos/:repoId/pull-requests/:prId/merge`.
+- [ ] Verificar ausencia de conflictos y aprobación.
+- [ ] Realizar merge usando librería Git.
+- [ ] Cerrar PR y actualizar estado.
+- [ ] Notificar por email a participantes.
+
+---
+
+### HU-23: Gestión de colaboradores con roles
 
 > **Como** owner de un repositorio
 > **Quiero** invitar a otros usuarios con roles específicos (Developer, Reporter)
@@ -508,7 +578,7 @@
 
 ---
 
-### HU-21: Dar estrella a repositorios
+### HU-24: Dar estrella a repositorios
 
 > **Como** usuario
 > **Quiero** marcar repositorios como favoritos
@@ -532,7 +602,7 @@
 
 ## Épica 5: Búsqueda y Notificaciones
 
-### HU-22: Buscar repositorios por nombre
+### HU-25: Buscar repositorios por nombre
 
 > **Como** usuario
 > **Quiero** buscar repositorios públicos por su nombre
@@ -555,7 +625,7 @@
 
 ---
 
-### HU-23: Buscar usuarios
+### HU-26: Buscar usuarios
 
 > **Como** usuario
 > **Quiero** buscar otros usuarios por nombre de usuario
@@ -576,7 +646,7 @@
 
 ---
 
-### HU-24: Notificaciones por email
+### HU-27: Notificaciones por email
 
 > **Como** usuario
 > **Quiero** recibir correos cuando ocurran eventos clave (PR creado, revisión, merge)
@@ -605,7 +675,7 @@
 
 ## Épica 6: Documentación y Calidad
 
-### HU-25: Documentación de API con Swagger
+### HU-28: Documentación de API con Swagger
 
 > **Como** desarrollador que integra con la plataforma
 > **Quiero** tener una documentación interactiva de la API
@@ -627,7 +697,7 @@
 
 ---
 
-### HU-26: Interfaz como Progressive Web App (PWA)
+### HU-29: Interfaz como Progressive Web App (PWA)
 
 > **Como** usuario
 > **Quiero** poder instalar la aplicación en mi dispositivo móvil
@@ -650,4 +720,4 @@
 
 ---
 
-_26 historias de usuario · 6 épicas_
+_29 historias de usuario · 6 épicas_

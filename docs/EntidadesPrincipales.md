@@ -165,24 +165,42 @@ Representa los archivos versionados en un commit.
 
 ---
 
+## PullRequest (Solicitud de Cambio)
+
+Permite proponer cambios entre ramas.
+
+| Campo          | Tipo                           |
+| -------------- | ------------------------------ |
+| Id             | UUID (PK)                      |
+| RepositoryId   | UUID (FK → Repository)         |
+| SourceBranchId | UUID                           |
+| TargetBranchId | UUID                           |
+| AuthorId       | UUID                           |
+| Title          | VARCHAR                        |
+| Description    | TEXT                           |
+| Status         | VARCHAR (Open, Closed, Merged) |
+| CreatedAt      | TIMESTAMP                      |
+
+---
+
 ## Issue (Incidencia)
 
 Permite registrar tareas, bugs o mejoras.
 **Servicio:** Issue Service | **Base de datos:** PostgreSQL (`issues_db`)
 
-| Campo       | Tipo                                                                      |
-| ----------- | ------------------------------------------------------------------------- |
-| id          | UUID (PK)                                                                 |
-| repo_id     | VARCHAR(50) NOT NULL — ID del repo (Mongo ObjectId como texto)            |
-| number      | INTEGER NOT NULL — número secuencial por repo                            |
-| title       | VARCHAR(255) NOT NULL                                                     |
-| body        | TEXT                                                                      |
-| state       | VARCHAR(20) NOT NULL DEFAULT 'open' — 'open' \| 'closed'                  |
-| author_id   | UUID NOT NULL — user_id de Auth Service                                   |
-| assignee_id | UUID — user_id de Auth Service (nullable)                                 |
-| created_at  | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                              |
-| updated_at  | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                              |
-| closed_at   | TIMESTAMP                                                                 |
+| Campo       | Tipo                                                           |
+| ----------- | -------------------------------------------------------------- |
+| id          | UUID (PK)                                                      |
+| repo_id     | VARCHAR(50) NOT NULL — ID del repo (Mongo ObjectId como texto) |
+| number      | INTEGER NOT NULL — número secuencial por repo                  |
+| title       | VARCHAR(255) NOT NULL                                          |
+| body        | TEXT                                                           |
+| state       | VARCHAR(20) NOT NULL DEFAULT 'open' — 'open' \| 'closed'       |
+| author_id   | UUID NOT NULL — user_id de Auth Service                        |
+| assignee_id | UUID — user_id de Auth Service (nullable)                      |
+| created_at  | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                   |
+| updated_at  | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                   |
+| closed_at   | TIMESTAMP                                                      |
 
 ---
 
@@ -214,16 +232,17 @@ Etiquetas reutilizables dentro de un repositorio (bug, feature, etc.).
 
 ## Comment (Comentario)
 
-Permite comentar en Issues.
+Permite comentar en Issues y Pull Requests.
 
-| Campo      | Tipo                                         |
-| ---------- | -------------------------------------------- |
-| Id         | UUID (PK)                                    |
-| body       | TEXT NOT NULL                                |
-| AuthorId   | UUID NOT NULL — user_id de Auth Service      |
-| IssueId    | UUID (FK → issues) ON DELETE CASCADE         |
-| CreatedAt  | DATETIME                                     |
-| updated_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
+| Campo         | Tipo                                                   |
+| ------------- | ------------------------------------------------------ |
+| Id            | UUID (PK)                                              |
+| body          | TEXT NOT NULL                                          |
+| AuthorId      | UUID NOT NULL — user_id de Auth Service                |
+| IssueId       | UUID (FK → issues) ON DELETE CASCADE                   |
+| PullRequestId | UUID (FK → pull_requests) ON DELETE CASCADE (nullable) |
+| CreatedAt     | DATETIME                                               |
+| updated_at    | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP           |
 
 ---
 
@@ -232,12 +251,12 @@ Permite comentar en Issues.
 Registra que un usuario marcó un repositorio como favorito.  
 **Servicio:** Repo Service | **Base de datos:** MongoDB
 
-| Campo      | Tipo                                         |
-| ---------- | -------------------------------------------- |
-| id         | ObjectId (PK)                                |
-| repo_id    | ObjectId (FK → repositories)                 |
+| Campo      | Tipo                                           |
+| ---------- | ---------------------------------------------- |
+| id         | ObjectId (PK)                                  |
+| repo_id    | ObjectId (FK → repositories)                   |
 | user_id    | VARCHAR(50) NOT NULL — user_id de Auth Service |
-| created_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
+| created_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP   |
 
 ---
 
@@ -249,6 +268,7 @@ User ──< Repository
 User ──< RepositoryPermission >── Repository
 
 Repository ──< Issue ──< Comment
+Repository ──< PullRequest ──< Comment
 
 User ──< OAuthAccount
 User ──< Session

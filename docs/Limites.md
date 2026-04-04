@@ -10,8 +10,7 @@ Las siguientes funcionalidades quedan **fuera del alcance** del proyecto:
 | L-04 | Registro de paquetes               | No se publicarán ni consumirán paquetes npm, Maven, Docker o PyPI desde la plataforma.                                                       |
 | L-05 | Git LFS y archivos grandes         | Tamaño máximo de repositorio: 100 MB. No se implementará Git Large File Storage.                                                             |
 | L-06 | Notificaciones en tiempo real      | Sin WebSockets ni push notifications. Las actualizaciones se verán al recargar la página. Solo notificaciones por email.                     |
-| L-07 | Búsqueda de código                 | No habrá indexación ni búsqueda dentro del contenido de archivos. Solo búsqueda por nombre de repositorio y usuario.                        |
+| L-07 | Búsqueda de código                 | No habrá indexación ni búsqueda dentro del contenido de archivos. Solo búsqueda por nombre de repositorio y usuario.                         |
 | L-08 | Aplicación móvil nativa            | Se implementará como PWA (Progressive Web App) en lugar de app nativa.                                                                       |
-| L-09 | Pull Requests como feature         | La plataforma Mini-GitHub no implementa Pull Requests para sus usuarios. El equipo de desarrollo sí utilizará PRs en el repositorio del proyecto para gestionar el propio código fuente. |
 
 ---
