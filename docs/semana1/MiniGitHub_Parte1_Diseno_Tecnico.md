@@ -42,12 +42,13 @@ Las exclusiones relevantes —ordenadas según su impacto en el diseño— son: 
 
 ### Fases propuestas
 
-| Fase | Contenido principal | Resultado esperado |
-| ---- | ------------------- | ------------------ |
-| **1** | Autenticación, gateway mínimo, contrato Smithy estable, despliegue Keycloak + RDS (referencia CDK) | Flujo OIDC demostrable; API documentada |
-| **2** | Repo Service, almacenamiento de objetos (MinIO/S3), eventos hacia búsqueda | CRUD de repositorios y archivos coherentes con OpenAPI |
-| **3** | Issue Service, Search Service, frontend integrado | Flujos HU principales cerrados en demo |
-| **4** | Kubernetes en cloud, validación operativa, documentación final | Entrega académica completa sin CI/CD en producto |
+| Fase | Fecha (consigna docente) | Contenido oficial | Alineación con la documentación del ecosistema Mini-GitHub |
+| ---- | ------------------------ | ----------------- | ---------------------------------------------------------- |
+| **Parte 1** | Domingo 29 de marzo | Diseño del sistema; implementación de AuthN / AuthZ | Documento de diseño, `Rubrica_Parte1.md`, modelo **Smithy** / OpenAPI, OIDC con **Keycloak**, roles en repositorio; infra opcional **Github-Cdk**. |
+| **Parte 2** | Domingo 12 de abril | Implementación de microservicios; base de datos | Servicios y puertos de `README.md` / `.claude-context.md`, **PostgreSQL** por servicio (`ModeloDeDatos.md`), MinIO/S3, RabbitMQ, Redis, Elasticsearch, contrato **Github-Smithy**. |
+| **Entrega final** | Domingo 26 de abril | Implementación de CI/CD; observabilidad | Pipelines y observabilidad del **proyecto del equipo** (repositorios GitHub); coherente con entrega final docente y con **RNF** / plan en `README.md` (sin interpretar CI/CD como feature **L-01** del producto). |
+
+**Entregables (docente):** repositorios en GitHub (CDK, microservicios, modelo Smithy); documento de diseño del sistema; presentación y grabación (20 minutos).
 
 ---
 
