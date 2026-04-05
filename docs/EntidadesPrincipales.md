@@ -8,7 +8,7 @@ El sistema a desarrollar es una plataforma web tipo “Mini GitHub” que permit
 - Creación de repositorios Git
 - Control de acceso a repositorios
 - Subida, descarga y visualización de archivos
-- Colaboración mediante Issues y comentarios
+- Colaboración mediante Issues, Pull Requests y comentarios
 
 El sistema será implementado con Git como motor externo.
 
@@ -28,18 +28,22 @@ El modelo de datos se enfoca en:
 
 ## Tabla de Entidades por Servicio
 
-| Entidad          | Servicio      | Base de Datos |
-| ---------------- | ------------- | ------------- |
-| `users`          | Auth Service  | PostgreSQL    |
-| `oauth_accounts` | Auth Service  | PostgreSQL    |
-| `sessions`       | Auth Service  | PostgreSQL    |
-| `repositories`   | Repo Service  | PostgreSQL    |
-| `files`          | Repo Service  | PostgreSQL    |
-| `stars`          | Repo Service  | PostgreSQL    |
-| `issues`         | Issue Service | PostgreSQL    |
-| `labels`         | Issue Service | PostgreSQL    |
-| `issue_labels`   | Issue Service | PostgreSQL    |
-| `comments`       | Issue Service | PostgreSQL    |
+| Entidad                  | Servicio      | Base de Datos |
+| ------------------------ | ------------- | ------------- |
+| `users`                  | Auth Service  | PostgreSQL    |
+| `oauth_accounts`         | Auth Service  | PostgreSQL    |
+| `sessions`               | Auth Service  | PostgreSQL    |
+| `repositories`           | Repo Service  | PostgreSQL    |
+| `repository_permissions` | Repo Service  | PostgreSQL    |
+| `branches`               | Repo Service  | PostgreSQL    |
+| `commits`                | Repo Service  | PostgreSQL    |
+| `files`                  | Repo Service  | PostgreSQL    |
+| `pull_requests`          | Repo Service  | PostgreSQL    |
+| `stars`                  | Repo Service  | PostgreSQL    |
+| `issues`                 | Issue Service | PostgreSQL    |
+| `labels`                 | Issue Service | PostgreSQL    |
+| `issue_labels`           | Issue Service | PostgreSQL    |
+| `comments`               | Issue Service | PostgreSQL    |
 
 ---
 
@@ -117,12 +121,12 @@ Representa un repositorio Git creado por un usuario.
 Define los niveles de acceso de los usuarios a un repositorio.  
 **Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`)
 
-| Campo        | Tipo                                         |
-| ------------ | -------------------------------------------- |
-| Id           | UUID (PK)                                    |
-| UserId       | UUID (FK → users)                            |
-| RepositoryId | UUID (FK → repositories)                     |
-| Role         | VARCHAR(50) NOT NULL (Owner, Write, Read)    |
+| Campo        | Tipo                                      |
+| ------------ | ----------------------------------------- |
+| Id           | UUID (PK)                                 |
+| UserId       | UUID (FK → users)                         |
+| RepositoryId | UUID (FK → repositories)                  |
+| Role         | VARCHAR(50) NOT NULL (Owner, Write, Read) |
 
 ---
 
@@ -131,12 +135,12 @@ Define los niveles de acceso de los usuarios a un repositorio.
 Representa las ramas dentro de un repositorio.  
 **Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`)
 
-| Campo        | Tipo                                         |
-| ------------ | -------------------------------------------- |
-| Id           | UUID (PK)                                    |
-| Name         | VARCHAR(100) NOT NULL                        |
-| RepositoryId | UUID (FK → repositories)                     |
-| IsDefault    | BOOLEAN NOT NULL DEFAULT false               |
+| Campo        | Tipo                           |
+| ------------ | ------------------------------ |
+| Id           | UUID (PK)                      |
+| Name         | VARCHAR(100) NOT NULL          |
+| RepositoryId | UUID (FK → repositories)       |
+| IsDefault    | BOOLEAN NOT NULL DEFAULT false |
 
 ---
 
@@ -150,7 +154,7 @@ Representa los commits realizados en el repositorio.
 | Id           | VARCHAR(100) (PK)                            |
 | Message      | TEXT NOT NULL                                |
 | AuthorId     | UUID (FK → users)                            |
-| RepositoryId | UUID (FK → repositories)                   |
+| RepositoryId | UUID (FK → repositories)                     |
 | BranchId     | UUID (FK → branches)                         |
 | CreatedAt    | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
 
@@ -161,12 +165,12 @@ Representa los commits realizados en el repositorio.
 Representa los archivos versionados en un commit.  
 **Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`)
 
-| Campo    | Tipo                                         |
-| -------- | -------------------------------------------- |
-| Id       | UUID (PK)                                    |
-| Path     | VARCHAR(255) NOT NULL                        |
-| Content  | TEXT                                         |
-| CommitId | VARCHAR(100) (FK → commits)                  |
+| Campo    | Tipo                        |
+| -------- | --------------------------- |
+| Id       | UUID (PK)                   |
+| Path     | VARCHAR(255) NOT NULL       |
+| Content  | TEXT                        |
+| CommitId | VARCHAR(100) (FK → commits) |
 
 ---
 
@@ -193,19 +197,19 @@ Permite proponer cambios entre ramas.
 Permite registrar tareas, bugs o mejoras.
 **Servicio:** Issue Service | **Base de datos:** PostgreSQL (`issues_db`)
 
-| Campo       | Tipo                                                           |
-| ----------- | -------------------------------------------------------------- |
-| id          | UUID (PK)                                                      |
+| Campo       | Tipo                                                                                     |
+| ----------- | ---------------------------------------------------------------------------------------- |
+| id          | UUID (PK)                                                                                |
 | repo_id     | UUID NOT NULL — identificador del repositorio (Issue Service; referencia lógica al repo) |
-| number      | INTEGER NOT NULL — número secuencial por repo                  |
-| title       | VARCHAR(255) NOT NULL                                          |
-| body        | TEXT                                                           |
-| state       | VARCHAR(20) NOT NULL DEFAULT 'open' — 'open' \| 'closed'       |
-| author_id   | UUID NOT NULL — user_id de Auth Service                        |
-| assignee_id | UUID — user_id de Auth Service (nullable)                      |
-| created_at  | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                   |
-| updated_at  | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                   |
-| closed_at   | TIMESTAMP                                                      |
+| number      | INTEGER NOT NULL — número secuencial por repo                                            |
+| title       | VARCHAR(255) NOT NULL                                                                    |
+| body        | TEXT                                                                                     |
+| state       | VARCHAR(20) NOT NULL DEFAULT 'open' — 'open' \| 'closed'                                 |
+| author_id   | UUID NOT NULL — user_id de Auth Service                                                  |
+| assignee_id | UUID — user_id de Auth Service (nullable)                                                |
+| created_at  | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                                             |
+| updated_at  | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP                                             |
+| closed_at   | TIMESTAMP                                                                                |
 
 ---
 
@@ -214,13 +218,13 @@ Permite registrar tareas, bugs o mejoras.
 Etiquetas reutilizables dentro de un repositorio (bug, feature, etc.).  
 **Servicio:** Issue Service | **Base de datos:** PostgreSQL (`issues_db`)
 
-| Campo       | Tipo                         |
-| ----------- | ---------------------------- |
-| id          | UUID (PK)                    |
-| repo_id     | UUID NOT NULL                |
-| name        | VARCHAR(50) NOT NULL         |
-| color       | CHAR(7) NOT NULL — "#ff0000" |
-| description | VARCHAR(255)                 |
+| Campo       | Tipo                                                                              |
+| ----------- | --------------------------------------------------------------------------------- |
+| id          | UUID (PK)                                                                         |
+| repo_id     | UUID NOT NULL — identificador del repositorio (referencia lógica al Repo Service) |
+| name        | VARCHAR(50) NOT NULL                                                              |
+| color       | CHAR(7) NOT NULL — "#ff0000"                                                      |
+| description | VARCHAR(255)                                                                      |
 
 ---
 

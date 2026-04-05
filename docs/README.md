@@ -63,22 +63,22 @@ El objetivo principal es demostrar competencias en:
 | **Issues**        | CRUD completo                       | Crear, editar, cerrar y comentar issues                        |
 | **Issues**        | Organización                        | Labels y asignación de usuarios                                |
 | **Pull Requests** | Gestión básica                      | Crear PRs, revisar con comentarios, aprobar y merge            |
-| **Búsqueda**      | Búsqueda básica                     | Buscar repositorios por nombre y descripción                   |
+| **Búsqueda**      | Búsqueda básica                     | Buscar repositorios por nombre y usuarios por username         |
 | **Colaboración**  | Stars                               | Dar y quitar estrellas a repositorios                          |
 | **API**           | Documentación OpenAPI               | Swagger UI para explorar y probar la API REST                  |
 
 #### Arquitectura y Tecnología
 
-| Aspecto               | Alcance                                                             |
-| --------------------- | ------------------------------------------------------------------- |
-| **Microservicios**    | Mínimo 4 servicios independientes y desplegables                    |
-| **Contenedorización** | 100% de servicios dockerizados                                      |
-| **Orquestación**      | Docker Compose (desarrollo) + Kubernetes (producción)               |
-| **Bases de datos**    | Patrón database-per-service implementado                            |
-| **Mensajería**        | Comunicación asíncrona entre servicios via RabbitMQ                 |
-| **Caché/Sesiones**    | Redis para caché y sesiones de aplicación                           |
-| **API Gateway**       | Punto único de entrada con autenticación centralizada               |
-| **Cloud**             | Despliegue funcional en al menos un proveedor cloud                 |
+| Aspecto               | Alcance                                                                                                                     |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Microservicios**    | Mínimo 4 servicios independientes y desplegables                                                                            |
+| **Contenedorización** | 100% de servicios dockerizados                                                                                              |
+| **Orquestación**      | Docker Compose (desarrollo) + Kubernetes (producción)                                                                       |
+| **Bases de datos**    | Patrón database-per-service implementado                                                                                    |
+| **Mensajería**        | Comunicación asíncrona entre servicios via RabbitMQ                                                                         |
+| **Caché/Sesiones**    | Redis para caché y sesiones de aplicación                                                                                   |
+| **API Gateway**       | Punto único de entrada con autenticación centralizada                                                                       |
+| **Cloud**             | Despliegue funcional en al menos un proveedor cloud                                                                         |
 | **CI/CD**             | Sin pipeline integrado en el producto (L-01 en Limites.md); despliegue manual o automatización externa al alcance funcional |
 
 #### Entregables Comprometidos
@@ -98,22 +98,22 @@ El objetivo principal es demostrar competencias en:
 
 #### Funcionalidades Excluidas
 
-| Funcionalidad                     | Razón de Exclusión                                                  | Alternativa Implementada                               |
-| --------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
-| **Control de versiones Git real** | Complejidad extrema, requiere implementar protocolo Git completo    | Simulación con versionado básico de archivos           |
-| **Diff y merge de código**        | Algoritmos complejos de comparación de texto                        | Visualización de contenido sin comparación             |
-| **Branches reales**               | Requiere implementación de árbol de commits                         | Concepto de branch como etiqueta/tag simple            |
-| **Code review avanzado**          | Comentarios en línea con sugerencias automáticas y flujos complejos | Comentarios en PR e issues (básico)                    |
-| **GitHub Actions / CI en el producto** | Workflows, runners y ejecución de jobs como parte del sistema  | No incluido (L-01); sin CI/CD dentro del alcance funcional del Mini-GitHub |
-| **Wikis**                         | Feature secundaria                                                  | README del repositorio                                 |
-| **GitHub Pages**                  | Hosting de sitios estáticos                                         | No incluido                                            |
-| **Gists**                         | Snippets de código compartidos                                      | No incluido                                            |
-| **Organizaciones**                | Gestión de equipos y permisos complejos                             | Solo usuarios individuales                             |
-| **Notificaciones**                | Email, push, tiempo real, WebSockets, SSE                           | No incluido (L-06); sin subsistema de notificaciones   |
-| **GitHub Copilot / AI features**  | Integración con modelos de IA                                       | No incluido                                            |
-| **Marketplace / Apps**            | Ecosistema de integraciones                                         | No incluido                                            |
-| **Seguridad avanzada**            | Escaneo de vulnerabilidades, Dependabot                             | No incluido                                            |
-| **Insights / Analytics**          | Gráficos de contribuciones, traffic                                 | Estadísticas básicas (stars, issues count)             |
+| Funcionalidad                          | Razón de Exclusión                                                  | Alternativa Implementada                                                   |
+| -------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **Servidor Git enterprise**            | Alta complejidad operativa (HA, replicación, hardening avanzado)    | Microservicio Git hosteado con soporte básico HTTPS                        |
+| **Diff y merge de código**             | Algoritmos complejos de comparación de texto                        | Visualización de contenido sin comparación                                 |
+| **Branch protection avanzada**         | Reglas complejas de protección y políticas obligatorias             | Gestión básica de branches y validaciones mínimas                          |
+| **Code review avanzado**               | Comentarios en línea con sugerencias automáticas y flujos complejos | Comentarios en PR e issues (básico)                                        |
+| **GitHub Actions / CI en el producto** | Workflows, runners y ejecución de jobs como parte del sistema       | No incluido (L-01); sin CI/CD dentro del alcance funcional del Mini-GitHub |
+| **Wikis**                              | Feature secundaria                                                  | README del repositorio                                                     |
+| **GitHub Pages**                       | Hosting de sitios estáticos                                         | No incluido                                                                |
+| **Gists**                              | Snippets de código compartidos                                      | No incluido                                                                |
+| **Organizaciones**                     | Gestión de equipos y permisos complejos                             | Solo usuarios individuales                                                 |
+| **Notificaciones**                     | Email, push, tiempo real, WebSockets, SSE                           | No incluido (L-06); sin subsistema de notificaciones                       |
+| **GitHub Copilot / AI features**       | Integración con modelos de IA                                       | No incluido                                                                |
+| **Marketplace / Apps**                 | Ecosistema de integraciones                                         | No incluido                                                                |
+| **Seguridad avanzada**                 | Escaneo de vulnerabilidades, Dependabot                             | No incluido                                                                |
+| **Insights / Analytics**               | Gráficos de contribuciones, traffic                                 | Estadísticas básicas (stars, issues count)                                 |
 
 #### Limitaciones Técnicas
 
@@ -149,23 +149,23 @@ El objetivo principal es demostrar competencias en:
 
 ### Comparativa: Mini-GitHub vs GitHub Real
 
-| Característica       | GitHub Real       | Mini-GitHub        | Estado       |
-| -------------------- | ----------------- | ------------------ | ------------ |
-| Usuarios registrados | 100M+             | Demo (~100)        | Simplificado |
-| Repositorios         | Ilimitados        | Limitados          | Simplificado |
-| Git protocol         | Completo          | No implementado    | Excluido     |
-| Push/Pull/Clone      | SSH, HTTPS        | Upload/Download UI | Alternativa  |
-| Branches             | Ilimitadas        | Simuladas          | Simplificado |
-| Commits history      | Completo          | No incluido        | Excluido     |
-| Pull Requests        | Completo          | Básico             | Simplificado |
-| Issues               | Completo          | Básico             | Simplificado |
-| Actions (CI/CD)      | Completo          | No incluido        | Excluido     |
-| Packages             | Registry completo | No incluido        | Excluido     |
-| Projects             | Kanban boards     | No incluido        | Excluido     |
-| Discussions          | Foros             | No incluido        | Excluido     |
-| Mobile app           | iOS/Android       | No incluido        | Excluido     |
-| API                  | REST + GraphQL    | REST básico        | Simplificado |
-| Webhooks             | Completo          | No incluido        | Excluido     |
+| Característica       | GitHub Real       | Mini-GitHub     | Estado       |
+| -------------------- | ----------------- | --------------- | ------------ |
+| Usuarios registrados | 100M+             | Demo (~100)     | Simplificado |
+| Repositorios         | Ilimitados        | Limitados       | Simplificado |
+| Git protocol         | Completo          | Básico (HTTPS)  | Simplificado |
+| Push/Pull/Clone      | SSH, HTTPS        | HTTPS (sin SSH) | Simplificado |
+| Branches             | Ilimitadas        | Básicas         | Simplificado |
+| Commits history      | Completo          | Básico          | Simplificado |
+| Pull Requests        | Completo          | Básico          | Simplificado |
+| Issues               | Completo          | Básico          | Simplificado |
+| Actions (CI/CD)      | Completo          | No incluido     | Excluido     |
+| Packages             | Registry completo | No incluido     | Excluido     |
+| Projects             | Kanban boards     | No incluido     | Excluido     |
+| Discussions          | Foros             | No incluido     | Excluido     |
+| Mobile app           | iOS/Android       | No incluido     | Excluido     |
+| API                  | REST + GraphQL    | REST básico     | Simplificado |
+| Webhooks             | Completo          | No incluido     | Excluido     |
 
 ---
 
@@ -173,23 +173,23 @@ El objetivo principal es demostrar competencias en:
 
 #### Supuestos
 
-| ID     | Supuesto                                                        |
-| ------ | --------------------------------------------------------------- |
-| SUP-01 | El equipo tiene conocimientos básicos de Docker y contenedores  |
-| SUP-02 | Se cuenta con acceso a un proveedor cloud con tier gratuito     |
-| SUP-03 | El equipo puede dedicar al menos 20 horas semanales al proyecto |
+| ID     | Supuesto                                                                        |
+| ------ | ------------------------------------------------------------------------------- |
+| SUP-01 | El equipo tiene conocimientos básicos de Docker y contenedores                  |
+| SUP-02 | Se cuenta con acceso a un proveedor cloud con tier gratuito                     |
+| SUP-03 | El equipo puede dedicar al menos 20 horas semanales al proyecto                 |
 | SUP-04 | Se tiene acceso a GitHub (u homólogo) para el repositorio del código del equipo |
-| SUP-05 | Los usuarios del sistema tienen conexión a internet estable     |
+| SUP-05 | Los usuarios del sistema tienen conexión a internet estable                     |
 
 #### Dependencias Externas
 
-| Dependencia     | Tipo                | Riesgo si no está disponible      |
-| --------------- | ------------------- | --------------------------------- |
-| Docker Hub      | Imágenes base       | Medio - se pueden usar mirrors    |
-| npm Registry    | Paquetes Node.js    | Alto - crítico para el build      |
-| Proveedor Cloud | Despliegue          | Alto - no hay demo en producción  |
+| Dependencia     | Tipo                   | Riesgo si no está disponible      |
+| --------------- | ---------------------- | --------------------------------- |
+| Docker Hub      | Imágenes base          | Medio - se pueden usar mirrors    |
+| npm Registry    | Paquetes Node.js       | Alto - crítico para el build      |
+| Proveedor Cloud | Despliegue             | Alto - no hay demo en producción  |
 | GitHub          | Repositorio del código | Medio - se puede usar alternativa |
-| MinIO/S3        | Almacenamiento      | Alto - archivos no funcionan      |
+| MinIO/S3        | Almacenamiento         | Alto - archivos no funcionan      |
 
 ---
 
@@ -342,19 +342,17 @@ El objetivo principal es demostrar competencias en:
 
 ### RF05 - Búsqueda
 
-| ID     | Requisito                                                  | Prioridad |
-| ------ | ---------------------------------------------------------- | --------- |
-| RF05.1 | El sistema debe permitir buscar repositorios por nombre    | Alta      |
-| RF05.2 | El sistema debe permitir buscar usuarios                   | Media     |
-| RF05.3 | El sistema debe permitir filtrar repositorios por lenguaje | Baja      |
+| ID     | Requisito                                               | Prioridad |
+| ------ | ------------------------------------------------------- | --------- |
+| RF05.1 | El sistema debe permitir buscar repositorios por nombre | Alta      |
+| RF05.2 | El sistema debe permitir buscar usuarios                | Media     |
 
 ### RF06 - Colaboración
 
 | ID     | Requisito                                                                                                 | Prioridad |
 | ------ | --------------------------------------------------------------------------------------------------------- | --------- |
 | RF06.1 | El sistema debe permitir dar "star" a repositorios                                                        | Media     |
-| RF06.2 | El sistema debe mostrar estadísticas básicas del repo                                                     | Media     |
-| RF06.3 | El sistema debe permitir gestionar colaboradores de un repositorio con roles (Owner, Developer, Reporter) | Media     |
+| RF06.2 | El sistema debe permitir gestionar colaboradores de un repositorio con roles (Owner, Developer, Reporter) | Media     |
 
 ### RF07 - Pull Requests
 
@@ -386,11 +384,11 @@ El objetivo principal es demostrar competencias en:
 
 ### Cloud y Despliegue
 
-| ID    | Requisito                                                    | Métrica                         |
-| ----- | ------------------------------------------------------------ | ------------------------------- |
-| RNF07 | El sistema debe desplegarse en un proveedor cloud            | AWS/GCP/Azure                   |
+| ID    | Requisito                                                                                                         | Métrica                                            |
+| ----- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| RNF07 | El sistema debe desplegarse en un proveedor cloud                                                                 | AWS/GCP/Azure                                      |
 | RNF08 | Sin pipeline CI/CD integrado en el producto (alineado con L-01); despliegue manual o externo al alcance funcional | Evidencia de despliegue sin workflows en el código |
-| RNF09 | El sistema debe tener configuración por variables de entorno | 0 credenciales hardcodeadas     |
+| RNF09 | El sistema debe tener configuración por variables de entorno                                                      | 0 credenciales hardcodeadas                        |
 
 ### Rendimiento y Escalabilidad
 
@@ -421,13 +419,13 @@ El objetivo principal es demostrar competencias en:
 
 ### Backend
 
-| Componente    | Tecnología            | Justificación                                   |
-| ------------- | --------------------- | ----------------------------------------------- |
-| Lenguaje      | Node.js (TypeScript)  | Ecosistema maduro, async nativo                 |
-| Framework     | Express.js / Fastify  | Ligero, flexible, gran comunidad                |
+| Componente    | Tecnología            | Justificación                                           |
+| ------------- | --------------------- | ------------------------------------------------------- |
+| Lenguaje      | Node.js (TypeScript)  | Ecosistema maduro, async nativo                         |
+| Framework     | Express.js / Fastify  | Ligero, flexible, gran comunidad                        |
 | ORM SQL       | Prisma                | Type-safe, migraciones automáticas (Auth, Repo, Issues) |
-| Validación    | Zod / Joi             | Validación de schemas                           |
-| Autenticación | Keycloak (OIDC) + JWT | SSO estandar, gestion centralizada de identidad |
+| Validación    | Zod / Joi             | Validación de schemas                                   |
+| Autenticación | Keycloak (OIDC) + JWT | SSO estandar, gestion centralizada de identidad         |
 
 ### Frontend
 
@@ -442,24 +440,24 @@ El objetivo principal es demostrar competencias en:
 
 ### Bases de Datos
 
-| Servicio       | Base de Datos | Justificación                  |
-| -------------- | ------------- | ------------------------------ |
-| Auth Service   | PostgreSQL    | Datos relacionales, ACID       |
+| Servicio       | Base de Datos | Justificación                                  |
+| -------------- | ------------- | ---------------------------------------------- |
+| Auth Service   | PostgreSQL    | Datos relacionales, ACID                       |
 | Repo Service   | PostgreSQL    | Metadatos y relaciones ACID; blobs en MinIO/S3 |
-| Issue Service  | PostgreSQL    | Relaciones complejas           |
-| Search Service | Elasticsearch | Full-text search optimizado    |
-| Caché          | Redis         | Sesiones, caché, pub/sub       |
+| Issue Service  | PostgreSQL    | Relaciones complejas                           |
+| Search Service | Elasticsearch | Full-text search optimizado                    |
+| Caché          | Redis         | Sesiones, caché, pub/sub                       |
 
 ### Infraestructura
 
-| Componente        | Tecnología     | Justificación                                                 |
-| ----------------- | -------------- | ------------------------------------------------------------- |
-| Contenedores      | Docker         | Estándar de la industria                                      |
-| Orquestación Dev  | Docker Compose | Simple para desarrollo                                        |
-| Orquestación Prod | Kubernetes     | Escalabilidad, auto-healing                                   |
-| API Gateway       | Kong / Nginx   | Rate limiting, routing                                        |
-| Message Broker    | RabbitMQ       | Mensajería confiable                                          |
-| Object Storage    | MinIO / AWS S3 | Almacenamiento de archivos                                    |
+| Componente        | Tecnología             | Justificación                                                 |
+| ----------------- | ---------------------- | ------------------------------------------------------------- |
+| Contenedores      | Docker                 | Estándar de la industria                                      |
+| Orquestación Dev  | Docker Compose         | Simple para desarrollo                                        |
+| Orquestación Prod | Kubernetes             | Escalabilidad, auto-healing                                   |
+| API Gateway       | Kong / Nginx           | Rate limiting, routing                                        |
+| Message Broker    | RabbitMQ               | Mensajería confiable                                          |
+| Object Storage    | MinIO / AWS S3         | Almacenamiento de archivos                                    |
 | Doc. API          | Swagger UI (OpenAPI 3) | Contrato explícito y pruebas desde el navegador (`/api-docs`) |
 
 ### Cloud (elegir uno)
@@ -748,7 +746,7 @@ mini-github/
 - CRUD de repositorios
 - Gestión de archivos
 - Control de permisos
-- Gestión de branches (simulado)
+- Gestión de branches (básico)
 - Stars y forks
 
 **Base de datos:** PostgreSQL (`repos_db`) + MinIO (archivos)
