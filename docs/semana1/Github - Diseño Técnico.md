@@ -93,6 +93,17 @@ El modelo conceptual se alinea con `EntidadesPrincipales.md` y el esquema relaci
 | **Issue**, **Label**, **IssueLabel**, **Comment**, **PullRequest**                   | Issue                | PostgreSQL `issues_db`                        | Issues y PR vinculados al identificador lógico del repositorio    |
 | **Índices de búsqueda** (proyección)                                                 | Search               | Elasticsearch                                 | Materialización eventual a partir de eventos de dominio           |
 
+* Un Usuario puede poseer muchos Repositorios y tener múltiples Sesiones activas.
+
+* Un Repositorio contiene múltiples Branches, Commits, e Issues.
+
+* Los Pull Requests conectan dos Branches para proponer cambios.
+
+* Los Comentarios se centralizan en la discusión de Issues y Pull Requests.
+
+* Las Etiquetas (Labels) se vinculan de forma muchos-a-muchos con las Issues para facilitar la filtración.
+
+
 En este sentido, la separación por servicio permite evolucionar el esquema de issues sin migrar la base de autenticación, a la vez que impone el uso de **identificadores UUID** compartidos como referencias lógicas entre contextos acotados.
 
 ---
