@@ -65,6 +65,7 @@ El objetivo principal es demostrar competencias en:
 | **Pull Requests** | Gestión básica                      | Crear PRs, revisar con comentarios, aprobar y merge            |
 | **Búsqueda**      | Búsqueda básica                     | Buscar repositorios por nombre y descripción                   |
 | **Colaboración**  | Stars                               | Dar y quitar estrellas a repositorios                          |
+| **API**           | Documentación OpenAPI               | Swagger UI para explorar y probar la API REST                  |
 
 #### Arquitectura y Tecnología
 
@@ -78,7 +79,7 @@ El objetivo principal es demostrar competencias en:
 | **Caché/Sesiones**    | Redis para caché y sesiones de aplicación                           |
 | **API Gateway**       | Punto único de entrada con autenticación centralizada               |
 | **Cloud**             | Despliegue funcional en al menos un proveedor cloud                 |
-| **CI/CD**             | Soporte externo para el repositorio del equipo (fuera del producto) |
+| **CI/CD**             | Sin pipeline integrado en el producto (L-01 en Limites.md); despliegue manual o automatización externa al alcance funcional |
 
 #### Entregables Comprometidos
 
@@ -103,12 +104,12 @@ El objetivo principal es demostrar competencias en:
 | **Diff y merge de código**        | Algoritmos complejos de comparación de texto                        | Visualización de contenido sin comparación             |
 | **Branches reales**               | Requiere implementación de árbol de commits                         | Concepto de branch como etiqueta/tag simple            |
 | **Code review avanzado**          | Comentarios en línea con sugerencias automáticas y flujos complejos | Comentarios en PR e issues (básico)                    |
-| **GitHub Actions/CI interno**     | Sistema completo de workflows                                       | CI/CD solo para el proyecto, no para repos de usuarios |
+| **GitHub Actions / CI en el producto** | Workflows, runners y ejecución de jobs como parte del sistema  | No incluido (L-01); sin CI/CD dentro del alcance funcional del Mini-GitHub |
 | **Wikis**                         | Feature secundaria                                                  | README del repositorio                                 |
 | **GitHub Pages**                  | Hosting de sitios estáticos                                         | No incluido                                            |
 | **Gists**                         | Snippets de código compartidos                                      | No incluido                                            |
 | **Organizaciones**                | Gestión de equipos y permisos complejos                             | Solo usuarios individuales                             |
-| **Notificaciones en tiempo real** | WebSockets, SSE                                                     | Notificaciones por polling o no incluidas              |
+| **Notificaciones**                | Email, push, tiempo real, WebSockets, SSE                           | No incluido (L-06); sin subsistema de notificaciones   |
 | **GitHub Copilot / AI features**  | Integración con modelos de IA                                       | No incluido                                            |
 | **Marketplace / Apps**            | Ecosistema de integraciones                                         | No incluido                                            |
 | **Seguridad avanzada**            | Escaneo de vulnerabilidades, Dependabot                             | No incluido                                            |
@@ -177,7 +178,7 @@ El objetivo principal es demostrar competencias en:
 | SUP-01 | El equipo tiene conocimientos básicos de Docker y contenedores  |
 | SUP-02 | Se cuenta con acceso a un proveedor cloud con tier gratuito     |
 | SUP-03 | El equipo puede dedicar al menos 20 horas semanales al proyecto |
-| SUP-04 | Se tiene acceso a GitHub para el repositorio y CI/CD            |
+| SUP-04 | Se tiene acceso a GitHub (u homólogo) para el repositorio del código del equipo |
 | SUP-05 | Los usuarios del sistema tienen conexión a internet estable     |
 
 #### Dependencias Externas
@@ -187,7 +188,7 @@ El objetivo principal es demostrar competencias en:
 | Docker Hub      | Imágenes base       | Medio - se pueden usar mirrors    |
 | npm Registry    | Paquetes Node.js    | Alto - crítico para el build      |
 | Proveedor Cloud | Despliegue          | Alto - no hay demo en producción  |
-| GitHub          | Repositorio y CI/CD | Medio - se puede usar alternativa |
+| GitHub          | Repositorio del código | Medio - se puede usar alternativa |
 | MinIO/S3        | Almacenamiento      | Alto - archivos no funcionan      |
 
 ---
@@ -260,8 +261,8 @@ El objetivo principal es demostrar competencias en:
          │                    │                 │                   │
          ▼                    ▼                 ▼                   ▼
 ┌───────────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────────┐
-│    PostgreSQL     │ │    MongoDB    │ │  PostgreSQL   │ │  Elasticsearch    │
-│   (users, auth)   │ │(repos, files) │ │   (issues)    │ │    (índices)      │
+│    PostgreSQL     │ │  PostgreSQL   │ │  PostgreSQL   │ │  Elasticsearch    │
+│   (users, auth)   │ │ (repos, files)│ │   (issues)    │ │    (índices)      │
 └───────────────────┘ └───────┬───────┘ └───────────────┘ └───────────────────┘
                               │
                               ▼
@@ -280,7 +281,6 @@ El objetivo principal es demostrar competencias en:
 │                                                                              │
 │  Comunicación asíncrona entre servicios:                                     │
 │  - Eventos de creación de repos                                              │
-│  - Notificaciones                                                            │
 │  - Indexación de búsqueda                                                    │
 │  Redis se usa para caché/sesiones (no como broker principal de eventos).     │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -389,7 +389,7 @@ El objetivo principal es demostrar competencias en:
 | ID    | Requisito                                                    | Métrica                         |
 | ----- | ------------------------------------------------------------ | ------------------------------- |
 | RNF07 | El sistema debe desplegarse en un proveedor cloud            | AWS/GCP/Azure                   |
-| RNF08 | CI/CD del repositorio del equipo es externo al producto      | No bloquea la entrega funcional |
+| RNF08 | Sin pipeline CI/CD integrado en el producto (alineado con L-01); despliegue manual o externo al alcance funcional | Evidencia de despliegue sin workflows en el código |
 | RNF09 | El sistema debe tener configuración por variables de entorno | 0 credenciales hardcodeadas     |
 
 ### Rendimiento y Escalabilidad
@@ -425,8 +425,7 @@ El objetivo principal es demostrar competencias en:
 | ------------- | --------------------- | ----------------------------------------------- |
 | Lenguaje      | Node.js (TypeScript)  | Ecosistema maduro, async nativo                 |
 | Framework     | Express.js / Fastify  | Ligero, flexible, gran comunidad                |
-| ORM SQL       | Prisma                | Type-safe, migraciones automáticas              |
-| ODM NoSQL     | Mongoose              | Estándar para MongoDB                           |
+| ORM SQL       | Prisma                | Type-safe, migraciones automáticas (Auth, Repo, Issues) |
 | Validación    | Zod / Joi             | Validación de schemas                           |
 | Autenticación | Keycloak (OIDC) + JWT | SSO estandar, gestion centralizada de identidad |
 
@@ -446,7 +445,7 @@ El objetivo principal es demostrar competencias en:
 | Servicio       | Base de Datos | Justificación                  |
 | -------------- | ------------- | ------------------------------ |
 | Auth Service   | PostgreSQL    | Datos relacionales, ACID       |
-| Repo Service   | MongoDB       | Documentos flexibles, archivos |
+| Repo Service   | PostgreSQL    | Metadatos y relaciones ACID; blobs en MinIO/S3 |
 | Issue Service  | PostgreSQL    | Relaciones complejas           |
 | Search Service | Elasticsearch | Full-text search optimizado    |
 | Caché          | Redis         | Sesiones, caché, pub/sub       |
@@ -461,7 +460,7 @@ El objetivo principal es demostrar competencias en:
 | API Gateway       | Kong / Nginx   | Rate limiting, routing                                        |
 | Message Broker    | RabbitMQ       | Mensajería confiable                                          |
 | Object Storage    | MinIO / AWS S3 | Almacenamiento de archivos                                    |
-| CI/CD (externo)   | GitHub Actions | Automatización del repositorio del equipo, fuera del producto |
+| Doc. API          | Swagger UI (OpenAPI 3) | Contrato explícito y pruebas desde el navegador (`/api-docs`) |
 
 ### Cloud (elegir uno)
 
@@ -752,7 +751,7 @@ mini-github/
 - Gestión de branches (simulado)
 - Stars y forks
 
-**Base de datos:** MongoDB + MinIO (archivos)
+**Base de datos:** PostgreSQL (`repos_db`) + MinIO (archivos)
 
 **Eventos que emite:**
 
@@ -840,51 +839,46 @@ CREATE TABLE sessions (
 );
 ```
 
-### Repo Service - MongoDB
+### Repo Service - PostgreSQL
 
-```javascript
-// Repository Schema
-{
-  _id: ObjectId,
-  name: String,           // "my-awesome-project"
-  description: String,
-  owner_id: String,       // UUID del usuario
-  visibility: String,     // "public" | "private"
-  default_branch: String, // "main"
-  language: String,       // "JavaScript"
-  stars_count: Number,
-  forks_count: Number,
-  created_at: Date,
-  updated_at: Date,
+```sql
+-- Repositories
+CREATE TABLE repositories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(150) NOT NULL,
+    description TEXT,
+    is_private BOOLEAN NOT NULL DEFAULT false,
+    owner_id UUID NOT NULL,
+    default_branch VARCHAR(100) DEFAULT 'main',
+    language VARCHAR(50),
+    stars_count INTEGER NOT NULL DEFAULT 0,
+    forks_count INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(owner_id, name)
+);
 
-  settings: {
-    has_issues: Boolean,
-    has_wiki: Boolean
-  }
-}
+-- Repository files (metadata; contenido en MinIO/S3)
+CREATE TABLE repo_files (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    repository_id UUID NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
+    path VARCHAR(512) NOT NULL,
+    storage_key VARCHAR(512) NOT NULL,
+    content_type VARCHAR(100),
+    size_bytes BIGINT,
+    branch VARCHAR(100),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
-// File Schema
-{
-  _id: ObjectId,
-  repo_id: ObjectId,
-  path: String,           // "src/index.js"
-  name: String,           // "index.js"
-  type: String,           // "file" | "directory"
-  size: Number,
-  storage_key: String,    // Key en MinIO/S3
-  content_type: String,
-  branch: String,
-  created_at: Date,
-  updated_at: Date
-}
-
-// Star Schema
-{
-  _id: ObjectId,
-  user_id: String,
-  repo_id: ObjectId,
-  created_at: Date
-}
+-- Stars
+CREATE TABLE stars (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    repository_id UUID NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, repository_id)
+);
 ```
 
 ### Issue Service - PostgreSQL
@@ -893,7 +887,7 @@ CREATE TABLE sessions (
 -- Issues table
 CREATE TABLE issues (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    repo_id VARCHAR(50) NOT NULL,
+    repo_id UUID NOT NULL,
     number SERIAL,
     title VARCHAR(255) NOT NULL,
     body TEXT,
@@ -909,7 +903,7 @@ CREATE TABLE issues (
 -- Labels table
 CREATE TABLE labels (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    repo_id VARCHAR(50) NOT NULL,
+    repo_id UUID NOT NULL,
     name VARCHAR(50) NOT NULL,
     color VARCHAR(7) NOT NULL,
     description VARCHAR(255),
@@ -1053,7 +1047,7 @@ POST /api/repos/johndoe/my-project/issues
 
 ```
 ┌──────┐          ┌───────────┐          ┌─────────────┐          ┌──────────────┐          ┌────────┐
-│Client│          │API Gateway│          │Auth Service │          │Repo Service  │          │MongoDB │
+│Client│          │API Gateway│          │Auth Service │          │Repo Service  │          │PostgreSQL│
 └──┬───┘          └─────┬─────┘          └──────┬──────┘          └──────┬───────┘          └───┬────┘
    │                    │                       │                        │                      │
    │ POST /api/repos    │                       │                        │                      │
@@ -1136,7 +1130,8 @@ POST /api/repos/johndoe/my-project/issues
 │  │                              NAMESPACE: databases                                 │   │
 │  │                                                                                   │   │
 │  │   ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐                │   │
-│  │   │   PostgreSQL    │   │    MongoDB      │   │  Elasticsearch  │                │   │
+│  │   │   PostgreSQL    │   │   PostgreSQL    │   │  Elasticsearch  │                │   │
+│  │   │ (auth / issues) │   │    (repos_db)   │   │   (índices)     │                │   │
 │  │   │   StatefulSet   │   │   StatefulSet   │   │   StatefulSet   │                │   │
 │  │   └────────┬────────┘   └────────┬────────┘   └────────┬────────┘                │   │
 │  │            │                     │                     │                          │   │
@@ -1220,7 +1215,7 @@ AUTH_DATABASE_URL=postgresql://user:pass@postgres:5432/auth_db
 
 # Repo Service
 REPO_SERVICE_PORT=3002
-MONGO_URI=mongodb://mongo:27017/repos_db
+REPO_DATABASE_URL=postgresql://user:pass@postgres:5432/repos_db
 MINIO_ENDPOINT=minio
 MINIO_PORT=9000
 MINIO_ACCESS_KEY=minioadmin
@@ -1281,9 +1276,9 @@ kubectl apply -f infrastructure/kubernetes/ingress/
 
 ### CI/CD (Fuera del Alcance del Producto)
 
-Para esta implementación de Mini-GitHub no se codificará un pipeline CI/CD como funcionalidad del sistema.
+Para esta implementación de Mini-GitHub no se codificará un pipeline CI/CD como funcionalidad del sistema (L-01 en `Limites.md`). No hay workflows, runners ni ejecución de jobs en contenedores dentro del producto.
 
-Si el equipo decide usar GitHub Actions u otra herramienta para su flujo interno de trabajo, se considera soporte externo al producto.
+Cualquier automatización que use el equipo para su propio repositorio de código queda fuera del alcance funcional documentado aquí.
 
 ---
 

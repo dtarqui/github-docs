@@ -33,9 +33,9 @@ El modelo de datos se enfoca en:
 | `users`          | Auth Service  | PostgreSQL    |
 | `oauth_accounts` | Auth Service  | PostgreSQL    |
 | `sessions`       | Auth Service  | PostgreSQL    |
-| `repositories`   | Repo Service  | MongoDB       |
-| `files`          | Repo Service  | MongoDB       |
-| `stars`          | Repo Service  | MongoDB       |
+| `repositories`   | Repo Service  | PostgreSQL    |
+| `files`          | Repo Service  | PostgreSQL    |
+| `stars`          | Repo Service  | PostgreSQL    |
 | `issues`         | Issue Service | PostgreSQL    |
 | `labels`         | Issue Service | PostgreSQL    |
 | `issue_labels`   | Issue Service | PostgreSQL    |
@@ -98,70 +98,75 @@ Gestiona los tokens JWT activos para control de sesiones.
 
 ## Repository (Repositorio)
 
-Representa un repositorio Git creado por un usuario.
+Representa un repositorio Git creado por un usuario.  
+**Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`)
 
-| Campo       | Tipo            |
-| ----------- | --------------- |
-| Id          | INT (PK)        |
-| Name        | VARCHAR         |
-| Description | TEXT            |
-| IsPrivate   | BIT             |
-| OwnerId     | INT (FK → User) |
-| CreatedAt   | DATETIME        |
+| Campo       | Tipo                                         |
+| ----------- | -------------------------------------------- |
+| Id          | UUID (PK)                                    |
+| Name        | VARCHAR(150) NOT NULL                        |
+| Description | TEXT                                         |
+| IsPrivate   | BOOLEAN NOT NULL DEFAULT false               |
+| OwnerId     | UUID (FK → users)                            |
+| CreatedAt   | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
 
 ---
 
 ## RepositoryPermission (Permisos)
 
-Define los niveles de acceso de los usuarios a un repositorio.
+Define los niveles de acceso de los usuarios a un repositorio.  
+**Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`)
 
-| Campo        | Tipo                         |
-| ------------ | ---------------------------- |
-| Id           | INT (PK)                     |
-| UserId       | INT (FK → User)              |
-| RepositoryId | INT (FK → Repository)        |
-| Role         | VARCHAR (Owner, Write, Read) |
+| Campo        | Tipo                                         |
+| ------------ | -------------------------------------------- |
+| Id           | UUID (PK)                                    |
+| UserId       | UUID (FK → users)                            |
+| RepositoryId | UUID (FK → repositories)                     |
+| Role         | VARCHAR(50) NOT NULL (Owner, Write, Read)    |
 
 ---
 
 ## Branch (Rama)
 
-Representa las ramas dentro de un repositorio.
+Representa las ramas dentro de un repositorio.  
+**Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`)
 
-| Campo        | Tipo     |
-| ------------ | -------- |
-| Id           | INT (PK) |
-| Name         | VARCHAR  |
-| RepositoryId | INT (FK) |
-| IsDefault    | BIT      |
+| Campo        | Tipo                                         |
+| ------------ | -------------------------------------------- |
+| Id           | UUID (PK)                                    |
+| Name         | VARCHAR(100) NOT NULL                        |
+| RepositoryId | UUID (FK → repositories)                     |
+| IsDefault    | BOOLEAN NOT NULL DEFAULT false               |
 
 ---
 
 ## Commit
 
-Representa los commits realizados en el repositorio.
+Representa los commits realizados en el repositorio.  
+**Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`)
 
-| Campo        | Tipo            |
-| ------------ | --------------- |
-| Id           | VARCHAR (PK)    |
-| Message      | TEXT            |
-| AuthorId     | INT (FK → User) |
-| RepositoryId | INT (FK)        |
-| BranchId     | INT (FK)        |
-| CreatedAt    | DATETIME        |
+| Campo        | Tipo                                         |
+| ------------ | -------------------------------------------- |
+| Id           | VARCHAR(100) (PK)                            |
+| Message      | TEXT NOT NULL                                |
+| AuthorId     | UUID (FK → users)                            |
+| RepositoryId | UUID (FK → repositories)                   |
+| BranchId     | UUID (FK → branches)                         |
+| CreatedAt    | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
 
 ---
 
 ## File (Archivo)
 
-Representa los archivos versionados en un commit.
+Representa los archivos versionados en un commit.  
+**Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`)
 
-| Campo    | Tipo                  |
-| -------- | --------------------- |
-| Id       | INT (PK)              |
-| Path     | VARCHAR               |
-| Content  | TEXT                  |
-| CommitId | VARCHAR (FK → Commit) |
+| Campo    | Tipo                                         |
+| -------- | -------------------------------------------- |
+| Id       | UUID (PK)                                    |
+| Path     | VARCHAR(255) NOT NULL                        |
+| Content  | TEXT                                         |
+| CommitId | VARCHAR(100) (FK → commits)                  |
 
 ---
 
@@ -191,7 +196,7 @@ Permite registrar tareas, bugs o mejoras.
 | Campo       | Tipo                                                           |
 | ----------- | -------------------------------------------------------------- |
 | id          | UUID (PK)                                                      |
-| repo_id     | VARCHAR(50) NOT NULL — ID del repo (Mongo ObjectId como texto) |
+| repo_id     | UUID NOT NULL — identificador del repositorio (Issue Service; referencia lógica al repo) |
 | number      | INTEGER NOT NULL — número secuencial por repo                  |
 | title       | VARCHAR(255) NOT NULL                                          |
 | body        | TEXT                                                           |
@@ -212,7 +217,7 @@ Etiquetas reutilizables dentro de un repositorio (bug, feature, etc.).
 | Campo       | Tipo                         |
 | ----------- | ---------------------------- |
 | id          | UUID (PK)                    |
-| repo_id     | VARCHAR(50) NOT NULL         |
+| repo_id     | UUID NOT NULL                |
 | name        | VARCHAR(50) NOT NULL         |
 | color       | CHAR(7) NOT NULL — "#ff0000" |
 | description | VARCHAR(255)                 |
@@ -241,7 +246,7 @@ Permite comentar en Issues y Pull Requests.
 | AuthorId      | UUID NOT NULL — user_id de Auth Service                |
 | IssueId       | UUID (FK → issues) ON DELETE CASCADE                   |
 | PullRequestId | UUID (FK → pull_requests) ON DELETE CASCADE (nullable) |
-| CreatedAt     | DATETIME                                               |
+| CreatedAt     | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP           |
 | updated_at    | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP           |
 
 ---
@@ -249,14 +254,14 @@ Permite comentar en Issues y Pull Requests.
 ## Star (Estrella)
 
 Registra que un usuario marcó un repositorio como favorito.  
-**Servicio:** Repo Service | **Base de datos:** MongoDB
+**Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`)
 
-| Campo      | Tipo                                           |
-| ---------- | ---------------------------------------------- |
-| id         | ObjectId (PK)                                  |
-| repo_id    | ObjectId (FK → repositories)                   |
-| user_id    | VARCHAR(50) NOT NULL — user_id de Auth Service |
-| created_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP   |
+| Campo      | Tipo                                         |
+| ---------- | -------------------------------------------- |
+| id         | UUID (PK)                                    |
+| repo_id    | UUID (FK → repositories)                     |
+| user_id    | UUID NOT NULL — user_id de Auth Service      |
+| created_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
 
 ---
 

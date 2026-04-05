@@ -1,0 +1,589 @@
+<mxfile host="app.diagrams.net" agent="Claude Code" version="29.6.6">
+  <diagram name="Sec - Gestion de Repositorios" id="repo-management-sequence">
+    <mxGraphModel dx="4000" dy="2000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="2400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Frame principal -->
+        <mxCell id="frame-1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=200;height=30;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=14;" value="Gestión de Repositorios (HU-06, HU-07, HU-08, HU-09)" vertex="1">
+          <mxGeometry height="2300" width="1400" x="50" y="20" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== ACTORES Y LIFELINES ==================== -->
+
+        <!-- Usuario (Actor) -->
+        <mxCell id="actor-usuario" parent="1" style="shape=umlLifeline;participant=umlActor;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;verticalAlign=top;spacingTop=36;labelBackgroundColor=#ffffff;outlineConnect=0;fillColor=#FFD966;" value="" vertex="1">
+          <mxGeometry height="2200" width="20" x="120" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="actor-usuario-bar" parent="actor-usuario" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFE599;" value="" vertex="1">
+          <mxGeometry height="2100" width="10" x="5" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="label-usuario" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontStyle=1;" value="Usuario" vertex="1">
+          <mxGeometry height="30" width="70" x="95" y="55" as="geometry" />
+        </mxCell>
+
+        <!-- Frontend/UI (Boundary) -->
+        <mxCell id="boundary-ui" parent="1" style="shape=umlLifeline;participant=umlBoundary;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;verticalAlign=top;spacingTop=36;outlineConnect=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="" vertex="1">
+          <mxGeometry height="2200" width="50" x="280" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="boundary-ui-bar" parent="boundary-ui" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="" vertex="1">
+          <mxGeometry height="2100" width="10" x="20" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="label-ui" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontStyle=1;" value="Interfaz&lt;br&gt;Repositorios" vertex="1">
+          <mxGeometry height="45" width="90" x="262" y="40" as="geometry" />
+        </mxCell>
+
+        <!-- API Gateway (Control) -->
+        <mxCell id="control-gateway" parent="1" style="shape=umlLifeline;participant=umlControl;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;verticalAlign=top;spacingTop=36;outlineConnect=0;fillColor=#fff2cc;strokeColor=#d6b656;" value="" vertex="1">
+          <mxGeometry height="2200" width="40" x="480" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="control-gateway-bar" parent="control-gateway" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#fff2cc;strokeColor=#d6b656;" value="" vertex="1">
+          <mxGeometry height="2100" width="10" x="15" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="label-gateway" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontStyle=1;" value="API Gateway&lt;br&gt;(Auth + Routing)" vertex="1">
+          <mxGeometry height="45" width="100" x="450" y="40" as="geometry" />
+        </mxCell>
+
+        <!-- Servicio Repositorios (Control) -->
+        <mxCell id="control-service" parent="1" style="shape=umlLifeline;participant=umlControl;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;verticalAlign=top;spacingTop=36;outlineConnect=0;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
+          <mxGeometry height="2200" width="40" x="680" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="control-service-bar" parent="control-service" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
+          <mxGeometry height="2100" width="10" x="15" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="label-service" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontStyle=1;" value="Servicio&lt;br&gt;Repositorios" vertex="1">
+          <mxGeometry height="45" width="90" x="655" y="40" as="geometry" />
+        </mxCell>
+
+        <!-- Base de Datos (Entity) -->
+        <mxCell id="entity-db" parent="1" style="shape=umlLifeline;participant=umlEntity;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;verticalAlign=top;spacingTop=36;outlineConnect=0;fillColor=#f8cecc;strokeColor=#b85450;" value="" vertex="1">
+          <mxGeometry height="2200" width="40" x="880" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="entity-db-bar" parent="entity-db" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#f8cecc;strokeColor=#b85450;" value="" vertex="1">
+          <mxGeometry height="2100" width="10" x="15" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="label-db" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontStyle=1;" value="Base de Datos&lt;br&gt;(PostgreSQL)" vertex="1">
+          <mxGeometry height="45" width="100" x="850" y="40" as="geometry" />
+        </mxCell>
+
+        <!-- Sistema de Archivos Git (Entity) -->
+        <mxCell id="entity-git" parent="1" style="shape=umlLifeline;participant=umlEntity;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;verticalAlign=top;spacingTop=36;outlineConnect=0;fillColor=#e1d5e7;strokeColor=#9673a6;" value="" vertex="1">
+          <mxGeometry height="2200" width="40" x="1080" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="entity-git-bar" parent="entity-git" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#e1d5e7;strokeColor=#9673a6;" value="" vertex="1">
+          <mxGeometry height="2100" width="10" x="15" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="label-git" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontStyle=1;" value="Sistema Git&lt;br&gt;(File Storage)" vertex="1">
+          <mxGeometry height="45" width="90" x="1055" y="40" as="geometry" />
+        </mxCell>
+
+        <!-- Servicio Notificaciones (Control) - Opcional -->
+        <mxCell id="control-notif" parent="1" style="shape=umlLifeline;participant=umlControl;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;verticalAlign=top;spacingTop=36;outlineConnect=0;fillColor=#ffe6cc;strokeColor=#d79b00;" value="" vertex="1">
+          <mxGeometry height="2200" width="40" x="1280" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="control-notif-bar" parent="control-notif" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#ffe6cc;strokeColor=#d79b00;" value="" vertex="1">
+          <mxGeometry height="2100" width="10" x="15" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="label-notif" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontStyle=1;" value="Servicio&lt;br&gt;Notificaciones" vertex="1">
+          <mxGeometry height="45" width="100" x="1250" y="40" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== HU-07: LISTAR REPOSITORIOS ==================== -->
+
+        <!-- Separador HU-07 -->
+        <mxCell id="sep-hu07" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=14;verticalAlign=top;align=left;spacingTop=-6;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=12;" value="HU-07: Listar repositorios del usuario" vertex="1">
+          <mxGeometry height="30" width="280" x="70" y="160" as="geometry" />
+        </mxCell>
+
+        <!-- 1. Usuario accede a mis repositorios -->
+        <mxCell id="hu07-msg1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontStyle=0;" value="1. Acceder a 'Mis Repositorios'" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="135" y="210" as="sourcePoint" />
+            <mxPoint x="300" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 2. UI solicita lista al Gateway -->
+        <mxCell id="hu07-msg2" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="2. GET /api/repos?user=me" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="250" as="sourcePoint" />
+            <mxPoint x="495" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3. Gateway valida token -->
+        <mxCell id="hu07-msg3" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" value="3. validateJWT(token)" edge="1">
+          <mxGeometry relative="1" y="10" as="geometry">
+            <Array as="points">
+              <mxPoint x="530" y="280" />
+              <mxPoint x="530" y="300" />
+            </Array>
+            <mxPoint x="505" y="280" as="sourcePoint" />
+            <mxPoint x="505" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 4. Gateway llama al servicio -->
+        <mxCell id="hu07-msg4" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="4. getRepositoriesByUser(userId)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="330" as="sourcePoint" />
+            <mxPoint x="695" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5. Servicio consulta BD -->
+        <mxCell id="hu07-msg5" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="5. SELECT * FROM repositories WHERE owner_id = ?" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="705" y="370" as="sourcePoint" />
+            <mxPoint x="895" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. BD retorna lista -->
+        <mxCell id="hu07-msg6" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="6. :List&lt;Repository&gt;" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="895" y="410" as="sourcePoint" />
+            <mxPoint x="705" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 7. Servicio retorna al Gateway -->
+        <mxCell id="hu07-msg7" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="7. :RepositoryListDTO" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="695" y="450" as="sourcePoint" />
+            <mxPoint x="505" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 8. Gateway retorna a UI -->
+        <mxCell id="hu07-msg8" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="8. HTTP 200: { repositories: [...] }" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="495" y="490" as="sourcePoint" />
+            <mxPoint x="310" y="490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 9. UI muestra al usuario -->
+        <mxCell id="hu07-msg9" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="9. Mostrar lista de repositorios" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="530" as="sourcePoint" />
+            <mxPoint x="135" y="530" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== HU-06: CREAR REPOSITORIO ==================== -->
+
+        <!-- Separador HU-06 -->
+        <mxCell id="sep-hu06" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=14;verticalAlign=top;align=left;spacingTop=-6;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" value="HU-06: Crear repositorio nuevo" vertex="1">
+          <mxGeometry height="30" width="280" x="70" y="580" as="geometry" />
+        </mxCell>
+
+        <!-- 1. Usuario hace clic en crear -->
+        <mxCell id="hu06-msg1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="1. Clic en 'Nuevo Repositorio'" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="135" y="630" as="sourcePoint" />
+            <mxPoint x="300" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 2. UI muestra formulario -->
+        <mxCell id="hu06-msg2" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="2. Mostrar formulario de creación" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="670" as="sourcePoint" />
+            <mxPoint x="135" y="670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3. Usuario ingresa datos -->
+        <mxCell id="hu06-msg3" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="3. Ingresar: nombre, descripción,&lt;br&gt;visibilidad, inicializar README" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="135" y="720" as="sourcePoint" />
+            <mxPoint x="300" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 4. UI envía al Gateway -->
+        <mxCell id="hu06-msg4" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="4. POST /api/repos { name, description, visibility, initReadme }" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="770" as="sourcePoint" />
+            <mxPoint x="495" y="770" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5. Gateway valida token -->
+        <mxCell id="hu06-msg5" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" value="5. validateJWT(token)" edge="1">
+          <mxGeometry relative="1" y="10" as="geometry">
+            <Array as="points">
+              <mxPoint x="530" y="800" />
+              <mxPoint x="530" y="820" />
+            </Array>
+            <mxPoint x="505" y="800" as="sourcePoint" />
+            <mxPoint x="505" y="820" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. Gateway llama al servicio -->
+        <mxCell id="hu06-msg6" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="6. createRepository(repoDTO, userId)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="850" as="sourcePoint" />
+            <mxPoint x="695" y="850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 7. Servicio valida nombre único -->
+        <mxCell id="hu06-msg7" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="7. SELECT COUNT(*) FROM repositories&lt;br&gt;WHERE owner_id = ? AND name = ?" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="705" y="890" as="sourcePoint" />
+            <mxPoint x="895" y="890" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 8. BD confirma disponibilidad -->
+        <mxCell id="hu06-msg8" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="8. :count = 0 (disponible)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="895" y="930" as="sourcePoint" />
+            <mxPoint x="705" y="930" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 9. Servicio inserta en BD -->
+        <mxCell id="hu06-msg9" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="9. INSERT INTO repositories (...)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="705" y="970" as="sourcePoint" />
+            <mxPoint x="895" y="970" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 10. BD confirma inserción -->
+        <mxCell id="hu06-msg10" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="10. :repositoryId" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="895" y="1010" as="sourcePoint" />
+            <mxPoint x="705" y="1010" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 11. Servicio crea estructura Git -->
+        <mxCell id="hu06-msg11" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="11. initGitRepository(repoId, initReadme)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="705" y="1050" as="sourcePoint" />
+            <mxPoint x="1095" y="1050" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 12. Git crea estructura -->
+        <mxCell id="hu06-msg12" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" value="12. git init + README.md" edge="1">
+          <mxGeometry relative="1" y="10" as="geometry">
+            <Array as="points">
+              <mxPoint x="1130" y="1080" />
+              <mxPoint x="1130" y="1100" />
+            </Array>
+            <mxPoint x="1105" y="1080" as="sourcePoint" />
+            <mxPoint x="1105" y="1100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 13. Git confirma -->
+        <mxCell id="hu06-msg13" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="13. :success" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1095" y="1130" as="sourcePoint" />
+            <mxPoint x="705" y="1130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 14. Servicio retorna al Gateway -->
+        <mxCell id="hu06-msg14" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="14. :RepositoryDTO (creado)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="695" y="1170" as="sourcePoint" />
+            <mxPoint x="505" y="1170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 15. Gateway retorna a UI -->
+        <mxCell id="hu06-msg15" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="15. HTTP 201: { repository: {...} }" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="495" y="1210" as="sourcePoint" />
+            <mxPoint x="310" y="1210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 16. UI muestra éxito y redirige -->
+        <mxCell id="hu06-msg16" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="16. Mostrar mensaje de éxito&lt;br&gt;Redirigir al nuevo repositorio" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="1260" as="sourcePoint" />
+            <mxPoint x="135" y="1260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== HU-08: EDITAR REPOSITORIO ==================== -->
+
+        <!-- Separador HU-08 -->
+        <mxCell id="sep-hu08" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=14;verticalAlign=top;align=left;spacingTop=-6;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=12;" value="HU-08: Editar información de repositorio" vertex="1">
+          <mxGeometry height="30" width="280" x="70" y="1320" as="geometry" />
+        </mxCell>
+
+        <!-- 1. Usuario accede a configuración -->
+        <mxCell id="hu08-msg1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="1. Acceder a 'Configuración' del repo" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="135" y="1370" as="sourcePoint" />
+            <mxPoint x="300" y="1370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 2. UI solicita datos actuales -->
+        <mxCell id="hu08-msg2" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="2. GET /api/repos/:repoId" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="1410" as="sourcePoint" />
+            <mxPoint x="495" y="1410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3. Gateway valida y obtiene -->
+        <mxCell id="hu08-msg3" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="3. getRepositoryById(repoId, userId)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="1450" as="sourcePoint" />
+            <mxPoint x="695" y="1450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 4. Servicio verifica permisos de owner -->
+        <mxCell id="hu08-msg4" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="4. SELECT * FROM repositories&lt;br&gt;WHERE id = ? AND owner_id = ?" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="705" y="1490" as="sourcePoint" />
+            <mxPoint x="895" y="1490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5. BD retorna datos -->
+        <mxCell id="hu08-msg5" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="5. :Repository (con permisos)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="895" y="1530" as="sourcePoint" />
+            <mxPoint x="705" y="1530" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6-7-8. Retorno en cascada -->
+        <mxCell id="hu08-msg6" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="6. :RepositoryDTO" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="695" y="1570" as="sourcePoint" />
+            <mxPoint x="505" y="1570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="hu08-msg7" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="7. HTTP 200: { repository }" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="495" y="1600" as="sourcePoint" />
+            <mxPoint x="310" y="1600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="hu08-msg8" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="8. Mostrar formulario con datos actuales" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="1640" as="sourcePoint" />
+            <mxPoint x="135" y="1640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 9. Usuario modifica datos -->
+        <mxCell id="hu08-msg9" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="9. Modificar descripción y/o visibilidad" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="135" y="1690" as="sourcePoint" />
+            <mxPoint x="300" y="1690" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 10. UI envía actualización -->
+        <mxCell id="hu08-msg10" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="10. PATCH /api/repos/:repoId { description, visibility }" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="1730" as="sourcePoint" />
+            <mxPoint x="495" y="1730" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 11. Gateway valida y llama servicio -->
+        <mxCell id="hu08-msg11" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="11. updateRepository(repoId, updateDTO, userId)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="1770" as="sourcePoint" />
+            <mxPoint x="695" y="1770" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 12. Servicio actualiza BD -->
+        <mxCell id="hu08-msg12" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="12. UPDATE repositories SET ...&lt;br&gt;WHERE id = ? AND owner_id = ?" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="705" y="1810" as="sourcePoint" />
+            <mxPoint x="895" y="1810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 13. BD confirma -->
+        <mxCell id="hu08-msg13" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="13. :rowsAffected = 1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="895" y="1850" as="sourcePoint" />
+            <mxPoint x="705" y="1850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 14-15-16. Retorno en cascada -->
+        <mxCell id="hu08-msg14" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="14. :RepositoryDTO (actualizado)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="695" y="1890" as="sourcePoint" />
+            <mxPoint x="505" y="1890" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="hu08-msg15" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="15. HTTP 200: { repository }" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="495" y="1920" as="sourcePoint" />
+            <mxPoint x="310" y="1920" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="hu08-msg16" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="16. Mostrar mensaje: 'Cambios guardados'" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="1960" as="sourcePoint" />
+            <mxPoint x="135" y="1960" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== HU-09: ELIMINAR REPOSITORIO ==================== -->
+
+        <!-- Separador HU-09 -->
+        <mxCell id="sep-hu09" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=14;verticalAlign=top;align=left;spacingTop=-6;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=12;" value="HU-09: Eliminar repositorio" vertex="1">
+          <mxGeometry height="30" width="280" x="70" y="2010" as="geometry" />
+        </mxCell>
+
+        <!-- 1. Usuario hace clic en eliminar -->
+        <mxCell id="hu09-msg1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="1. Clic en 'Eliminar repositorio'" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="135" y="2060" as="sourcePoint" />
+            <mxPoint x="300" y="2060" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 2. UI muestra confirmación -->
+        <mxCell id="hu09-msg2" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="2. Mostrar modal de confirmación&lt;br&gt;'Escriba el nombre del repo para confirmar'" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="2110" as="sourcePoint" />
+            <mxPoint x="135" y="2110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3. Usuario confirma -->
+        <mxCell id="hu09-msg3" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="3. Escribir nombre y confirmar eliminación" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="135" y="2160" as="sourcePoint" />
+            <mxPoint x="300" y="2160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 4. UI envía DELETE -->
+        <mxCell id="hu09-msg4" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="4. DELETE /api/repos/:repoId" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="2200" as="sourcePoint" />
+            <mxPoint x="495" y="2200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5. Gateway valida -->
+        <mxCell id="hu09-msg5" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" value="5. validateJWT(token)" edge="1">
+          <mxGeometry relative="1" y="10" as="geometry">
+            <Array as="points">
+              <mxPoint x="530" y="2230" />
+              <mxPoint x="530" y="2250" />
+            </Array>
+            <mxPoint x="505" y="2230" as="sourcePoint" />
+            <mxPoint x="505" y="2250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. Gateway llama servicio -->
+        <mxCell id="hu09-msg6" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="6. deleteRepository(repoId, userId)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="2280" as="sourcePoint" />
+            <mxPoint x="695" y="2280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 7. Servicio verifica owner -->
+        <mxCell id="hu09-msg7" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="7. SELECT owner_id FROM repositories WHERE id = ?" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="705" y="2320" as="sourcePoint" />
+            <mxPoint x="895" y="2320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 8. BD confirma owner -->
+        <mxCell id="hu09-msg8" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="8. :owner_id (verificado)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="895" y="2360" as="sourcePoint" />
+            <mxPoint x="705" y="2360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 9. Servicio elimina archivos Git -->
+        <mxCell id="hu09-msg9" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="9. deleteGitRepository(repoId)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="705" y="2400" as="sourcePoint" />
+            <mxPoint x="1095" y="2400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 10. Git confirma eliminación archivos -->
+        <mxCell id="hu09-msg10" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="10. :filesDeleted" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1095" y="2440" as="sourcePoint" />
+            <mxPoint x="705" y="2440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 11. Servicio elimina de BD (cascada) -->
+        <mxCell id="hu09-msg11" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" value="11. DELETE FROM repositories WHERE id = ?&lt;br&gt;(CASCADE: branches, commits, collaborators)" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="705" y="2490" as="sourcePoint" />
+            <mxPoint x="895" y="2490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 12. BD confirma -->
+        <mxCell id="hu09-msg12" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="12. :deleted" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="895" y="2530" as="sourcePoint" />
+            <mxPoint x="705" y="2530" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 13. Notificar colaboradores (async) -->
+        <mxCell id="hu09-msg13" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;dashed=1;strokeColor=#d79b00;" value="13. notifyCollaborators(repoId, 'deleted') [async]" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="705" y="2570" as="sourcePoint" />
+            <mxPoint x="1295" y="2570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 14-15-16. Retorno en cascada -->
+        <mxCell id="hu09-msg14" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="14. :success" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="695" y="2610" as="sourcePoint" />
+            <mxPoint x="505" y="2610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="hu09-msg15" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="15. HTTP 204: No Content" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="495" y="2650" as="sourcePoint" />
+            <mxPoint x="310" y="2650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="hu09-msg16" parent="1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;" value="16. Mostrar: 'Repositorio eliminado'&lt;br&gt;Redirigir al dashboard" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="2700" as="sourcePoint" />
+            <mxPoint x="135" y="2700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

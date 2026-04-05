@@ -6,7 +6,7 @@
 - [Épica 2: Gestión de Repositorios](#épica-2-gestión-de-repositorios)
 - [Épica 3: Operaciones Git y Archivos](#épica-3-operaciones-git-y-archivos)
 - [Épica 4: Pull Requests y Colaboración](#épica-4-pull-requests-y-colaboración)
-- [Épica 5: Búsqueda y Notificaciones](#épica-5-búsqueda-y-notificaciones)
+- [Épica 5: Búsqueda](#épica-5-búsqueda)
 - [Épica 6: Documentación y Calidad](#épica-6-documentación-y-calidad)
 
 ---
@@ -600,7 +600,7 @@
 
 ---
 
-## Épica 5: Búsqueda y Notificaciones
+## Épica 5: Búsqueda
 
 ### HU-25: Buscar repositorios por nombre
 
@@ -646,36 +646,9 @@
 
 ---
 
-### HU-27: Notificaciones por email
-
-> **Como** usuario
-> **Quiero** recibir correos cuando ocurran eventos clave (PR creado, revisión, merge)
-> **Para** mantenerme informado sin estar en la plataforma
-
-**Criterios de aceptación:**
-
-- [ ] Configuración de preferencias de notificaciones.
-- [ ] Envío de emails para:
-  - PR creado donde soy reviewer o propietario.
-  - Comentario en PR que sigo.
-  - Merge completado.
-  - Invitación a colaborador.
-- [ ] Plantillas de email claras.
-
-**Checklist de tareas:**
-
-- [ ] Configurar servicio de emails.
-- [ ] Escuchar eventos del sistema (event sourcing).
-- [ ] Crear cola de envío para no bloquear.
-- [ ] Diseñar plantillas HTML.
-- [ ] Implementar configuración de preferencias por usuario.
-- [ ] Pruebas de entrega.
-
----
-
 ## Épica 6: Documentación y Calidad
 
-### HU-28: Documentación de API con Swagger
+### HU-27: Documentación de API con Swagger
 
 > **Como** desarrollador que integra con la plataforma
 > **Quiero** tener una documentación interactiva de la API
@@ -697,7 +670,7 @@
 
 ---
 
-### HU-29: Interfaz como Progressive Web App (PWA)
+### HU-28: Interfaz como Progressive Web App (PWA)
 
 > **Como** usuario
 > **Quiero** poder instalar la aplicación en mi dispositivo móvil
@@ -720,4 +693,4 @@
 
 ---
 
-_29 historias de usuario · 6 épicas_
+_28 historias de usuario · 6 épicas_
