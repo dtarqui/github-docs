@@ -1,4 +1,4 @@
-# Evaluación de Github - Diseño Técnico vs Rubrica Parte 1 (Revisión Actualizada)
+# Evaluación de Github - Diseño Técnico vs Rubrica Parte 1 (Reevaluación)
 
 Fecha: 2026-04-05
 Documento evaluado: [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md)
@@ -8,10 +8,15 @@ Rúbrica base: [docs/semana1/Rubrica_Parte1.md](docs/semana1/Rubrica_Parte1.md)
 
 Estimación actual: 19.0 / 20 (sin penalizaciones).
 
-Mejoras logradas desde la revisión anterior:
+Estado de la reevaluación:
 
-- Se incorporó AuthN completo con flujo OIDC + PKCE y claims de token en [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md#L484).
-- Se incorporó AuthZ con RBAC y mapeo scopes -> operaciones en [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md#L517).
+- Documento de diseño fuerte y coherente con la rúbrica en secciones A y B.
+- La única brecha de alto impacto sigue siendo evidencia verificable de Smithy en este workspace.
+
+Mejoras verificadas en esta reevaluación:
+
+- Se incorporó AuthN completo con flujo OIDC + PKCE y claims de token en [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md#L464).
+- Se incorporó AuthZ con RBAC y mapeo scopes -> operaciones en [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md#L499).
 - Se formalizó versionado REST en `/v1` en [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md#L106).
 
 Brecha principal restante para puntaje máximo:
@@ -26,7 +31,7 @@ Brecha principal restante para puntaje máximo:
 - Qué falta: enlace/commit del repo `Github-Smithy` + evidencia de `smithy build` exitoso.
 
 2. Media: C3 depende de evidencia en el modelo, no solo en documento.
-- Evidencia documental existe en [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md#L100) y [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md#L142), pero la rúbrica pide traits/errores Smithy concretos.
+- Evidencia documental existe en [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md#L100), [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md#L142) y [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md#L518), pero la rúbrica pide traits/errores Smithy concretos.
 - Impacto: si no se demuestra en `.smithy`, C3 puede bajar de Excelente/Bueno a Suficiente.
 
 3. Media-baja: trazabilidad de entregables externos aún no consolidada en un anexo de evidencias.
@@ -62,6 +67,11 @@ Subtotal C: 5.0 / 6.0
 
 Total estimado: 19.0 / 20
 
+Nota de confianza:
+
+- Alta en A y B (evidencia completa en documento).
+- Media en C por ausencia de artefacto Smithy en este workspace de evaluación.
+
 ## Qué Debemos Mejorar para Llegar a la Nota Máxima
 
 1. Cerrar C1 con evidencia técnica completa
@@ -90,6 +100,10 @@ Total estimado: 19.0 / 20
 1. Subir evidencia Smithy (30-45 min).
 2. Añadir anexo de evidencias al documento (15-20 min).
 3. Hacer revisión cruzada final con checklist de rúbrica (15 min).
+
+## Veredicto de Reevaluación
+
+El documento está técnicamente fuerte y listo para nota alta. La diferencia entre 19 y 20 depende de una sola condición: mostrar evidencia verificable del modelo Smithy y de `smithy build` exitoso en la entrega.
 
 ## Conclusión
 

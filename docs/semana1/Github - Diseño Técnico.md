@@ -62,9 +62,9 @@ Fuera del alcance:
 
 1. **RF-P1 (Alta).** Los usuarios registrados deben poder **autenticarse** mediante correo y contraseña o, alternativamente, mediante **OIDC/SSO** con Keycloak (incluida federación con proveedores externos configurados en el _realm_), **para** acceder a recursos protegidos sin depender de un único mecanismo de credenciales.
 
-2. **RF-P2 (Alta).** Los usuarios autenticados deben poder **crear y administrar repositorios** (visibilidad pública o privada), **subir y recuperar archivos** asociados y consultar la estructura lógica de ramas según el modelo académico, **para** versionar y compartir artefactos de software dentro de los límites del proyecto. _Trazabilidad:_ RF02, RF03; HUs de repositorios y archivos.
+2. **RF-P2 (Alta).** Los usuarios autenticados deben poder **crear y administrar repositorios** (visibilidad pública o privada), **subir y recuperar archivos** asociados y consultar la estructura lógica de ramas según el modelo académico, **para** versionar y compartir artefactos de software dentro de los límites del proyecto.
 
-3. **RF-P3 (Media).** Los colaboradores autorizados deben poder **gestionar issues y pull requests en flujo básico** (creación, comentarios, revisión y merge simplificado), **para** coordinar cambios sin implementar el ecosistema completo de revisiones de GitHub. _Trazabilidad:_ RF04, RF07 y aclaración de PR.
+3. **RF-P3 (Media).** Los colaboradores autorizados deben poder **gestionar issues y pull requests en flujo básico** (creación, comentarios, revisión y merge simplificado), **para** coordinar cambios sin implementar el ecosistema completo de revisiones de GitHub.
 
 ### 1.2 Requerimientos no funcionales
 
@@ -76,7 +76,7 @@ Fuera del alcance:
 | **RNF-P4** | Cada microservicio debe persistir en **su propia base PostgreSQL** (patrón _database per service_).                               | Tres instancias lógicas mínimas (`auth_db`, `repos_db`, `issues_db`) sin esquema compartido accidental.              | Consistencia de diseño / CAP (servicios débilmente acoplados) |
 | **RNF-P5** | El contrato REST debe permanecer **versionado y generado desde Smithy**, con documentación **OpenAPI/Swagger** accesible.         | Artefacto `MiniGitHubApi.openapi.json` reproducible por build; UI en `/api-docs` o equivalente por servicio/gateway. | Mantenibilidad                                                |
 
-### 1.3 Estimación de capacidad _(complementaria)_
+### 1.3 Estimación de capacidad
 
 Para el alcance académico, se adopta el orden de magnitud ya consensuado en la documentación general: aproximadamente **100 usuarios concurrentes**, almacenamiento total del orden de **gigabytes** en tier gratuito o de demostración, y tráfico de búsqueda dominado por lecturas. Por tanto, no se justifica particionamiento agresivo en la fase inicial; no obstante, el Search Service y Elasticsearch permiten evolucionar hacia mayor volumen si el proyecto lo requiere.
 
@@ -103,7 +103,7 @@ En este sentido, la separación por servicio permite evolucionar el esquema de i
 
 Se adopta **REST** sobre JSON con autenticación **Bearer JWT**, conforme al servicio Smithy `com.minigithub#MiniGitHubApi` (`@httpBearerAuth`). El listado de operaciones agregadas en `model/service.smithy` agrupa los casos de uso por puertos lógicos de referencia: **3001** (auth), **3002** (repositorio y archivos), **3003** (issues y pull requests), **3004** (búsqueda).
 
-Convención de versionado: la interfaz pública canónica se publica bajo prefijo **`/v1`**. Por compatibilidad transitoria, el gateway puede mantener alias históricos bajo `/api` hasta completar migración de clientes.
+Convención de versionado: la interfaz pública canónica se publica bajo prefijo **`/v1`**.
 
 ### 3.2 Operaciones representativas
 
@@ -256,8 +256,6 @@ Operación interna: publicación de evento `repo.created` (RabbitMQ)
 
 Resultado esperado: Search Service consume el evento y actualiza proyección en Elasticsearch (consistencia eventual).
 
-Nota: para el listado integral de endpoints REST, ver `README.md` en la sección **API Endpoints**.
-
 ---
 
 ## 4. Flujo de datos
@@ -337,7 +335,7 @@ flowchart TB
     GW --- RD
 ```
 
-Este diagrama resume la topología documentada en `README.md` de github-docs y en `.claude-context.md`; además, conecta el rol de **Keycloak** como proveedor OIDC externo a los microservicios.
+Este diagrama resume la topología documentada en `README.md` de github-docs. Además, conecta el rol de **Keycloak** como proveedor OIDC externo a los microservicios.
 
 ### 5.2 Infraestructura AWS (referencia Github-Cdk)
 
@@ -348,21 +346,6 @@ El stack `KeycloakStack` compone **GithubVpc**, **KubeCluster** (EKS), **GithubD
 ## 6. Inmersiones profundas
 
 ### 6.1 Esquema de base de datos
-
-El esquema fuente de verdad se mantiene en `ModeloDeDatos.md`. Aquí se documentan las decisiones que impactan diseño, compatibilidad y operación.
-
-**Cambios clave de esquema aplicados**
-
-- Estandarización de identificadores a **UUID** en entidades relacionales principales.
-- Separación por contexto con patrón **database-per-service** (`auth_db`, `repos_db`, `issues_db`).
-- En `issues` y `labels`, `repo_id` es referencia lógica (sin FK cross-service) para mantener bajo acoplamiento entre servicios.
-- Tabla `comments` con restricción `chk_comment_target` para garantizar que un comentario pertenezca a issue o PR, pero no a ambos.
-
-**Compatibilidad hacia atrás y migración de datos**
-
-- Estrategia recomendada de migración en dos pasos: expandir (agregar columnas/índices/constraints nuevas) y luego contraer (retirar estructuras antiguas tras validación).
-- Durante transición, mantener doble lectura o mapeo en capa de aplicación cuando existan clientes que aún no usen la representación final.
-- Validar consistencia de `repo_id` mediante llamada a Repo Service antes de persistir Issue/Label, para compensar la ausencia de FK física cross-service.
 
 **Tabla simple de entidades críticas**
 
@@ -461,8 +444,6 @@ Respuesta operativa:
 - Se ejecuta SOP de diagnóstico (API, DB, mensajería, IdP).
 - Se registra causa raíz y acción correctiva.
 
-Nota: pendiente definir herramienta final de alertamiento (Prometheus Alertmanager, CloudWatch o equivalente) y enlaces definitivos a dashboards/SOP.
-
 ### 6.4 Seguridad
 
 Controles de seguridad aplicados para la fase actual:
@@ -541,8 +522,6 @@ Mapeo de scopes a operaciones API:
 - Renovación: refresh token rotatorio; revocación en logout y ante sospecha de compromiso.
 - Secretos: solo por variables de entorno/secret manager, nunca hardcoded.
 - Regla de seguridad: identidad de usuario derivada de `sub` del token, no de campos en body.
-
-Nota: pendiente acordar política exacta de revocación global por cambio de credenciales (todos los dispositivos vs dispositivo actual).
 
 ### 6.5 Extensibilidad
 
@@ -754,7 +733,6 @@ _Motivo:_ en este entorno no se generan archivos binarios de imagen automáticam
 | Artefacto                  | Ubicación                                              |
 | -------------------------- | ------------------------------------------------------ |
 | Documentación de producto  | `github-docs/docs/*.md`                                |
-| Contexto resumido          | `github-docs/.claude-context.md`                       |
 | Contrato Smithy            | `Github-Smithy/model/`                                 |
 | Infraestructura AWS        | `Github-Cdk/lib/stacks/keycloak-stack.ts` y constructs |
 | Patrón Spring (referencia) | `Github-ms-users/docs/ARCHITECTURE.md`                 |
