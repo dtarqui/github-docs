@@ -110,6 +110,8 @@ En este sentido, la separación por servicio permite evolucionar el esquema de i
 
 ## 3. API o Interfaz del Sistema
 
+Para una referencia detallada se tiene los APIs en el siguiente [recurso](../APIS_RESUMEN.md)
+
 ### 3.1 Protocolo y contrato
 
 Se adopta **REST** sobre JSON con autenticación **Bearer JWT**, conforme al servicio Smithy `com.minigithub#MiniGitHubApi` (`@httpBearerAuth`). El listado de operaciones agregadas en `model/service.smithy` agrupa los casos de uso por puertos lógicos de referencia: **3001** (auth), **3002** (repositorio y archivos), **3003** (issues y pull requests), **3004** (búsqueda).
