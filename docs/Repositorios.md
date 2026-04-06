@@ -4,6 +4,7 @@ Este documento centraliza los repositorios oficiales usados.
 
 | Repositorio     | Proposito                                                                         | URL                                           |
 | --------------- | --------------------------------------------------------------------------------- | --------------------------------------------- |
+| Github-Diseño Tecnico | Diseño tecnico de Proyecto Github | [Github Diseño Tecnico](https://github.com/dtarqui/github-docs/blob/main/docs/semana1/Github%20-%20Dise%C3%B1o%20T%C3%A9cnico.md) |
 | Github-ms-users | Referencia de patrones de seguridad/policy enforcer y arquitectura complementaria | https://github.com/Savitar465/Github-ms-users |
 | Github-Smithy   | Contrato API (Smithy), generacion OpenAPI y evidencia de `smithy build`           | https://github.com/Savitar465/Github-Smithy   |
 | github-docs     | Documentacion funcional/tecnica del proyecto y entregables escritos               | https://github.com/dtarqui/github-docs        |
