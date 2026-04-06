@@ -349,7 +349,166 @@ flowchart TB
 
 Este diagrama resume la topología documentada en `README.md` de github-docs. Además, conecta el rol de **Keycloak** como proveedor OIDC externo a los microservicios.
 
-### 5.2 Infraestructura AWS (referencia Github-Cdk)
+### 5.2 Diagramas de Secuencia - Gestión de Repositorios
+
+A continuación se presentan los diagramas de secuencia detallados para las operaciones principales de gestión de repositorios, mostrando la interacción entre componentes del sistema.
+
+#### 5.2.1 Crear Repositorio Nuevo
+
+Este diagrama ilustra el flujo completo desde que un usuario autenticado solicita crear un repositorio hasta que el sistema persiste los datos y retorna la confirmación.
+
+![Diagrama de Secuencia - Crear Repositorio](imagenes/Sec_Gestion_Repositorios-Sec%20-%20Crear%20repositorio%20nuevo.drawio.png)
+
+**Flujo del proceso:**
+
+1. **Autenticación:** El usuario envía la petición con JWT token en el header Authorization
+2. **Validación de permisos:** El API Gateway valida el token con el Auth Service
+3. **Validación de negocio:** El Repo Service verifica que el nombre del repositorio sea único para ese usuario
+4. **Persistencia:** Se crea el repositorio en PostgreSQL con sus metadatos (nombre, descripción, visibilidad)
+5. **Inicialización:** Se crea la rama `main` por defecto y un archivo README.md inicial en MinIO
+6. **Eventos:** Se publica evento `repo.created` a RabbitMQ para notificar al Search Service
+7. **Respuesta:** Se retorna código HTTP 201 con los datos del repositorio creado
+
+**Validaciones clave:**
+- Nombre de repositorio debe ser único por propietario
+- Formato del nombre: alfanumérico, guiones, 1-100 caracteres
+- Usuario debe estar autenticado (token JWT válido)
+
+**Manejo de errores:**
+- `409 Conflict`: Si ya existe un repositorio con ese nombre para el usuario
+- `400 Bad Request`: Si el formato del nombre es inválido
+- `401 Unauthorized`: Si el token JWT es inválido o ha expirado
+
+#### 5.2.2 Listar Repositorios de Usuario
+
+Este diagrama muestra cómo el sistema recupera y presenta la lista de repositorios asociados a un usuario específico.
+
+![Diagrama de Secuencia - Listar Repositorios](imagenes/Sec_Gestion_Repositorios-Sec%20-%20Listar%20repositorios%20de%20usuarios.drawio.png)
+
+**Flujo del proceso:**
+
+1. **Solicitud:** El cliente solicita `GET /v1/repositories?owner={username}` con paginación
+2. **Autenticación:** Gateway valida JWT y extrae identidad del usuario
+3. **Consulta:** Repo Service consulta PostgreSQL filtrando por `owner_id`
+4. **Filtrado de visibilidad:**
+   - Si el usuario es el propietario: retorna repositorios públicos y privados
+   - Si es otro usuario: retorna solo repositorios públicos
+5. **Enriquecimiento:** Se agregan datos calculados (estrellas, forks, último commit)
+6. **Paginación:** Se aplica `limit` y `offset` (default: 30 repos por página)
+7. **Respuesta:** Se retorna lista con metadata de paginación (total_count, page, per_page)
+
+**Parámetros de consulta:**
+- `owner`: Nombre de usuario (requerido)
+- `visibility`: Filtro opcional (`public`, `private`, `all`)
+- `sort`: Ordenamiento (`created`, `updated`, `name`, `stars`)
+- `page`: Número de página (default: 1)
+- `per_page`: Cantidad por página (default: 30, max: 100)
+
+**Optimizaciones:**
+- Índice compuesto en `(owner_id, created_at DESC)` para ordenamiento eficiente
+- Cache de resultados en Redis por 5 minutos para usuarios con muchos repositorios
+- Carga eager de relaciones frecuentes (owner, default_branch)
+
+#### 5.2.3 Editar Información de Repositorio
+
+Este diagrama detalla el proceso de actualización de metadatos de un repositorio existente.
+
+![Diagrama de Secuencia - Editar Repositorio](imagenes/Sec_Gestion_Repositorios-Sec%20-%20Editar%20informaci%C3%B3n%20de%20repositorio.drawio.png)
+
+**Flujo del proceso:**
+
+1. **Solicitud:** Cliente envía `PATCH /v1/repositories/{owner}/{repo}` con campos a actualizar
+2. **Autenticación y Autorización:**
+   - Gateway valida JWT
+   - Repo Service verifica que el usuario tenga rol `Owner` en el repositorio
+3. **Validación de datos:**
+   - Nuevo nombre (si aplica) no debe estar en uso por el mismo propietario
+   - Descripción no excede 500 caracteres
+   - Visibilidad es `public` o `private`
+4. **Actualización:** Se modifican solo los campos enviados (partial update)
+5. **Evento:** Se publica `repo.updated` con campos modificados para reindexación
+6. **Respuesta:** Se retorna código HTTP 200 con el repositorio actualizado
+
+**Campos editables:**
+- `name`: Nombre del repositorio (requiere verificación de unicidad)
+- `description`: Descripción textual (max 500 caracteres)
+- `visibility`: `public` o `private`
+- `default_branch`: Rama por defecto (debe existir)
+- `homepage`: URL del sitio web del proyecto
+- `topics`: Array de tags para categorización
+
+**Restricciones de autorización:**
+- Solo el `Owner` puede editar estos campos
+- `Developer` puede modificar solo algunos metadatos (topics, homepage)
+- `Reporter` no tiene permisos de edición
+
+**Casos especiales:**
+- Cambio de nombre actualiza URLs en respuestas subsecuentes
+- Cambio de visibilidad a `private` revoca acceso a no-colaboradores
+- Cambio de `default_branch` valida que la rama exista
+
+#### 5.2.4 Eliminar Repositorio
+
+Este diagrama muestra el proceso de eliminación permanente de un repositorio y todos sus recursos asociados.
+
+![Diagrama de Secuencia - Eliminar Repositorio](imagenes/Sec_Gestion_Repositorios-Sec%20-%20Eliminar%20repositorio.drawio.png)
+
+**Flujo del proceso:**
+
+1. **Solicitud:** Cliente envía `DELETE /v1/repositories/{owner}/{repo}`
+2. **Autenticación y Autorización:**
+   - Gateway valida JWT
+   - Repo Service verifica rol `Owner` (solo el propietario puede eliminar)
+3. **Confirmación (opcional):** Si está configurado, requiere confirmación explícita con el nombre del repositorio en el body
+4. **Eliminación en cascada:**
+   - **Paso 1:** Se eliminan archivos del bucket MinIO `repos/{repo_id}/*`
+   - **Paso 2:** Se eliminan registros relacionados en PostgreSQL:
+     - `commits` (con archivos asociados en `commit_files`)
+     - `branches`
+     - `files`
+     - `stars`
+     - `collaborators` (permisos)
+   - **Paso 3:** Se elimina el registro del repositorio (dispara cascade por FK)
+5. **Limpieza de índices:** Se publica evento `repo.deleted` para remover de Elasticsearch
+6. **Respuesta:** Se retorna código HTTP 204 No Content
+
+**Validaciones previas a eliminación:**
+- Usuario debe tener rol `Owner`
+- Confirmación con nombre exacto del repositorio (previene eliminaciones accidentales)
+- Opcionalmente: verificar que no haya PRs abiertos desde forks
+
+**Proceso de eliminación (transaccional):**
+
+```sql
+BEGIN TRANSACTION;
+-- 1. Eliminar relaciones N:M
+DELETE FROM stars WHERE repo_id = ?;
+DELETE FROM collaborators WHERE repo_id = ?;
+-- 2. Eliminar entidades dependientes
+DELETE FROM commit_files WHERE commit_id IN (SELECT id FROM commits WHERE repo_id = ?);
+DELETE FROM files WHERE repo_id = ?;
+DELETE FROM commits WHERE repo_id = ?;
+DELETE FROM branches WHERE repo_id = ?;
+-- 3. Eliminar repositorio (dispara cascade restante)
+DELETE FROM repositories WHERE id = ?;
+COMMIT;
+```
+
+**Manejo de archivos en MinIO:**
+- Eliminación de bucket completo: `DELETE /repos/{repo_id}`
+- Si falla MinIO: Se marca repositorio como `deleted` y se programa limpieza asíncrona
+- Rollback PostgreSQL si eliminación de archivos falla
+
+**Consideraciones de seguridad:**
+- Eliminación es **permanente e irreversible** (no hay papelera de reciclaje)
+- Logs de auditoría registran quién eliminó qué y cuándo
+- Opción de "archivar" en lugar de eliminar (soft delete) para casos especiales
+
+**Eventos publicados:**
+- `repo.deleted`: Payload con `repo_id`, `owner_id`, `name`, `timestamp`
+- Consumidores: Search Service (remover índice), Analytics Service (métricas)
+
+### 5.3 Infraestructura AWS (referencia Github-Cdk)
 
 El stack `KeycloakStack` compone **GithubVpc**, **KubeCluster** (EKS), **GithubDatabase** (RDS PostgreSQL) y **KeycloakManifests**. En consecuencia, la identidad del despliegue académico puede anclarse a un entorno Kubernetes gestionado en AWS, si bien los microservicios de negocio pueden desplegarse en fases posteriores sobre el mismo clúster o en compose local.
 
