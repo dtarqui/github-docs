@@ -1,4 +1,4 @@
-# Mini-GitHub — Documento de diseño técnico
+# GitHub — Documento de diseño técnico
 
 **Estado del documento:** EN REVISIÓN
 
@@ -6,7 +6,7 @@
 
 ## Resumen
 
-Mini-GitHub es un proyecto académico que implementa una forja de código simplificada con arquitectura de microservicios. El sistema permite autenticación (local y OIDC con Keycloak), gestión de repositorios, operaciones Git básicas por HTTPS (sin SSH), issues, pull requests en flujo básico y búsqueda. La solución se documenta a partir de un contrato API en Smithy/OpenAPI y se despliega en entorno cloud/local con PostgreSQL por servicio, almacenamiento de objetos y mensajería asíncrona.
+GitHub es un proyecto académico que implementa una forja de código simplificada con arquitectura de microservicios. El sistema permite autenticación (local y OIDC con Keycloak), gestión de repositorios, operaciones Git básicas por HTTPS (sin SSH), issues, pull requests en flujo básico y búsqueda. La solución se documenta a partir de un contrato API en Smithy/OpenAPI y se despliega en entorno cloud/local con PostgreSQL por servicio, almacenamiento de objetos y mensajería asíncrona.
 
 Nuestros clientes son principalmente estudiantes, docentes y evaluadores que usan la demo para validar capacidades técnicas del equipo. El valor que entregamos es una plataforma entendible, desplegable y demostrable en tiempos académicos, con foco en seguridad básica, trazabilidad y alcance realista (sin funcionalidades enterprise como CI/CD integrado, notificaciones y reglas avanzadas de protección de ramas).
 
@@ -47,7 +47,7 @@ La Entrega final incluye:
 
 Fuera del alcance:
 
-- CI/CD como funcionalidad del producto Mini-GitHub (L-01).
+- CI/CD como funcionalidad del producto GitHub (L-01).
 - Funcionalidades enterprise del servidor Git (HA/replicación/hardening avanzado).
 - Acceso por SSH y gestión de claves públicas (solo HTTPS para operaciones Git).
 - Organizaciones complejas y permisos empresariales avanzados.
@@ -93,22 +93,23 @@ El modelo conceptual se alinea con `EntidadesPrincipales.md` y el esquema relaci
 | **Issue**, **Label**, **IssueLabel**, **Comment**, **PullRequest**                   | Issue                | PostgreSQL `issues_db`                        | Issues y PR vinculados al identificador lógico del repositorio    |
 | **Índices de búsqueda** (proyección)                                                 | Search               | Elasticsearch                                 | Materialización eventual a partir de eventos de dominio           |
 
-* Un Usuario puede poseer muchos Repositorios y tener múltiples Sesiones activas.
+- Un Usuario puede poseer muchos Repositorios y tener múltiples Sesiones activas.
 
-* Un Repositorio contiene múltiples Branches, Commits, e Issues.
+- Un Repositorio contiene múltiples Branches, Commits, e Issues.
 
-* Los Pull Requests conectan dos Branches para proponer cambios.
+- Los Pull Requests conectan dos Branches para proponer cambios.
 
-* Los Comentarios se centralizan en la discusión de Issues y Pull Requests.
+- Los Comentarios se centralizan en la discusión de Issues y Pull Requests.
 
-* Las Etiquetas (Labels) se vinculan de forma muchos-a-muchos con las Issues para facilitar la filtración.
-
+- Las Etiquetas (Labels) se vinculan de forma muchos-a-muchos con las Issues para facilitar la filtración.
 
 En este sentido, la separación por servicio permite evolucionar el esquema de issues sin migrar la base de autenticación, a la vez que impone el uso de **identificadores UUID** compartidos como referencias lógicas entre contextos acotados.
 
 ---
 
 ## 3. API o Interfaz del Sistema
+
+Para una referencia detallada se tiene los APIs en el siguiente [recurso](../APIS_RESUMEN.md)
 
 ### 3.1 Protocolo y contrato
 
@@ -122,16 +123,16 @@ Este documento resume solo las operaciones críticas. El inventario completo de 
 
 **APIs públicas (REST) prioritarias**
 
-| Operación          | Método y ruta                                               | Entrada (request)                                | Salida (response)                          | Excepciones HTTP                         | Restricciones clave                                             |
-| ------------------ | ----------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------ | ---------------------------------------- | --------------------------------------------------------------- |
-| Register           | `POST /v1/users`                                            | `username`, `email`, `password` (requeridos)     | `user`, `accessToken`, `refreshToken`      | `400`, `409`, `422`                      | `email` válido; contraseña con política mínima                  |
-| Login              | `POST /v1/sessions`                                         | `email`, `password` (requeridos)                 | `accessToken`, `refreshToken`, `expiresIn` | `400`, `401`, `429`                      | bloqueo temporal por intentos fallidos                          |
-| CreateRepository   | `POST /v1/repositories`                                     | `name` (requerido), `description?`, `visibility` | metadatos del repositorio creado           | `400`, `401`, `403`, `409`               | `name` único por propietario; `visibility` en {public, private} |
-| GetFileContent     | `GET /v1/repositories/{owner}/{repo}/contents/{path}`       | `owner`, `repo`, `path` (ruta); `ref?` (query)   | contenido, `sha`, metadatos                | `400`, `401`, `403`, `404`               | `path` obligatorio y normalizado                                |
-| CreateIssue        | `POST /v1/repositories/{owner}/{repo}/issues`               | `title` (requerido), `body?`, `labels?`          | issue creado con `id` y `number`           | `400`, `401`, `403`, `404`, `422`        | `title` no vacío; labels válidos en el repo                     |
-| CreatePullRequest  | `POST /v1/repositories/{owner}/{repo}/pull-requests`        | `title`, `base`, `head` (requeridos), `body?`    | PR creado (`id`, `status`)                 | `400`, `401`, `403`, `404`, `409`        | no se permite PR si `base == head`                              |
-| MergePullRequest   | `POST /v1/repositories/{owner}/{repo}/pull-requests/{prId}/merges` | `prId` (ruta), `commitMessage?`            | estado final de PR (`merged`)              | `400`, `401`, `403`, `404`, `409`, `422` | solo PR abierto y mergeable                                     |
-| SearchRepositories | `GET /v1/search/repositories?q={texto}`                     | `q` (requerido), `page?`, `limit?`               | lista paginada de repositorios             | `400`, `401`, `422`                      | `limit` acotado (p. ej. max 100)                                |
+| Operación          | Método y ruta                                                      | Entrada (request)                                | Salida (response)                          | Excepciones HTTP                         | Restricciones clave                                             |
+| ------------------ | ------------------------------------------------------------------ | ------------------------------------------------ | ------------------------------------------ | ---------------------------------------- | --------------------------------------------------------------- |
+| Register           | `POST /v1/users`                                                   | `username`, `email`, `password` (requeridos)     | `user`, `accessToken`, `refreshToken`      | `400`, `409`, `422`                      | `email` válido; contraseña con política mínima                  |
+| Login              | `POST /v1/sessions`                                                | `email`, `password` (requeridos)                 | `accessToken`, `refreshToken`, `expiresIn` | `400`, `401`, `429`                      | bloqueo temporal por intentos fallidos                          |
+| CreateRepository   | `POST /v1/repositories`                                            | `name` (requerido), `description?`, `visibility` | metadatos del repositorio creado           | `400`, `401`, `403`, `409`               | `name` único por propietario; `visibility` en {public, private} |
+| GetFileContent     | `GET /v1/repositories/{owner}/{repo}/contents/{path}`              | `owner`, `repo`, `path` (ruta); `ref?` (query)   | contenido, `sha`, metadatos                | `400`, `401`, `403`, `404`               | `path` obligatorio y normalizado                                |
+| CreateIssue        | `POST /v1/repositories/{owner}/{repo}/issues`                      | `title` (requerido), `body?`, `labels?`          | issue creado con `id` y `number`           | `400`, `401`, `403`, `404`, `422`        | `title` no vacío; labels válidos en el repo                     |
+| CreatePullRequest  | `POST /v1/repositories/{owner}/{repo}/pull-requests`               | `title`, `base`, `head` (requeridos), `body?`    | PR creado (`id`, `status`)                 | `400`, `401`, `403`, `404`, `409`        | no se permite PR si `base == head`                              |
+| MergePullRequest   | `POST /v1/repositories/{owner}/{repo}/pull-requests/{prId}/merges` | `prId` (ruta), `commitMessage?`                  | estado final de PR (`merged`)              | `400`, `401`, `403`, `404`, `409`, `422` | solo PR abierto y mergeable                                     |
+| SearchRepositories | `GET /v1/search/repositories?q={texto}`                            | `q` (requerido), `page?`, `limit?`               | lista paginada de repositorios             | `400`, `401`, `422`                      | `limit` acotado (p. ej. max 100)                                |
 
 **Tipos de datos complejos**
 
@@ -175,7 +176,7 @@ Authorization: Bearer <access_token>
 Content-Type: application/json
 
 {
-    "name": "mini-github-demo",
+    "name": "github-demo",
     "description": "Repositorio de prueba",
     "visibility": "private"
 }
@@ -187,7 +188,7 @@ Respuesta exitosa (`201 Created`):
 {
   "id": "a3f4d2c1-8a0e-4d12-a5cc-5f66b8d28b90",
   "owner": "jdoe",
-  "name": "mini-github-demo",
+  "name": "github-demo",
   "visibility": "private",
   "defaultBranch": "main",
   "createdAt": "2026-04-05T10:30:00Z"
@@ -259,7 +260,7 @@ Operación interna: publicación de evento `repo.created` (RabbitMQ)
   "event": "repo.created",
   "repoId": "a3f4d2c1-8a0e-4d12-a5cc-5f66b8d28b90",
   "owner": "jdoe",
-  "name": "mini-github-demo",
+  "name": "github-demo",
   "visibility": "private",
   "timestamp": "2026-04-05T10:30:01Z"
 }
@@ -360,14 +361,14 @@ El stack `KeycloakStack` compone **GithubVpc**, **KubeCluster** (EKS), **GithubD
 
 **Tabla simple de entidades críticas**
 
-| Tabla | Columna | Tipo | Restricciones | Descripción |
-| --- | --- | --- | --- | --- |
-| `repositories` | `id` | UUID | PK, NOT NULL | Identificador único del repositorio |
-| `repositories` | `owner_id` | UUID | FK NOT NULL -> `users.id` | Propietario del repositorio |
-| `issues` | `repo_id` | UUID | NOT NULL, índice | Referencia lógica a repositorio (validada en aplicación) |
-| `issues` | `number` | INTEGER | UNIQUE (`repo_id`, `number`) | Numeración secuencial por repositorio |
-| `pull_requests` | `status` | VARCHAR(20) | CHECK (`open`,`closed`,`merged`) | Estado del PR |
-| `comments` | `issue_id` / `pull_request_id` | UUID | CHECK de exclusión mutua | Objetivo del comentario |
+| Tabla           | Columna                        | Tipo        | Restricciones                    | Descripción                                              |
+| --------------- | ------------------------------ | ----------- | -------------------------------- | -------------------------------------------------------- |
+| `repositories`  | `id`                           | UUID        | PK, NOT NULL                     | Identificador único del repositorio                      |
+| `repositories`  | `owner_id`                     | UUID        | FK NOT NULL -> `users.id`        | Propietario del repositorio                              |
+| `issues`        | `repo_id`                      | UUID        | NOT NULL, índice                 | Referencia lógica a repositorio (validada en aplicación) |
+| `issues`        | `number`                       | INTEGER     | UNIQUE (`repo_id`, `number`)     | Numeración secuencial por repositorio                    |
+| `pull_requests` | `status`                       | VARCHAR(20) | CHECK (`open`,`closed`,`merged`) | Estado del PR                                            |
+| `comments`      | `issue_id` / `pull_request_id` | UUID        | CHECK de exclusión mutua         | Objetivo del comentario                                  |
 
 **Fuente de diagrama ER (Mermaid)**
 
@@ -440,14 +441,14 @@ Limitaciones aceptadas para esta fase: sin multi-región, sin autoscaling avanza
 
 Se define monitoreo operativo mínimo alineado con RNF (latencia, disponibilidad, salud y seguridad), con alarmas accionables.
 
-| Sistema | Métrica | Umbral de Alarma | Responsable | Enlace | Descripción |
-| --- | --- | --- | --- | --- | --- |
-| API Gateway | Latencia p95 | > 200 ms sostenido 5 min | Equipo Backend | TBD | Control de SLO de rutas críticas |
-| API Gateway | Error rate (5xx) | > 2% por 5 min | Equipo Backend | TBD | Detecta degradación de servicios aguas abajo |
-| Auth Service | Fallas de login | > 10% por 10 min | Equipo Auth | TBD | Detecta caída de IdP, credenciales inválidas masivas o abuso |
-| Repo/Issue/Search | Health check `/health` | 2 fallas consecutivas | Equipo Plataforma | TBD | Disponibilidad de cada microservicio |
-| RabbitMQ | Cola acumulada | > 1000 mensajes pendientes | Equipo Plataforma | TBD | Riesgo de atraso en indexación/eventos |
-| PostgreSQL | Uso de CPU | > 80% por 10 min | Equipo Datos | TBD | Señal de cuello de botella en BD |
+| Sistema           | Métrica                | Umbral de Alarma           | Responsable       | Enlace | Descripción                                                  |
+| ----------------- | ---------------------- | -------------------------- | ----------------- | ------ | ------------------------------------------------------------ |
+| API Gateway       | Latencia p95           | > 200 ms sostenido 5 min   | Equipo Backend    | TBD    | Control de SLO de rutas críticas                             |
+| API Gateway       | Error rate (5xx)       | > 2% por 5 min             | Equipo Backend    | TBD    | Detecta degradación de servicios aguas abajo                 |
+| Auth Service      | Fallas de login        | > 10% por 10 min           | Equipo Auth       | TBD    | Detecta caída de IdP, credenciales inválidas masivas o abuso |
+| Repo/Issue/Search | Health check `/health` | 2 fallas consecutivas      | Equipo Plataforma | TBD    | Disponibilidad de cada microservicio                         |
+| RabbitMQ          | Cola acumulada         | > 1000 mensajes pendientes | Equipo Plataforma | TBD    | Riesgo de atraso en indexación/eventos                       |
+| PostgreSQL        | Uso de CPU             | > 80% por 10 min           | Equipo Datos      | TBD    | Señal de cuello de botella en BD                             |
 
 Respuesta operativa:
 
@@ -504,29 +505,29 @@ sequenceDiagram
 
 Claims esperados en tokens:
 
-| Token | Claims relevantes |
-| --- | --- |
-| `id_token` | `sub`, `email`, `preferred_username`, `name`, `iat`, `exp` |
-| `access_token` | `sub`, `scope`, `roles`, `aud`, `iat`, `exp`, `iss` |
+| Token          | Claims relevantes                                          |
+| -------------- | ---------------------------------------------------------- |
+| `id_token`     | `sub`, `email`, `preferred_username`, `name`, `iat`, `exp` |
+| `access_token` | `sub`, `scope`, `roles`, `aud`, `iat`, `exp`, `iss`        |
 
 #### 6.4.2 Modelo de autorización (AuthZ)
 
 Modelo: **RBAC por repositorio** con soporte por scopes OAuth2.
 
-| Rol | Lectura repositorio | Escritura archivos | Gestión issues | Gestión PR | Administración repo |
-| --- | --- | --- | --- | --- | --- |
-| Owner | Si | Si | Si | Si | Si |
-| Developer | Si | Si | Si | Si | No |
-| Reporter | Si | No | Parcial | Comentarios | No |
+| Rol       | Lectura repositorio | Escritura archivos | Gestión issues | Gestión PR  | Administración repo |
+| --------- | ------------------- | ------------------ | -------------- | ----------- | ------------------- |
+| Owner     | Si                  | Si                 | Si             | Si          | Si                  |
+| Developer | Si                  | Si                 | Si             | Si          | No                  |
+| Reporter  | Si                  | No                 | Parcial        | Comentarios | No                  |
 
 Mapeo de scopes a operaciones API:
 
-| Scope | Operaciones principales |
-| --- | --- |
-| `repos:read` | `GET /v1/repositories/*`, `GET /v1/search/repositories` |
-| `repos:write` | `POST/PATCH/DELETE /v1/repositories/*` |
-| `issues:write` | `POST/PATCH /v1/repositories/{owner}/{repo}/issues` |
-| `pulls:write` | `POST /v1/repositories/{owner}/{repo}/pull-requests` y `.../merges` |
+| Scope          | Operaciones principales                                             |
+| -------------- | ------------------------------------------------------------------- |
+| `repos:read`   | `GET /v1/repositories/*`, `GET /v1/search/repositories`             |
+| `repos:write`  | `POST/PATCH/DELETE /v1/repositories/*`                              |
+| `issues:write` | `POST/PATCH /v1/repositories/{owner}/{repo}/issues`                 |
+| `pulls:write`  | `POST /v1/repositories/{owner}/{repo}/pull-requests` y `.../merges` |
 
 #### 6.4.3 Integración SSO y ciclo de tokens
 
@@ -583,7 +584,6 @@ Rollback operativo:
 - Si falla un servicio no crítico (p. ej. Search), mantener operación degradada documentada.
 - Cambios de esquema solo con migraciones reversibles o plan de contingencia.
 
-
 ### 6.8 Despliegues Regionales
 
 Estrategia regional para la fase actual:
@@ -595,7 +595,6 @@ Estrategia regional para la fase actual:
 Compatibilidad de servicios:
 
 - Si la región seleccionada no ofrece un componente gestionado requerido, usar alternativa equivalente dentro de la misma región o en entorno local para demo.
-
 
 ### 6.9 Retención de Datos
 
@@ -644,7 +643,6 @@ Criterios mínimos de salida:
 - p95 dentro de objetivo acordado para rutas críticas.
 - No regresiones en autenticación y autorización.
 
-
 ### 6.11 Dependencias
 
 Dependencias externas al código de negocio del equipo:
@@ -676,79 +674,404 @@ Punto de entrada operativo:
 
 ---
 
-## Temas de discusión
+## Temas de Discusión
 
-### Decisión TD-1: fuente de verdad del contrato API
+### Tema de Discusión: Fuente de verdad y especificación contract-first de la API REST
 
-**Contexto:** coexisten descripciones en README y el modelo Smithy.
+Coexisten descripciones dispersas en `README.md` y el modelo formal del repositorio **Github-Smithy**. El equipo debe fijar un único artefacto que gobierne rutas, esquemas y documentación interoperable.
 
-- **Opción A [RECOMENDADA]:** Smithy como fuente única; generación de OpenAPI en build. _Pros:_ coherencia, diff versionable. _Contras:_ curva de aprendizaje.
-- **Opción B:** OpenAPI escrito a mano. _Pros:_ inmediatez. _Contras:_ deriva frente al código.
+- Opción 1 [RECOMENDADA] — **Smithy 2.0** con proyección a OpenAPI (`MiniGitHubApi.openapi.json`) y validación en build.
+- Opción 2 — **OpenAPI 3.x escrito a mano** (YAML/JSON) sin IDL intermedio.
+- Opción 3 — **gRPC + Protobuf** como contrato binario entre servicios.
+- Opción 4 — **GraphQL** con esquema único para el cliente.
 
-**Conclusión:** se adopta la **Opción A**, por tanto las implementaciones deben validarse contra el artefacto generado.
+#### Opción 1 [RECOMENDADA] — Smithy 2.0
 
-### Decisión TD-2: despliegue de Keycloak
+En este enfoque, el servicio `com.minigithub#MiniGitHubApi` centraliza operaciones; `./gradlew build` valida el modelo y `./gradlew smithyBuild` genera OpenAPI para Swagger y consumidores.
 
-**Contexto:** coste y complejidad de EKS frente a compose local.
+**Pros:**
 
-- **Opción A [RECOMENDADA para demo cloud]:** Stack CDK documentado. _Pros:_ alineación con la asignatura. _Contras:_ coste.
-- **Opción B:** Solo Docker Compose local. _Pros:_ economía. _Contras:_ menor fidelidad con “cloud”.
+- Un solo modelo versionable; detección temprana de errores de diseño.
+- OpenAPI estándar para herramientas del ecosistema (Swagger UI, clientes).
+- Alineación con prácticas de APIs en AWS y con la asignatura (contract-first).
 
-**Conclusión:** el diseño admite **ambas**, pero la narrativa académica privilegia la **Opción A** como referencia arquitectónica.
+**Contras:**
+
+- Curva de aprendizaje de la sintaxis Smithy.
+- Comunidad y plugins menores que en OpenAPI “puro”.
+
+#### Opción 2 — OpenAPI manual
+
+**Pros:** inicio rápido, familiaridad generalizada.
+
+**Contras:** riesgo alto de deriva frente a implementaciones; duplicación entre servicios.
+
+#### Opción 3 — gRPC + Protobuf
+
+**Pros:** eficiencia binaria, contratos fuertes.
+
+**Contras:** no encaja con el cliente web REST acordado; coste de gateway y tooling.
+
+#### Opción 4 — GraphQL
+
+**Pros:** flexibilidad de lectura para clientes heterogéneos.
+
+**Contras:** complejidad operativa y de seguridad para el alcance académico actual.
+
+**Conclusión**
+
+## Dada la necesidad de REST JSON, documentación Swagger y un único contrato compartido, se adopta la **Opción 1 (Smithy)**. Las implementaciones deben contrastarse con el artefacto OpenAPI generado.
+
+### Tema de Discusión: Proveedor de identidad OIDC y forma de despliegue
+
+El sistema requiere autenticación OIDC/SSO (Keycloak en docs) con posibilidad de federación. Las alternativas van desde SaaS gestionado hasta despliegue propio en Kubernetes.
+
+- Opción 1 [RECOMENDADA] — **Keycloak** desplegado en **EKS** mediante infraestructura **AWS CDK** (`Github-Cdk`: VPC, RDS para Keycloak, manifiestos).
+- Opción 2 — **Keycloak** solo en **Docker Compose** (desarrollo o demo económica).
+- Opción 3 — **Auth0** u otro IdP SaaS.
+- Opción 4 — **Amazon Cognito**.
+- Opción 5 — **Autenticación custom** sin IdP estándar.
+
+#### Opción 1 [RECOMENDADA] — Keycloak en EKS + CDK
+
+**Pros:**
+
+- Alineación directa con Arquitectura en la Nube (IaC, K8s, RDS).
+- Control del realm, clientes y federación (GitHub/Google) sin vendor lock-in del producto académico.
+- Reutilización del patrón documentado en el stack del curso.
+
+**Contras:**
+
+- Coste y complejidad operativa (cluster, ingress, secretos).
+- Mayor tiempo de puesta en marcha que Compose.
+
+#### Opción 2 — Keycloak en Docker Compose
+
+**Pros:** coste bajo y ciclo rápido para desarrollo local.
+
+**Contras:** menor fidelidad con el objetivo de despliegue en nube del proyecto.
+
+#### Opción 3 — Auth0 (SaaS)
+
+**Pros:** tiempo de configuración mínimo, SLA del proveedor.
+
+**Contras:** coste recurrente y menor aprendizaje de operar IdP propio.
+
+#### Opción 4 — Amazon Cognito
+
+**Pros:** integración nativa con AWS.
+
+**Contras:** menor flexibilidad que Keycloak para escenarios académicos de federación y laboratorio.
+
+#### Opción 5 — Custom
+
+**Pros:** control total.
+
+**Contras:** inseguro en tiempo académico; fuera de alcance razonable.
+
+**Conclusión**
+
+Se adopta **Keycloak** como proveedor OIDC. Para la narrativa y entrega cloud del curso, la **Opción 1** es la referencia arquitectónica; la **Opción 2** permanece válida para desarrollo. Las implementaciones deben validar tokens (JWKS) y no exponer la Admin API de Keycloak a Internet.
+
+---
+
+### Tema de Discusión: Estrategia de bases de datos entre microservicios
+
+Debe decidirse si los servicios comparten una misma instancia PostgreSQL, usan esquemas separados o bases totalmente independientes.
+
+- Opción 1 [RECOMENDADA] — **Database per service**: `auth_db`, `repos_db`, `issues_db` (PostgreSQL).
+- Opción 2 — **Base de datos compartida** con tablas por dominio.
+- Opción 3 — **Una instancia PostgreSQL, schema por servicio**.
+
+#### Opción 1 [RECOMENDADA] — Database per service
+
+**Pros:**
+
+- Acoplamiento bajo, despliegues y migraciones independientes por servicio.
+- Alineación con RNF-P4 y con `ModeloDeDatos.md`.
+- Fallos y cuellos de botella más acotados por dominio.
+
+**Contras:**
+
+- Mayor número de instancias o bases lógicas (coste operativo).
+- Sin JOINs transaccionales entre servicios; referencias UUID lógicas y eventos.
+
+#### Opción 2 — Base compartida
+
+**Pros:** simplicidad inicial y un solo punto de backup.
+
+**Contras:** alto acoplamiento; riesgo de conflictos de esquema y de “monolito disfrazado”.
+
+#### Opción 3 — Schema por servicio en una instancia
+
+**Pros:** separación lógica con menos instancias físicas.
+
+**Contras:** migraciones y permisos aún coordinados; menor aislamiento que BD separadas.
+
+**Conclusión**
+
+Se adopta la **Opción 1**, con tres bases PostgreSQL alineadas a Auth, Repo e Issue, y consistencia eventual donde aplique (p. ej. búsqueda). No se introduce otra tecnología de BD para el diseño actual del GitHub descrito en este repositorio.
+
+---
+
+### Tema de Discusión: Runtime e implementación de los microservicios de aplicación
+
+El frontend previsto es TypeScript; el backend puede implementarse en varios ecosistemas. La decisión afecta tooling, tiempos de arranque y homogeneidad del equipo.
+
+- Opción 1 [RECOMENDADA] — **Node.js + TypeScript** (Express/Fastify, Prisma).
+- Opción 2 — **Java + Spring Boot** (como en el microservicio de referencia `Github-ms-users`).
+- Opción 3 — **Go** o **Python (FastAPI)** para servicios concretos.
+
+#### Opción 1 [RECOMENDADA] — Node.js + TypeScript
+
+**Pros:**
+
+- Mismo lenguaje que el cliente SPA; reutilización de tipos y validaciones.
+- Arranque rápido de contenedores y huella de memoria moderada frente a JVM en cargas I/O-bound.
+- Encaje natural con generación de clientes desde OpenAPI/Smithy hacia TypeScript.
+
+**Contras:**
+
+- Menos madurez empresarial que Spring para ciertos patrones transaccionales complejos.
+
+#### Opción 2 — Java + Spring Boot
+
+**Pros:** ecosistema maduro, Spring Security, buen encaje con equipos Java-only.
+
+**Contras:** duplicación de stack respecto al frontend; mayor consumo de recursos y arranque más lento por servicio.
+
+#### Opción 3 — Go / Python
+
+**Pros:** rendimiento (Go) o velocidad de prototipo (Python).
+
+**Contras:** fragmentación de stack y de convenciones en un equipo pequeño.
+
+**Conclusión**
+
+Para GitHub se privilegia la **Opción 1** en los servicios nuevos del proyecto académico. `Github-ms-users` puede seguir como **referencia** de integración Keycloak en Java sin imponer Java en todos los servicios.
+
+---
+
+### Tema de Discusión: Motor de búsqueda e indexación (Search Service)
+
+La búsqueda de repositorios y usuarios puede resolverse con PostgreSQL, con un motor dedicado o con soluciones ligeras. Debe respetarse **L-07** (`Limites.md`): no hay búsqueda full-text dentro del **contenido** de archivos; el índice cubre metadatos y campos acordados al alcance.
+
+- Opción 1 [RECOMENDADA] — **Elasticsearch** (o OpenSearch) como proyección de lectura alimentada por eventos.
+- Opción 2 — **PostgreSQL** (índices, `pg_trgm`, búsqueda acotada en tablas por servicio).
+- Opción 3 — Motores ligeros (**Meilisearch**, **Typesense**).
+
+#### Opción 1 [RECOMENDADA] — Elasticsearch
+
+**Pros:**
+
+- Relevancia, facets y escalado horizontal del índice sin cargar las BD transaccionales.
+- Coherente con el rol de **Search Service** y RabbitMQ en la arquitectura descrita.
+
+**Contras:**
+
+- Infraestructura y operación adicionales; consistencia eventual con las fuentes de verdad.
+
+#### Opción 2 — Solo PostgreSQL
+
+**Pros:** menos componentes; coste reducido.
+
+**Contras:** límites de escala y de relevancia frente a ES para muchas consultas concurrentes.
+
+#### Opción 3 — Meilisearch / Typesense
+
+**Pros:** despliegue simple.
+
+**Contras:** desalineación con el stack ya documentado en `README.md` para el curso.
+
+**Conclusión**
+
+Se mantiene **Elasticsearch** como índice de búsqueda para metadatos de repositorios, usuarios e issues según el diseño global, **sin** extender el alcance a búsqueda de código dentro de archivos (L-07).
+
+---
+
+### Tema de Discusión: Almacenamiento de archivos de repositorio (blobs)
+
+Los archivos pueden guardarse como BLOB en PostgreSQL, en disco compartido o en almacenamiento de objetos compatible S3.
+
+- Opción 1 [RECOMENDADA] — **MinIO** (S3-compatible) para el contenido binario; **PostgreSQL** solo para metadatos (rutas, `sha`, tamaño, `mime_type`).
+- Opción 2 — **AWS S3** gestionado (misma API conceptual que MinIO).
+- Opción 3 — **BYTEA** / archivos grandes en PostgreSQL.
+- Opción 4 — **Sistema de archivos** en volumen compartido (NFS/EFS).
+
+#### Opción 1 [RECOMENDADA] — MinIO + metadatos en PostgreSQL
+
+**Pros:**
+
+- Separación clara entre OLTP y objetos; mejor rendimiento de consultas relacionales.
+- API estándar; migración futura a S3 con cambios mínimos de configuración.
+- Alineación con `README.md` y con prácticas de forjas reales.
+
+**Contras:**
+
+- Dos sistemas que operar (consistencia entre objeto y fila metadatos con transacciones compensatorias o flujos cuidados).
+
+#### Opción 2 — S3 gestionado
+
+**Pros:** durabilidad y escalado gestionados por AWS.
+
+**Contras:** coste y dependencia de cuenta cloud en todos los entornos.
+
+#### Opción 3 — BLOB en PostgreSQL
+
+**Pros:** un solo sistema para prototipos mínimos.
+
+**Contras:** degradación de rendimiento y backups más pesados con archivos medianos/grandes.
+
+#### Opción 4 — Filesystem compartido
+
+**Pros:** simple en laboratorio.
+
+**Contras:** menos idóneo para réplicas y despliegue en Kubernetes.
+
+**Conclusión**
+
+Se adopta la **Opción 1** para el diseño del GitHub: metadatos en `repos_db`, bytes en MinIO (o S3 en producción). Los límites de tamaño por archivo y por repositorio siguen lo acordado en documentación de límites del proyecto.
 
 ---
 
 ## Interesados
 
-- Cuerpo docente de la asignatura (evaluación de Parte 1).
-- Integrantes del equipo desarrollador del Mini-GitHub.
-- Eventuales revisores de seguridad o infraestructura en la institución.
+Enumera equipos y grupos que deben ser considerados en **revisiones de diseño** y en **procesos de control de cambios** (además del equipo que redacta este documento).
+
+- **Cuerpo docente** de la asignatura (evaluación de Parte 1 y criterios de rúbrica).
+- **Integrantes del equipo** desarrollador del GitHub (implementación y coherencia con el contrato).
+- **Eventuales revisores** de seguridad o infraestructura en la institución, si el curso lo exige.
 
 ---
 
 ## Contactos
 
-| Rol                       | Nombre        | Contacto      |
-| ------------------------- | ------------- | ------------- |
-| Responsable del documento | _(completar)_ | _(completar)_ |
-| Integrantes del equipo    | _(completar)_ | _(completar)_ |
+Contactos clave para ampliar información sobre este diseño y su implementación (completar antes de entregar).
+
+- **Líder técnico / autor del documento de diseño**
+- **Integrantes del equipo de desarrollo**
+- **Gerente de producto (PM)**
+- **Gerente de programa técnico (TPM)**
+- **Gerente de ingeniería (SDM)**
 
 ---
 
-## Apéndice A — Artefactos gráficos para exportación
+## Apéndice
 
-El cuerpo del documento ya incluye diagramas en **Mermaid**. Si la consigna exige **archivos de imagen** (p. ej. para aula virtual o informe PDF), el equipo debe:
+### Apéndice A - Antecedentes
+
+GitHub es un proyecto académico de **Arquitectura en la Nube y Microservicios**. La visión de producto (alcances, límites, requisitos, historias de usuario y modelo de datos) vive principalmente en el repositorio **github-docs**; el **contrato de API** se versiona en **Github-Smithy**; la **infraestructura de referencia** (VPC, EKS, RDS, Keycloak) en **Github-Cdk**; y existe un microservicio **Java/Spring** de referencia (**Github-ms-users**) para patrones con Keycloak.
+
+**Referencias del ecosistema (repositorios y rutas clave)**
+
+| Artefacto                  | Ubicación                                              |
+| -------------------------- | ------------------------------------------------------ |
+| Documentación de producto  | `github-docs/docs/*.md`                                |
+| Contrato Smithy            | `Github-Smithy/model/`                                 |
+| Infraestructura AWS        | `Github-Cdk/lib/stacks/keycloak-stack.ts` y constructs |
+| Patrón Spring (referencia) | `Github-ms-users/docs/ARCHITECTURE.md`                 |
+
+### Apéndice B - Actas de Revisión
+
+Registrar aquí las revisiones del documento de diseño acordadas con el docente y el equipo. Cada acta debería incluir, como mínimo: **fecha**, **asistentes** (o equipos representados), **comentarios o preguntas resueltas** y **acciones** con responsable.
+
+**Ejemplo de formato de acta (sustituir por actas reales):**
+
+**Revisión:**
+
+**Asistentes:** equipo de desarrollo; docente (si asistió).
+
+**Comentarios:** acuerdos sobre contrato Smithy, límites L-01/L-07 y prioridad de microservicios.
+
+**Acciones:** _(nombre)_ — actualizar diagrama de componentes según feedback.
+
+### Apéndice C - Artefactos gráficos (exportación)
+
+El cuerpo del documento incluye diagramas en **Mermaid**. Si la consigna exige **archivos de imagen** (por ejemplo para aula virtual o informe PDF), el equipo debe:
 
 1. Crear la carpeta **`docs/semana1/imagenes/`** en el repositorio `github-docs` (si no existe).
-2. Renderizar los diagramas mediante [Mermaid Live Editor](https://mermaid.live), **draw.io** (plugin Mermaid) o la extensión de diagramas del IDE.
+2. Renderizar los diagramas con [Mermaid Live Editor](https://mermaid.live), **draw.io** (plugin Mermaid) o la extensión de diagramas del IDE.
 3. Guardar como mínimo:
-    - `diagrama-authn-oidc.png` — secuencia del flujo OIDC (sección 6.4.1).
-    - `diagrama-authz-rbac.png` — modelo de autorización (sección 6.4.2).
-   - _(opcional)_ `diagrama-componentes.png` — figura de la sección 5.1.
-   - _(opcional)_ `diagrama-secuencia-repo.png` — figura de la sección 4.1.
+   - `diagrama-authn-oidc.png` — secuencia del flujo OIDC (sección 6.4.1).
+   - `diagrama-authz-rbac.png` — modelo de autorización (sección 6.4.2).
+   - `diagrama-componentes.png` — figura de la sección 5.1.
+   - `diagrama-secuencia-repo.png` — figura de la sección 4.1.
+4. En una revisión posterior del documento, insertar referencias Markdown del tipo `![AuthN OIDC](imagenes/diagrama-authn-oidc.png)`.
 
-4. Insertar en una futura revisión del documento las referencias Markdown: `![AuthN OIDC](imagenes/diagrama-authn-oidc.png)`.
+_Motivo:_ la generación de binarios (PNG/SVG) no forma parte del flujo automático del repositorio; la exportación es responsabilidad explícita del equipo.
 
-_Motivo:_ en este entorno no se generan archivos binarios de imagen automáticamente; por ello, la exportación queda como paso explícito del equipo.
+### Apéndice D - Referencias (bibliografía)
 
----
+Fuentes citadas y material de consulta alineado con el diseño.
 
-## Apéndice B — Actas de revisión
+#### D.1 Documentación técnica
 
-| Fecha         | Asistentes | Acuerdos | Acciones |
-| ------------- | ---------- | -------- | -------- |
-| _(pendiente)_ |            |          |          |
+1. **Smithy Language Specification**  
+   AWS. (2024). _Smithy 2.0 Language Specification_.  
+   https://smithy.io/2.0/spec/
 
----
+2. **Keycloak Documentation**  
+   Red Hat. (2024). _Keycloak Server Administration Guide_.  
+   https://www.keycloak.org/docs/latest/server_admin/
+
+3. **Elasticsearch Guide**  
+   Elastic. (2024). _Elasticsearch Guide 8.11_.  
+   https://www.elastic.co/guide/en/elasticsearch/reference/8.11/index.html
+
+4. **AWS CDK API Reference**  
+   Amazon Web Services. (2024). _AWS CDK TypeScript API Reference_.  
+   https://docs.aws.amazon.com/cdk/api/v2/
+
+5. **Kubernetes Documentation**  
+   CNCF. (2024). _Kubernetes Documentation - Concepts_.  
+   https://kubernetes.io/docs/concepts/
+
+#### D.2 Patrones de arquitectura
+
+6. **Microservices Patterns**  
+   Richardson, C. (2018). _Microservices Patterns: With examples in Java_. Manning Publications.
+
+7. **Building Microservices**  
+   Newman, S. (2021). _Building Microservices: Designing Fine-Grained Systems_ (2nd ed.). O'Reilly Media.
+
+8. **Database per Service Pattern**  
+   https://microservices.io/patterns/data/database-per-service.html
+
+9. **API Gateway Pattern**  
+   https://microservices.io/patterns/apigateway.html
+
+#### D.3 Seguridad y autenticación
+
+10. **OAuth 2.0 RFC 6749**  
+    IETF. (2012). _The OAuth 2.0 Authorization Framework_.  
+    https://datatracker.ietf.org/doc/html/rfc6749
+
+11. **OpenID Connect Core 1.0**  
+    OpenID Foundation. (2014). _OpenID Connect Core 1.0_.  
+    https://openid.net/specs/openid-connect-core-1_0.html
+
+12. **JWT RFC 7519**  
+    IETF. (2015). _JSON Web Token (JWT)_.  
+    https://datatracker.ietf.org/doc/html/rfc7519
+
+#### D.4 Proyectos de referencia
+
+13. **GitHub REST API Documentation**  
+    GitHub. (2024). _GitHub REST API Reference_.  
+    https://docs.github.com/en/rest
+
+14. **GitLab Architecture**  
+    GitLab. (2024). _GitLab Architecture Overview_.  
+    https://docs.gitlab.com/ee/development/architecture.html
 
 ## Referencias cruzadas de repositorios
 
-| Artefacto | Referencia |
-| --- | --- |
-| Índice oficial de repositorios | `docs/Repositorios.md` |
-| Documentación de producto | Repositorio `github-docs` (ver índice) |
-| Contrato Smithy | Repositorio `Github-Smithy` (ver índice) |
-| Infraestructura AWS | Repositorio `Github-Cdk` (ver índice) |
-| Patrón Spring (referencia) | Repositorio `Github-ms-users` (ver índice) |
+| Artefacto                      | Referencia                                 |
+| ------------------------------ | ------------------------------------------ |
+| Índice oficial de repositorios | `docs/Repositorios.md`                     |
+| Documentación de producto      | Repositorio `github-docs` (ver índice)     |
+| Contrato Smithy                | Repositorio `Github-Smithy` (ver índice)   |
+| Infraestructura AWS            | Repositorio `Github-Cdk` (ver índice)      |
+| Patrón Spring (referencia)     | Repositorio `Github-ms-users` (ver índice) |
 
 ---
