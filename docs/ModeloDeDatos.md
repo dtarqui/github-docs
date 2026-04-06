@@ -4,17 +4,17 @@
 
 ```sql
 -- USERS
-Users (
-  Id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  Username          VARCHAR(50)  UNIQUE NOT NULL,
-  Email             VARCHAR(255) UNIQUE NOT NULL,
-  PasswordHash      VARCHAR(255) NOT NULL,
+CREATE TABLE users (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  username          VARCHAR(50)  UNIQUE NOT NULL,
+  email             VARCHAR(255) UNIQUE NOT NULL,
+  password_hash     VARCHAR(255) NOT NULL,
   avatar_url        VARCHAR(500),
   bio               TEXT,
   location          VARCHAR(100),
   website           VARCHAR(255),
-  CreatedAt         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-   updated_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_users_username ON users (username);
@@ -97,6 +97,9 @@ CREATE TABLE files (
 );
 
 -- ISSUES
+-- Nota de diseño: repo_id es referencia lógica al repositorio (Repo Service),
+-- sin FK física cross-service para respetar database-per-service.
+-- La validez de repo_id se verifica en la capa de aplicación.
 CREATE TABLE issues (
   id           UUID   PRIMARY KEY DEFAULT gen_random_uuid(),
   repo_id      UUID   NOT NULL,
@@ -119,6 +122,8 @@ CREATE INDEX idx_issues_author_id  ON issues (author_id);
 CREATE INDEX idx_issues_state      ON issues (state);
 
 -- LABELS
+-- Nota de diseño: repo_id mantiene el mismo criterio de referencia lógica
+-- y validación en aplicación que issues.repo_id.
 CREATE TABLE labels (
     id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     repo_id     UUID        NOT NULL,

@@ -18,11 +18,11 @@
 
 ### Cloud y Despliegue
 
-| ID    | Requerimiento                                                   |
-| ----- | --------------------------------------------------------------- |
-| RNF07 | El sistema debe desplegarse en un proveedor cloud.              |
+| ID    | Requerimiento                                                                                                                                                                                                             |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RNF07 | El sistema debe desplegarse en un proveedor cloud.                                                                                                                                                                        |
 | RNF08 | No se implementará pipeline CI/CD como parte del producto (workflows, runners ni ejecución de jobs en contenedores; coherente con L-01). El despliegue puede ser manual o con herramientas externas al alcance funcional. |
-| RNF09 | El sistema debe tener configuración por variables de entorno.   |
+| RNF09 | El sistema debe tener configuración por variables de entorno.                                                                                                                                                             |
 
 ### Rendimiento y Escalabilidad
 

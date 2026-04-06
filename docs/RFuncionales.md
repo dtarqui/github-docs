@@ -61,4 +61,6 @@
 | RF07.2 | Los reviewers pueden aprobar o solicitar cambios en un Pull Request.                |
 | RF07.3 | El sistema detecta conflictos de merge y los reporta antes de ejecutar el merge.    |
 
+**Nota de alcance RF07:** se implementa flujo básico de PR. Quedan fuera para esta iteración revisores obligatorios, branch protection y checks automáticos obligatorios.
+
 ---

@@ -15,11 +15,10 @@ Nuestros clientes son principalmente estudiantes, docentes y evaluadores que usa
 ## Supuestos
 
 1. Se asume la disponibilidad de un proveedor **cloud** (p. ej. AWS) con permisos suficientes para desplegar EKS, RDS y recursos de red asociados, o bien un entorno local equivalente (p. ej. Docker Compose) para desarrollo.
-2. Se cuenta con acceso a un proveedor **cloud** con tier gratuito o créditos académicos para despliegue.
-3. Keycloak será el proveedor de identidad principal para autenticación SSO/OIDC.
-4. Se asume que el equipo dispone del repositorio **Github-Smithy** compilable (`./gradlew build`, `./gradlew smithyBuild`) para obtener el artefacto OpenAPI canónico.
-5. Se asume que el proyecto se desarrollará en un plazo máximo de **4 semanas**.
-6. Se asume un equipo de hasta **4 integrantes** con disponibilidad suficiente para sostener el marco de trabajo ágil acordado.
+2. Se asume que **Keycloak** queda operativo —ya sea mediante el stack CDK de referencia o un despliegue equivalente— con _realm_ y clientes configurados para el flujo OIDC descrito en este documento.
+3. Se asume que el equipo dispone del repositorio **Github-Smithy** compilable (`./gradlew build`, `./gradlew smithyBuild`) para obtener el artefacto OpenAPI canónico.
+4. Se asume que el proyecto se desarrollará en un plazo máximo de **4 semanas**.
+5. Se asume un equipo de hasta **4 integrantes** con disponibilidad suficiente para sostener el marco de trabajo ágil acordado.
 
 ---
 
@@ -473,6 +472,8 @@ Riesgos y mitigaciones prioritarias:
 - Abuso de login: rate limit y bloqueo temporal por intentos fallidos.
 - Exposición de paneles administrativos: restringir Keycloak Admin API a red interna.
 
+![alt Diagrama de seguridad](imagenes/seguridad.png)
+
 #### 6.4.1 Flujo de autenticación OIDC (AuthN)
 
 Flujo adoptado: **Authorization Code Flow con PKCE** (cliente público SPA + backend API).
@@ -675,401 +676,79 @@ Punto de entrada operativo:
 
 ---
 
-## Temas de Discusión
+## Temas de discusión
 
-### Tema de Discusión: Fuente de verdad y especificación contract-first de la API REST
+### Decisión TD-1: fuente de verdad del contrato API
 
-Coexisten descripciones dispersas en `README.md` y el modelo formal del repositorio **Github-Smithy**. El equipo debe fijar un único artefacto que gobierne rutas, esquemas y documentación interoperable.
+**Contexto:** coexisten descripciones en README y el modelo Smithy.
 
-- Opción 1 [RECOMENDADA] — **Smithy 2.0** con proyección a OpenAPI (`MiniGitHubApi.openapi.json`) y validación en build.
-- Opción 2 — **OpenAPI 3.x escrito a mano** (YAML/JSON) sin IDL intermedio.
-- Opción 3 — **gRPC + Protobuf** como contrato binario entre servicios.
-- Opción 4 — **GraphQL** con esquema único para el cliente.
+- **Opción A [RECOMENDADA]:** Smithy como fuente única; generación de OpenAPI en build. _Pros:_ coherencia, diff versionable. _Contras:_ curva de aprendizaje.
+- **Opción B:** OpenAPI escrito a mano. _Pros:_ inmediatez. _Contras:_ deriva frente al código.
 
-#### Opción 1 [RECOMENDADA] — Smithy 2.0
+**Conclusión:** se adopta la **Opción A**, por tanto las implementaciones deben validarse contra el artefacto generado.
 
-En este enfoque, el servicio `com.minigithub#MiniGitHubApi` centraliza operaciones; `./gradlew build` valida el modelo y `./gradlew smithyBuild` genera OpenAPI para Swagger y consumidores.
+### Decisión TD-2: despliegue de Keycloak
 
-**Pros:**
+**Contexto:** coste y complejidad de EKS frente a compose local.
 
-- Un solo modelo versionable; detección temprana de errores de diseño.
-- OpenAPI estándar para herramientas del ecosistema (Swagger UI, clientes).
-- Alineación con prácticas de APIs en AWS y con la asignatura (contract-first).
+- **Opción A [RECOMENDADA para demo cloud]:** Stack CDK documentado. _Pros:_ alineación con la asignatura. _Contras:_ coste.
+- **Opción B:** Solo Docker Compose local. _Pros:_ economía. _Contras:_ menor fidelidad con “cloud”.
 
-**Contras:**
-
-- Curva de aprendizaje de la sintaxis Smithy.
-- Comunidad y plugins menores que en OpenAPI “puro”.
-
-#### Opción 2 — OpenAPI manual
-
-**Pros:** inicio rápido, familiaridad generalizada.
-
-**Contras:** riesgo alto de deriva frente a implementaciones; duplicación entre servicios.
-
-#### Opción 3 — gRPC + Protobuf
-
-**Pros:** eficiencia binaria, contratos fuertes.
-
-**Contras:** no encaja con el cliente web REST acordado; coste de gateway y tooling.
-
-#### Opción 4 — GraphQL
-
-**Pros:** flexibilidad de lectura para clientes heterogéneos.
-
-**Contras:** complejidad operativa y de seguridad para el alcance académico actual.
-
-**Conclusión**
-
-Dada la necesidad de REST JSON, documentación Swagger y un único contrato compartido, se adopta la **Opción 1 (Smithy)**. Las implementaciones deben contrastarse con el artefacto OpenAPI generado. El detalle ampliado de comparativas permanece en `docs/MiniGitHub_Parte1_Diseno_Tecnico.md` (referencia del equipo).
-
----
-
-### Tema de Discusión: Proveedor de identidad OIDC y forma de despliegue
-
-El sistema requiere autenticación OIDC/SSO (Keycloak en docs) con posibilidad de federación. Las alternativas van desde SaaS gestionado hasta despliegue propio en Kubernetes.
-
-- Opción 1 [RECOMENDADA] — **Keycloak** desplegado en **EKS** mediante infraestructura **AWS CDK** (`Github-Cdk`: VPC, RDS para Keycloak, manifiestos).
-- Opción 2 — **Keycloak** solo en **Docker Compose** (desarrollo o demo económica).
-- Opción 3 — **Auth0** u otro IdP SaaS.
-- Opción 4 — **Amazon Cognito**.
-- Opción 5 — **Autenticación custom** sin IdP estándar.
-
-#### Opción 1 [RECOMENDADA] — Keycloak en EKS + CDK
-
-**Pros:**
-
-- Alineación directa con Arquitectura en la Nube (IaC, K8s, RDS).
-- Control del realm, clientes y federación (GitHub/Google) sin vendor lock-in del producto académico.
-- Reutilización del patrón documentado en el stack del curso.
-
-**Contras:**
-
-- Coste y complejidad operativa (cluster, ingress, secretos).
-- Mayor tiempo de puesta en marcha que Compose.
-
-#### Opción 2 — Keycloak en Docker Compose
-
-**Pros:** coste bajo y ciclo rápido para desarrollo local.
-
-**Contras:** menor fidelidad con el objetivo de despliegue en nube del proyecto.
-
-#### Opción 3 — Auth0 (SaaS)
-
-**Pros:** tiempo de configuración mínimo, SLA del proveedor.
-
-**Contras:** coste recurrente y menor aprendizaje de operar IdP propio.
-
-#### Opción 4 — Amazon Cognito
-
-**Pros:** integración nativa con AWS.
-
-**Contras:** menor flexibilidad que Keycloak para escenarios académicos de federación y laboratorio.
-
-#### Opción 5 — Custom
-
-**Pros:** control total.
-
-**Contras:** inseguro en tiempo académico; fuera de alcance razonable.
-
-**Conclusión**
-
-Se adopta **Keycloak** como proveedor OIDC. Para la narrativa y entrega cloud del curso, la **Opción 1** es la referencia arquitectónica; la **Opción 2** permanece válida para desarrollo. Las implementaciones deben validar tokens (JWKS) y no exponer la Admin API de Keycloak a Internet.
-
----
-
-### Tema de Discusión: Estrategia de bases de datos entre microservicios
-
-Debe decidirse si los servicios comparten una misma instancia PostgreSQL, usan esquemas separados o bases totalmente independientes.
-
-- Opción 1 [RECOMENDADA] — **Database per service**: `auth_db`, `repos_db`, `issues_db` (PostgreSQL).
-- Opción 2 — **Base de datos compartida** con tablas por dominio.
-- Opción 3 — **Una instancia PostgreSQL, schema por servicio**.
-
-#### Opción 1 [RECOMENDADA] — Database per service
-
-**Pros:**
-
-- Acoplamiento bajo, despliegues y migraciones independientes por servicio.
-- Alineación con RNF-P4 y con `ModeloDeDatos.md`.
-- Fallos y cuellos de botella más acotados por dominio.
-
-**Contras:**
-
-- Mayor número de instancias o bases lógicas (coste operativo).
-- Sin JOINs transaccionales entre servicios; referencias UUID lógicas y eventos.
-
-#### Opción 2 — Base compartida
-
-**Pros:** simplicidad inicial y un solo punto de backup.
-
-**Contras:** alto acoplamiento; riesgo de conflictos de esquema y de “monolito disfrazado”.
-
-#### Opción 3 — Schema por servicio en una instancia
-
-**Pros:** separación lógica con menos instancias físicas.
-
-**Contras:** migraciones y permisos aún coordinados; menor aislamiento que BD separadas.
-
-**Conclusión**
-
-Se adopta la **Opción 1**, con tres bases PostgreSQL alineadas a Auth, Repo e Issue, y consistencia eventual donde aplique (p. ej. búsqueda). No se introduce otra tecnología de BD para el diseño actual del Mini-GitHub descrito en este repositorio.
-
----
-
-### Tema de Discusión: Runtime e implementación de los microservicios de aplicación
-
-El frontend previsto es TypeScript; el backend puede implementarse en varios ecosistemas. La decisión afecta tooling, tiempos de arranque y homogeneidad del equipo.
-
-- Opción 1 [RECOMENDADA] — **Node.js + TypeScript** (Express/Fastify, Prisma).
-- Opción 2 — **Java + Spring Boot** (como en el microservicio de referencia `Github-ms-users`).
-- Opción 3 — **Go** o **Python (FastAPI)** para servicios concretos.
-
-#### Opción 1 [RECOMENDADA] — Node.js + TypeScript
-
-**Pros:**
-
-- Mismo lenguaje que el cliente SPA; reutilización de tipos y validaciones.
-- Arranque rápido de contenedores y huella de memoria moderada frente a JVM en cargas I/O-bound.
-- Encaje natural con generación de clientes desde OpenAPI/Smithy hacia TypeScript.
-
-**Contras:**
-
-- Menos madurez empresarial que Spring para ciertos patrones transaccionales complejos.
-
-#### Opción 2 — Java + Spring Boot
-
-**Pros:** ecosistema maduro, Spring Security, buen encaje con equipos Java-only.
-
-**Contras:** duplicación de stack respecto al frontend; mayor consumo de recursos y arranque más lento por servicio.
-
-#### Opción 3 — Go / Python
-
-**Pros:** rendimiento (Go) o velocidad de prototipo (Python).
-
-**Contras:** fragmentación de stack y de convenciones en un equipo pequeño.
-
-**Conclusión**
-
-Para Mini-GitHub se privilegia la **Opción 1** en los servicios nuevos del proyecto académico. `Github-ms-users` puede seguir como **referencia** de integración Keycloak en Java sin imponer Java en todos los servicios.
-
----
-
-### Tema de Discusión: Motor de búsqueda e indexación (Search Service)
-
-La búsqueda de repositorios y usuarios puede resolverse con PostgreSQL, con un motor dedicado o con soluciones ligeras. Debe respetarse **L-07** (`Limites.md`): no hay búsqueda full-text dentro del **contenido** de archivos; el índice cubre metadatos y campos acordados al alcance.
-
-- Opción 1 [RECOMENDADA] — **Elasticsearch** (o OpenSearch) como proyección de lectura alimentada por eventos.
-- Opción 2 — **PostgreSQL** (índices, `pg_trgm`, búsqueda acotada en tablas por servicio).
-- Opción 3 — Motores ligeros (**Meilisearch**, **Typesense**).
-
-#### Opción 1 [RECOMENDADA] — Elasticsearch
-
-**Pros:**
-
-- Relevancia, facets y escalado horizontal del índice sin cargar las BD transaccionales.
-- Coherente con el rol de **Search Service** y RabbitMQ en la arquitectura descrita.
-
-**Contras:**
-
-- Infraestructura y operación adicionales; consistencia eventual con las fuentes de verdad.
-
-#### Opción 2 — Solo PostgreSQL
-
-**Pros:** menos componentes; coste reducido.
-
-**Contras:** límites de escala y de relevancia frente a ES para muchas consultas concurrentes.
-
-#### Opción 3 — Meilisearch / Typesense
-
-**Pros:** despliegue simple.
-
-**Contras:** desalineación con el stack ya documentado en `README.md` para el curso.
-
-**Conclusión**
-
-Se mantiene **Elasticsearch** como índice de búsqueda para metadatos de repositorios, usuarios e issues según el diseño global, **sin** extender el alcance a búsqueda de código dentro de archivos (L-07).
-
----
-
-### Tema de Discusión: Almacenamiento de archivos de repositorio (blobs)
-
-Los archivos pueden guardarse como BLOB en PostgreSQL, en disco compartido o en almacenamiento de objetos compatible S3.
-
-- Opción 1 [RECOMENDADA] — **MinIO** (S3-compatible) para el contenido binario; **PostgreSQL** solo para metadatos (rutas, `sha`, tamaño, `mime_type`).
-- Opción 2 — **AWS S3** gestionado (misma API conceptual que MinIO).
-- Opción 3 — **BYTEA** / archivos grandes en PostgreSQL.
-- Opción 4 — **Sistema de archivos** en volumen compartido (NFS/EFS).
-
-#### Opción 1 [RECOMENDADA] — MinIO + metadatos en PostgreSQL
-
-**Pros:**
-
-- Separación clara entre OLTP y objetos; mejor rendimiento de consultas relacionales.
-- API estándar; migración futura a S3 con cambios mínimos de configuración.
-- Alineación con `README.md` y con prácticas de forjas reales.
-
-**Contras:**
-
-- Dos sistemas que operar (consistencia entre objeto y fila metadatos con transacciones compensatorias o flujos cuidados).
-
-#### Opción 2 — S3 gestionado
-
-**Pros:** durabilidad y escalado gestionados por AWS.
-
-**Contras:** coste y dependencia de cuenta cloud en todos los entornos.
-
-#### Opción 3 — BLOB en PostgreSQL
-
-**Pros:** un solo sistema para prototipos mínimos.
-
-**Contras:** degradación de rendimiento y backups más pesados con archivos medianos/grandes.
-
-#### Opción 4 — Filesystem compartido
-
-**Pros:** simple en laboratorio.
-
-**Contras:** menos idóneo para réplicas y despliegue en Kubernetes.
-
-**Conclusión**
-
-Se adopta la **Opción 1** para el diseño del Mini-GitHub: metadatos en `repos_db`, bytes en MinIO (o S3 en producción). Los límites de tamaño por archivo y por repositorio siguen lo acordado en documentación de límites del proyecto.
+**Conclusión:** el diseño admite **ambas**, pero la narrativa académica privilegia la **Opción A** como referencia arquitectónica.
 
 ---
 
 ## Interesados
 
-Enumera equipos y grupos que deben ser considerados en **revisiones de diseño** y en **procesos de control de cambios** (además del equipo que redacta este documento).
-
-- **Cuerpo docente** de la asignatura (evaluación de Parte 1 y criterios de rúbrica).
-- **Integrantes del equipo** desarrollador del Mini-GitHub (implementación y coherencia con el contrato).
-- **Eventuales revisores** de seguridad o infraestructura en la institución, si el curso lo exige.
+- Cuerpo docente de la asignatura (evaluación de Parte 1).
+- Integrantes del equipo desarrollador del Mini-GitHub.
+- Eventuales revisores de seguridad o infraestructura en la institución.
 
 ---
 
 ## Contactos
 
-Contactos clave para ampliar información sobre este diseño y su implementación (completar antes de entregar).
-
-- **Líder técnico / autor del documento de diseño** — _(nombre)_ — _(correo o perfil)_
-- **Integrantes del equipo de desarrollo** — _(nombres)_ — _(correo o canal del equipo)_
-- **Gerente de producto (PM)** — _(no aplica / N/A en entregable académico, salvo que el curso asigne figura)_
-- **Gerente de programa técnico (TPM)** — _(no aplica / N/A salvo que el curso asigne figura)_
-- **Gerente de ingeniería (SDM)** — _(no aplica / N/A salvo que el curso asigne figura)_
+| Rol                       | Nombre        | Contacto      |
+| ------------------------- | ------------- | ------------- |
+| Responsable del documento | _(completar)_ | _(completar)_ |
+| Integrantes del equipo    | _(completar)_ | _(completar)_ |
 
 ---
 
-## Apéndice
+## Apéndice A — Artefactos gráficos para exportación
 
-### Apéndice A - Antecedentes
-
-Mini-GitHub es un proyecto académico de **Arquitectura en la Nube y Microservicios**. La visión de producto (alcances, límites, requisitos, historias de usuario y modelo de datos) vive principalmente en el repositorio **github-docs**; el **contrato de API** se versiona en **Github-Smithy**; la **infraestructura de referencia** (VPC, EKS, RDS, Keycloak) en **Github-Cdk**; y existe un microservicio **Java/Spring** de referencia (**Github-ms-users**) para patrones con Keycloak. El documento **`docs/MiniGitHub_Parte1_Diseno_Tecnico.md`** amplía con detalle operativo y tablas comparativas lo resumido aquí (especialmente tras **Temas de Discusión**).
-
-**Referencias del ecosistema (repositorios y rutas clave)**
-
-| Artefacto                 | Ubicación                                              |
-| ------------------------- | ------------------------------------------------------ |
-| Documentación de producto | `github-docs/docs/*.md`                                |
-| Contrato Smithy           | `Github-Smithy/model/`                                 |
-| Infraestructura AWS       | `Github-Cdk/lib/stacks/keycloak-stack.ts` y constructs |
-| Patrón Spring (referencia) | `Github-ms-users/docs/ARCHITECTURE.md`                 |
-
-### Apéndice B - Actas de Revisión
-
-Registrar aquí las revisiones del documento de diseño acordadas con el docente y el equipo. Cada acta debería incluir, como mínimo: **fecha**, **asistentes** (o equipos representados), **comentarios o preguntas resueltas** y **acciones** con responsable.
-
-| Fecha         | Asistentes | Comentarios / acuerdos | Acciones (responsable) |
-| ------------- | ---------- | ---------------------- | ---------------------- |
-| _(pendiente)_ |            |                        |                        |
-
-**Ejemplo de formato de acta (sustituir por actas reales):**
-
-**Revisión (_fecha_):**
-
-**Asistentes:** equipo de desarrollo; docente (si asistió).
-
-**Comentarios:** acuerdos sobre contrato Smithy, límites L-01/L-07 y prioridad de microservicios.
-
-**Acciones:** _(nombre)_ — actualizar diagrama de componentes según feedback.
-
-### Apéndice C - Artefactos gráficos (exportación)
-
-El cuerpo del documento incluye diagramas en **Mermaid**. Si la consigna exige **archivos de imagen** (por ejemplo para aula virtual o informe PDF), el equipo debe:
+El cuerpo del documento ya incluye diagramas en **Mermaid**. Si la consigna exige **archivos de imagen** (p. ej. para aula virtual o informe PDF), el equipo debe:
 
 1. Crear la carpeta **`docs/semana1/imagenes/`** en el repositorio `github-docs` (si no existe).
-2. Renderizar los diagramas con [Mermaid Live Editor](https://mermaid.live), **draw.io** (plugin Mermaid) o la extensión de diagramas del IDE.
+2. Renderizar los diagramas mediante [Mermaid Live Editor](https://mermaid.live), **draw.io** (plugin Mermaid) o la extensión de diagramas del IDE.
 3. Guardar como mínimo:
-   - `diagrama-authn-oidc.png` — secuencia del flujo OIDC (sección 6.4.1).
-   - `diagrama-authz-rbac.png` — modelo de autorización (sección 6.4.2).
+    - `diagrama-authn-oidc.png` — secuencia del flujo OIDC (sección 6.4.1).
+    - `diagrama-authz-rbac.png` — modelo de autorización (sección 6.4.2).
    - _(opcional)_ `diagrama-componentes.png` — figura de la sección 5.1.
    - _(opcional)_ `diagrama-secuencia-repo.png` — figura de la sección 4.1.
-4. En una revisión posterior del documento, insertar referencias Markdown del tipo `![AuthN OIDC](imagenes/diagrama-authn-oidc.png)`.
 
-_Motivo:_ la generación de binarios (PNG/SVG) no forma parte del flujo automático del repositorio; la exportación es responsabilidad explícita del equipo.
+4. Insertar en una futura revisión del documento las referencias Markdown: `![AuthN OIDC](imagenes/diagrama-authn-oidc.png)`.
 
-### Apéndice D - Referencias (bibliografía)
+_Motivo:_ en este entorno no se generan archivos binarios de imagen automáticamente; por ello, la exportación queda como paso explícito del equipo.
 
-Fuentes citadas y material de consulta alineado con el diseño (mismo criterio que `docs/MiniGitHub_Parte1_Diseno_Tecnico.md`, sección de referencias).
+---
 
-#### D.1 Documentación técnica
+## Apéndice B — Actas de revisión
 
-1. **Smithy Language Specification**  
-   AWS. (2024). *Smithy 2.0 Language Specification*.  
-   https://smithy.io/2.0/spec/
+| Fecha         | Asistentes | Acuerdos | Acciones |
+| ------------- | ---------- | -------- | -------- |
+| _(pendiente)_ |            |          |          |
 
-2. **Keycloak Documentation**  
-   Red Hat. (2024). *Keycloak Server Administration Guide*.  
-   https://www.keycloak.org/docs/latest/server_admin/
+---
 
-3. **Elasticsearch Guide**  
-   Elastic. (2024). *Elasticsearch Guide 8.11*.  
-   https://www.elastic.co/guide/en/elasticsearch/reference/8.11/index.html
+## Referencias cruzadas de repositorios
 
-4. **AWS CDK API Reference**  
-   Amazon Web Services. (2024). *AWS CDK TypeScript API Reference*.  
-   https://docs.aws.amazon.com/cdk/api/v2/
-
-5. **Kubernetes Documentation**  
-   CNCF. (2024). *Kubernetes Documentation - Concepts*.  
-   https://kubernetes.io/docs/concepts/
-
-#### D.2 Patrones de arquitectura
-
-6. **Microservices Patterns**  
-   Richardson, C. (2018). *Microservices Patterns: With examples in Java*. Manning Publications.
-
-7. **Building Microservices**  
-   Newman, S. (2021). *Building Microservices: Designing Fine-Grained Systems* (2nd ed.). O'Reilly Media.
-
-8. **Database per Service Pattern**  
-   https://microservices.io/patterns/data/database-per-service.html
-
-9. **API Gateway Pattern**  
-   https://microservices.io/patterns/apigateway.html
-
-#### D.3 Seguridad y autenticación
-
-10. **OAuth 2.0 RFC 6749**  
-    IETF. (2012). *The OAuth 2.0 Authorization Framework*.  
-    https://datatracker.ietf.org/doc/html/rfc6749
-
-11. **OpenID Connect Core 1.0**  
-    OpenID Foundation. (2014). *OpenID Connect Core 1.0*.  
-    https://openid.net/specs/openid-connect-core-1_0.html
-
-12. **JWT RFC 7519**  
-    IETF. (2015). *JSON Web Token (JWT)*.  
-    https://datatracker.ietf.org/doc/html/rfc7519
-
-#### D.4 Proyectos de referencia
-
-13. **GitHub REST API Documentation**  
-    GitHub. (2024). *GitHub REST API Reference*.  
-    https://docs.github.com/en/rest
-
-14. **GitLab Architecture**  
-    GitLab. (2024). *GitLab Architecture Overview*.  
-    https://docs.gitlab.com/ee/development/architecture.html
-
+| Artefacto | Referencia |
+| --- | --- |
+| Índice oficial de repositorios | `docs/Repositorios.md` |
+| Documentación de producto | Repositorio `github-docs` (ver índice) |
+| Contrato Smithy | Repositorio `Github-Smithy` (ver índice) |
+| Infraestructura AWS | Repositorio `Github-Cdk` (ver índice) |
+| Patrón Spring (referencia) | Repositorio `Github-ms-users` (ver índice) |
 
 ---

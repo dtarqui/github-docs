@@ -278,11 +278,12 @@
 - [ ] URL HTTPS visible en repositorio.
 - [ ] Autenticación vía usuario/contraseña o token personal.
 - [ ] Soporte para `git clone` desde cliente externo.
+- [ ] Sin soporte de URL SSH para clonación.
 - [ ] Generación de token personal en perfil.
 
 **Checklist de tareas:**
 
-- [ ] Configurar servidor Git (ej. usando git-http-backend o libgit2).
+- [ ] Configurar microservicio Git hosteado con soporte HTTPS.
 - [ ] Implementar autenticación HTTP básica o token.
 - [ ] Crear endpoint para generar tokens personales.
 - [ ] Probar clonación con Git CLI.
@@ -301,11 +302,12 @@
 - [ ] Autenticación requerida para push.
 - [ ] Validación de permisos según rol (owner/developer).
 - [ ] Actualización correcta de branches y commits.
-- [ ] Rechazo de pushes que violen reglas (ej. no fast-forward).
+- [ ] Rechazo de pushes que violen reglas básicas de consistencia.
+- [ ] Operaciones solo por HTTPS (sin soporte SSH).
 
 **Checklist de tareas:**
 
-- [ ] Configurar recepción de pushes en backend.
+- [ ] Configurar recepción de pushes en backend/microservicio Git.
 - [ ] Implementar actualización de referencias Git.
 - [ ] Registrar commits y cambios en base de datos.
 - [ ] Manejar errores comunes (conflictos, falta de permisos).
@@ -503,6 +505,7 @@
 - [ ] Almacenar PR en BD.
 - [ ] Diseñar formulario de creación con preview de cambios.
 - [ ] Mostrar estado de conflictos.
+- [ ] Mantener alcance básico: sin revisores obligatorios ni reglas avanzadas de protección de rama.
 
 ---
 
@@ -526,6 +529,7 @@
 - [ ] Endpoint `PATCH /api/repos/:repoId/pull-requests/:prId/review`.
 - [ ] UI con diff side-by-side y áreas de comentario.
 - [ ] Actualizar estado del PR según revisiones.
+- [ ] Mantener alcance básico: sin sugerencias automáticas ni reglas de aprobación obligatoria por cantidad mínima de reviewers.
 
 ---
 
@@ -549,6 +553,7 @@
 - [ ] Realizar merge usando librería Git.
 - [ ] Cerrar PR y actualizar estado.
 - [ ] Notificar por email a participantes.
+- [ ] Mantener alcance básico: sin checks automáticos obligatorios ni branch protection avanzada.
 
 ---
 
