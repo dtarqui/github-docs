@@ -28,7 +28,7 @@ Brecha principal restante para puntaje máximo:
 1. Crítica: falta evidencia entregable de Smithy en este workspace.
 - Evidencia: no se encontraron archivos `.smithy` en el workspace de documentación.
 - Impacto: C1 puede bajar fuertemente si el evaluador no ve modelo + build funcionando.
-- Qué falta: enlace/commit del repo `Github-Smithy` + evidencia de `smithy build` exitoso.
+- Qué falta: enlace/commit del repo `Github-Smithy` (referenciado en `docs/Repositorios.md`) + evidencia de `smithy build` exitoso.
 
 2. Media: C3 depende de evidencia en el modelo, no solo en documento.
 - Evidencia documental existe en [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md#L100), [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md#L142) y [docs/semana1/Github - Diseño Técnico.md](docs/semana1/Github%20-%20Diseño%20Técnico.md#L518), pero la rúbrica pide traits/errores Smithy concretos.
@@ -89,7 +89,7 @@ Nota de confianza:
 
 ## Qué Falta (Concreto y Accionable)
 
-- [ ] Link a repo `Github-Smithy` con commit/tag de la entrega.
+- [ ] Link a repo `Github-Smithy` (según `docs/Repositorios.md`) con commit/tag de la entrega.
 - [ ] Evidencia de `smithy build` exitoso (texto o captura).
 - [ ] Tabla corta de operaciones Smithy por recurso (Auth, Repo, Issue, Search).
 - [ ] Evidencia de traits de seguridad/validación/errores en el modelo.

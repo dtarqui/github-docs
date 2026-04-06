@@ -741,11 +741,12 @@ _Motivo:_ en este entorno no se generan archivos binarios de imagen automáticam
 
 ## Referencias cruzadas de repositorios
 
-| Artefacto                  | Ubicación                                              |
-| -------------------------- | ------------------------------------------------------ |
-| Documentación de producto  | `github-docs/docs/*.md`                                |
-| Contrato Smithy            | `Github-Smithy/model/`                                 |
-| Infraestructura AWS        | `Github-Cdk/lib/stacks/keycloak-stack.ts` y constructs |
-| Patrón Spring (referencia) | `Github-ms-users/docs/ARCHITECTURE.md`                 |
+| Artefacto | Referencia |
+| --- | --- |
+| Índice oficial de repositorios | `docs/Repositorios.md` |
+| Documentación de producto | Repositorio `github-docs` (ver índice) |
+| Contrato Smithy | Repositorio `Github-Smithy` (ver índice) |
+| Infraestructura AWS | Repositorio `Github-Cdk` (ver índice) |
+| Patrón Spring (referencia) | Repositorio `Github-ms-users` (ver índice) |
 
 ---
