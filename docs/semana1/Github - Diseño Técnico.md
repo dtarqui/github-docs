@@ -306,46 +306,27 @@ Cuando el Search Service consume `repo.created`, actualiza el índice en Elastic
 
 ### 5.1 Componentes y comunicaciones
 
-```mermaid
-flowchart TB
-    subgraph Cliente
-        UI[Aplicación web / PWA]
-    end
-    subgraph Borde
-        GW[API Gateway]
-    end
-    subgraph Microservicios
-        A[Auth :3001]
-        R[Repo :3002]
-        I[Issue :3003]
-        S[Search :3004]
-    end
-    subgraph Datos
-        PA[(PostgreSQL auth_db)]
-        PR[(PostgreSQL repos_db)]
-        PI[(PostgreSQL issues_db)]
-        ES[(Elasticsearch)]
-        OB[(MinIO / S3)]
-        RD[(Redis)]
-    end
-    subgraph Mensajería
-        MQ[RabbitMQ]
-    end
-    subgraph Identidad
-        KC[Keycloak]
-    end
+### 5.1 Modelos C4
 
-    UI -->|HTTPS| GW
-    GW --> A & R & I & S
-    A --> PA
-    A -. OIDC .-> KC
-    R --> PR & OB
-    I --> PI
-    S --> ES
-    A & R & I --> MQ
-    MQ --> S
-    GW --- RD
-```
+#### Diagrama de contexto
+
+![Diagrama de contexto](imagenes/c4-contexto.png)
+
+#### Diagrama de contenedores
+
+![Diagrama de contenedores](imagenes/c4-contenedores.png)
+
+![Diagrama de contenedores services](imagenes/c4-contenedores-services.png)
+
+#### Diagrama de componentes
+
+![Diagrama de componentes](imagenes/c4-componentes-front.png)
+
+![Diagrama de componentes](imagenes/c4-componentes-back.png)
+
+### 5.2 Componentes y comunicaciones
+
+![Diagrama de componentes](imagenes/componentes.png)
 
 Este diagrama resume la topología documentada en `README.md` de github-docs. Además, conecta el rol de **Keycloak** como proveedor OIDC externo a los microservicios.
 
@@ -511,6 +492,8 @@ COMMIT;
 ### 5.3 Infraestructura AWS (referencia Github-Cdk)
 
 El stack `KeycloakStack` compone **GithubVpc**, **KubeCluster** (EKS), **GithubDatabase** (RDS PostgreSQL) y **KeycloakManifests**. En consecuencia, la identidad del despliegue académico puede anclarse a un entorno Kubernetes gestionado en AWS, si bien los microservicios de negocio pueden desplegarse en fases posteriores sobre el mismo clúster o en compose local.
+
+[Repo CDK](https://github.com/Savitar465/Github-Cdk.git)
 
 ---
 
