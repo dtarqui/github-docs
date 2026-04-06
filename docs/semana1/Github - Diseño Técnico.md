@@ -359,24 +359,55 @@ El stack `KeycloakStack` compone **GithubVpc**, **KubeCluster** (EKS), **GithubD
 
 ### 6.1 Esquema de base de datos
 
+La fuente de verdad del esquema relacional se mantiene en [ModeloDeDatos.md](../ModeloDeDatos.md). Esta seccion resume los cambios de esquema relevantes para el diseno y su impacto de compatibilidad.
+
+**Cambios de esquema aplicados**
+
+- Estandarizacion de identificadores a `UUID` en entidades principales.
+- Consolidacion del patron `database-per-service` con `auth_db`, `repos_db` e `issues_db`.
+- Uso de `repo_id` como referencia logica en `issues` y `labels` (sin FK fisica cross-service) para mantener bajo acoplamiento entre servicios.
+- Restriccion de integridad en `comments` para asegurar destino unico (`issue_id` o `pull_request_id`, no ambos).
+
+**Compatibilidad hacia atras**
+
+- Se recomienda estrategia `expand -> migrate -> contract` para cambios de esquema:
+  - `expand`: agregar nuevas columnas, constraints e indices sin romper clientes actuales.
+  - `migrate`: poblar datos y ajustar servicios consumidores/proveedores.
+  - `contract`: retirar columnas o rutas legacy una vez validadas.
+- En integraciones activas, mantener alias de API legacy temporales (si aplica) y traduccion de payload en gateway.
+
+**Actividad de migracion de datos**
+
+- Normalizacion de ids antiguos al formato `UUID` cuando corresponda.
+- Backfill de datos para restricciones nuevas (por ejemplo, estado de PR y numeracion de issues por repositorio).
+- Validacion de consistencia de `repo_id` via Repo Service antes de escritura en Issue Service.
+- Ejecucion de migraciones en ventanas controladas, con backup previo y validacion post-migracion.
+
+**Referencias de implementacion**
+
+- Esquema SQL base: [ModeloDeDatos.md](../ModeloDeDatos.md)
+- Entidades y relaciones de dominio: [EntidadesPrincipales.md](../EntidadesPrincipales.md)
+- Repositorios del ecosistema: [Repositorios.md](../Repositorios.md)
+
 **Tabla simple de entidades críticas**
 
-| Tabla           | Columna                        | Tipo        | Restricciones                    | Descripción                                              |
-| --------------- | ------------------------------ | ----------- | -------------------------------- | -------------------------------------------------------- |
-| `repositories`  | `id`                           | UUID        | PK, NOT NULL                     | Identificador único del repositorio                      |
-| `repositories`  | `owner_id`                     | UUID        | FK NOT NULL -> `users.id`        | Propietario del repositorio                              |
-| `issues`        | `repo_id`                      | UUID        | NOT NULL, índice                 | Referencia lógica a repositorio (validada en aplicación) |
-| `issues`        | `number`                       | INTEGER     | UNIQUE (`repo_id`, `number`)     | Numeración secuencial por repositorio                    |
-| `pull_requests` | `status`                       | VARCHAR(20) | CHECK (`open`,`closed`,`merged`) | Estado del PR                                            |
-| `comments`      | `issue_id` / `pull_request_id` | UUID        | CHECK de exclusión mutua         | Objetivo del comentario                                  |
+| Tabla           | Columnas clave                                   | Tipos                        | Restricciones clave              | Descripción                            |
+| --------------- | ------------------------------------------------ | ---------------------------- | -------------------------------- | -------------------------------------- |
+| `users`         | `id`, `email`, `username`                        | UUID, VARCHAR                | PK, UNIQUE                       | Identidad base de usuarios             |
+| `repositories`  | `id`, `owner_id`, `name`                         | UUID, UUID, VARCHAR          | PK, FK, UNIQUE por propietario   | Repositorios del dominio principal     |
+| `issues`        | `id`, `repo_id`, `number`, `state`               | UUID, UUID, INTEGER, VARCHAR | PK, UNIQUE (`repo_id`, `number`) | Seguimiento de trabajo por repositorio |
+| `pull_requests` | `id`, `repository_id`, `status`                  | UUID, UUID, VARCHAR          | PK, FK, CHECK de estado          | Flujo de PR basico entre ramas         |
+| `labels`        | `id`, `repo_id`, `name`                          | UUID, UUID, VARCHAR          | PK, UNIQUE (`repo_id`, `name`)   | Etiquetas por repositorio              |
+| `issue_labels`  | `issue_id`, `label_id`                           | UUID, UUID                   | PK compuesta, FKs                | Relacion muchos-a-muchos issue-label   |
+| `comments`      | `id`, `issue_id`, `pull_request_id`, `author_id` | UUID, UUID, UUID, UUID       | PK, CHECK de exclusión mutua     | Comentarios sobre issues o PR          |
 
 **Fuente de diagrama ER (Mermaid)**
 
 ```mermaid
 erDiagram
-    USERS ||--o{ REPOSITORIES : owns
     USERS ||--o{ OAUTH_ACCOUNTS : links
     USERS ||--o{ SESSIONS : has
+    USERS ||--o{ REPOSITORIES : owns
     REPOSITORIES ||--o{ BRANCHES : contains
     REPOSITORIES ||--o{ COMMITS : contains
     COMMITS ||--o{ FILES : snapshots
