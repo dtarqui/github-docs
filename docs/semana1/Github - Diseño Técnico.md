@@ -472,6 +472,8 @@ Riesgos y mitigaciones prioritarias:
 - Abuso de login: rate limit y bloqueo temporal por intentos fallidos.
 - Exposición de paneles administrativos: restringir Keycloak Admin API a red interna.
 
+![alt Diagrama de seguridad](imagenes/seguridad.png)
+
 #### 6.4.1 Flujo de autenticación OIDC (AuthN)
 
 Flujo adoptado: **Authorization Code Flow con PKCE** (cliente público SPA + backend API).
