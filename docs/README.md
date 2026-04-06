@@ -1,8 +1,10 @@
-# Mini-GitHub
+# GitHub
 
 > Proyecto académico para la materia **Arquitectura en la Nube y Microservicios**
 
 Recreación simplificada de GitHub utilizando arquitectura de microservicios, contenedorización y despliegue en la nube.
+
+*Diseño técnico de Proyecto Github* Ingresar aquí ->  [Github Diseño Tecnico](https://github.com/dtarqui/github-docs/blob/main/docs/semana1/Github%20-%20Dise%C3%B1o%20T%C3%A9cnico.md) 
 
 ---
 
