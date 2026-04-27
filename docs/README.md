@@ -66,7 +66,6 @@ El objetivo principal es demostrar competencias en:
 | **Issues**        | Organización                        | Labels y asignación de usuarios                                |
 | **Pull Requests** | Gestión básica                      | Crear PRs, revisar con comentarios, aprobar y merge            |
 | **Búsqueda**      | Búsqueda básica                     | Buscar repositorios por nombre y usuarios por username         |
-| **Colaboración**  | Stars                               | Dar y quitar estrellas a repositorios                          |
 | **API**           | Documentación OpenAPI               | Swagger UI para explorar y probar la API REST                  |
 
 #### Arquitectura y Tecnología
@@ -353,8 +352,7 @@ El objetivo principal es demostrar competencias en:
 
 | ID     | Requisito                                                                                                 | Prioridad |
 | ------ | --------------------------------------------------------------------------------------------------------- | --------- |
-| RF06.1 | El sistema debe permitir dar "star" a repositorios                                                        | Media     |
-| RF06.2 | El sistema debe permitir gestionar colaboradores de un repositorio con roles (Owner, Developer, Reporter) | Media     |
+| RF06.1 | El sistema debe permitir gestionar colaboradores de un repositorio con roles (Owner, Developer, Reporter) | Media     |
 
 ### RF07 - Pull Requests
 
@@ -372,7 +370,7 @@ El objetivo principal es demostrar competencias en:
 
 | ID    | Requisito                                                        | Métrica                             |
 | ----- | ---------------------------------------------------------------- | ----------------------------------- |
-| RNF01 | El sistema debe implementar arquitectura de microservicios       | Mínimo 4 servicios independientes   |
+| RNF01 | El sistema debe implementar arquitectura de microservicios       | Mínimo 5 servicios independientes   |
 | RNF02 | Cada microservicio debe tener su propia base de datos            | 1 BD por servicio                   |
 | RNF03 | Los servicios deben comunicarse mediante API REST y/o mensajería | 100% de comunicaciones documentadas |
 
@@ -396,24 +394,38 @@ El objetivo principal es demostrar competencias en:
 
 | ID    | Requisito                                                   | Métrica                                              |
 | ----- | ----------------------------------------------------------- | ---------------------------------------------------- |
-| RNF10 | El API Gateway debe responder en menos de 100ms             | p95 < 100ms en pruebas con 100 usuarios concurrentes |
+| RNF10 | El API Gateway debe responder en menos de 200ms             | p95 < 200ms en pruebas con 100 usuarios concurrentes |
 | RNF11 | Los servicios deben poder escalar horizontalmente           | Réplicas configurables                               |
-| RNF12 | El sistema debe soportar al menos 100 usuarios concurrentes | Load test k6 exitoso sin errores criticos            |
+| RNF12 | El sistema debe soportar al menos 100 usuarios concurrentes | Load test k6 exitoso sin errores críticos            |
 
 ### Seguridad
 
-| ID    | Requisito                                          | Métrica                             |
-| ----- | -------------------------------------------------- | ----------------------------------- |
-| RNF13 | Todas las comunicaciones externas deben usar HTTPS | 100% endpoints HTTPS                |
-| RNF14 | La autenticación debe usar JWT con expiración      | Access token 15m + refresh token 7d |
-| RNF15 | Las contraseñas deben almacenarse hasheadas        | bcrypt con salt                     |
+| ID    | Requisito                                                 | Métrica                             |
+| ----- | --------------------------------------------------------- | ----------------------------------- |
+| RNF13 | Todas las comunicaciones externas deben usar HTTPS (TLS 1.3) | 100% endpoints HTTPS             |
+| RNF14 | La autenticación debe usar JWT con expiración             | Access token 15m + refresh token 7d |
+| RNF15 | Las contraseñas deben almacenarse hasheadas               | bcrypt con salt                     |
+| RNF16 | Tokens de acceso con scopes y RBAC por repositorio        | Roles Owner/Developer/Reporter      |
+| RNF17 | Cifrado en reposo (AES-256) y en tránsito                 | Datos sensibles cifrados            |
+| RNF18 | Aislamiento total entre repositorios privados             | Sin acceso cross-tenant             |
 
-### Observabilidad
+### Usabilidad
 
-| ID    | Requisito                                  | Métrica                            |
-| ----- | ------------------------------------------ | ---------------------------------- |
-| RNF16 | El sistema debe tener logging centralizado | Logs en formato JSON               |
-| RNF17 | El sistema debe exponer métricas de salud  | Endpoints /health en cada servicio |
+| ID    | Requisito                                   | Métrica                        |
+| ----- | ------------------------------------------- | ------------------------------ |
+| RNF19 | Diseño responsivo y accesible               | Mobile-first, WCAG 2.1 AA      |
+| RNF20 | Interfaz funcional en navegadores modernos  | Chrome, Firefox, Safari, Edge  |
+
+### Observabilidad y Mantenibilidad
+
+| ID    | Requisito                                              | Métrica                            |
+| ----- | ------------------------------------------------------ | ---------------------------------- |
+| RNF21 | El sistema debe tener logging centralizado y estructurado | Logs en formato JSON            |
+| RNF22 | El sistema debe exponer métricas de salud (health checks) | Endpoints /health en cada servicio |
+| RNF23 | Monitoreo con Prometheus/Grafana                       | Dashboards operativos              |
+| RNF24 | Infraestructura como código (Terraform/Kubernetes)     | 100% IaC versionado                |
+| RNF25 | Despliegues automatizados con rollback (infraestructura del equipo, no feature del producto) | Pipeline de despliegue funcional |
+| RNF26 | Ambientes de staging y producción separados            | 2 ambientes mínimo                 |
 
 ---
 
@@ -749,7 +761,7 @@ mini-github/
 - Gestión de archivos
 - Control de permisos
 - Gestión de branches (básico)
-- Stars y forks
+- Forks
 
 **Base de datos:** PostgreSQL (`repos_db`) + MinIO (archivos)
 
@@ -851,7 +863,6 @@ CREATE TABLE repositories (
     owner_id UUID NOT NULL,
     default_branch VARCHAR(100) DEFAULT 'main',
     language VARCHAR(50),
-    stars_count INTEGER NOT NULL DEFAULT 0,
     forks_count INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -869,15 +880,6 @@ CREATE TABLE repo_files (
     branch VARCHAR(100),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
--- Stars
-CREATE TABLE stars (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL,
-    repository_id UUID NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, repository_id)
 );
 ```
 
@@ -983,8 +985,6 @@ POST /api/auth/register
 | GET    | `/api/repos/:owner/:repo/contents/*path` | Obtener contenido        |
 | PUT    | `/api/repos/:owner/:repo/contents/*path` | Subir archivo            |
 | DELETE | `/api/repos/:owner/:repo/contents/*path` | Eliminar archivo         |
-| PUT    | `/api/repos/:owner/:repo/star`           | Dar star                 |
-| DELETE | `/api/repos/:owner/:repo/star`           | Quitar star              |
 
 **Ejemplos:**
 

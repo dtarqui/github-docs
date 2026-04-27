@@ -70,7 +70,7 @@ Fuera del alcance:
 
 | ID         | Enunciado                                                                                                                         | Métrica o criterio de verificación                                                                                   | Dimensión                                                     |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| **RNF-P1** | El sistema debe implementar **arquitectura de microservicios** con al menos cuatro servicios desplegables de forma independiente. | Cuatro o más contenedores/servicios con health check operativo en compose o K8s.                                     | Escalabilidad / modularidad                                   |
+| **RNF-P1** | El sistema debe implementar **arquitectura de microservicios** con al menos cinco servicios desplegables de forma independiente (API Gateway, Auth, Repo, Issue, Search). | Cinco o más contenedores/servicios con health check operativo en compose o K8s.                                     | Escalabilidad / modularidad                                   |
 | **RNF-P2** | El API Gateway debe ofrecer latencia razonable bajo carga académica.                                                              | p95 de latencia en rutas críticas **inferior a 200 ms** en pruebas con ~100 usuarios concurrentes simulados.         | Latencia                                                      |
 | **RNF-P3** | Las comunicaciones externas deben emplear **HTTPS (TLS 1.3)** y los secretos no deben almacenarse en código fuente.               | Endpoints públicos solo TLS; variables sensibles inyectadas por entorno o secretos de K8s.                           | Seguridad                                                     |
 | **RNF-P4** | Cada microservicio debe persistir en **su propia base PostgreSQL** (patrón _database per service_).                               | Tres instancias lógicas mínimas (`auth_db`, `repos_db`, `issues_db`) sin esquema compartido accidental.              | Consistencia de diseño / CAP (servicios débilmente acoplados) |
@@ -89,7 +89,7 @@ El modelo conceptual se alinea con `EntidadesPrincipales.md` y el esquema relaci
 | Entidad (agregado)                                                                   | Servicio propietario | Persistencia                                  | Relación destacada                                                |
 | ------------------------------------------------------------------------------------ | -------------------- | --------------------------------------------- | ----------------------------------------------------------------- |
 | **User**, **OAuthAccount**, **Session**                                              | Auth                 | PostgreSQL `auth_db`                          | Un usuario posee cero o más cuentas OAuth                         |
-| **Repository**, **RepositoryPermission**, **Branch**, **Commit**, **File**, **Star** | Repo                 | PostgreSQL `repos_db` (+ objetos en MinIO/S3) | Repositorio pertenece a un propietario; permisos N:M usuario–repo |
+| **Repository**, **RepositoryPermission**, **Branch**, **Commit**, **File** | Repo                 | PostgreSQL `repos_db` (+ objetos en MinIO/S3) | Repositorio pertenece a un propietario; permisos N:M usuario–repo |
 | **Issue**, **Label**, **IssueLabel**, **Comment**, **PullRequest**                   | Issue                | PostgreSQL `issues_db`                        | Issues y PR vinculados al identificador lógico del repositorio    |
 | **Índices de búsqueda** (proyección)                                                 | Search               | Elasticsearch                                 | Materialización eventual a partir de eventos de dominio           |
 
@@ -381,7 +381,7 @@ Este diagrama muestra cómo el sistema recupera y presenta la lista de repositor
 **Parámetros de consulta:**
 - `owner`: Nombre de usuario (requerido)
 - `visibility`: Filtro opcional (`public`, `private`, `all`)
-- `sort`: Ordenamiento (`created`, `updated`, `name`, `stars`)
+- `sort`: Ordenamiento (`created`, `updated`, `name`)
 - `page`: Número de página (default: 1)
 - `per_page`: Cantidad por página (default: 30, max: 100)
 
@@ -447,7 +447,6 @@ Este diagrama muestra el proceso de eliminación permanente de un repositorio y 
      - `commits` (con archivos asociados en `commit_files`)
      - `branches`
      - `files`
-     - `stars`
      - `collaborators` (permisos)
    - **Paso 3:** Se elimina el registro del repositorio (dispara cascade por FK)
 5. **Limpieza de índices:** Se publica evento `repo.deleted` para remover de Elasticsearch
@@ -463,7 +462,6 @@ Este diagrama muestra el proceso de eliminación permanente de un repositorio y 
 ```sql
 BEGIN TRANSACTION;
 -- 1. Eliminar relaciones N:M
-DELETE FROM stars WHERE repo_id = ?;
 DELETE FROM collaborators WHERE repo_id = ?;
 -- 2. Eliminar entidades dependientes
 DELETE FROM commit_files WHERE commit_id IN (SELECT id FROM commits WHERE repo_id = ?);

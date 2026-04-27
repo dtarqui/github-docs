@@ -437,20 +437,6 @@ body: {
 DELETE /v1/repos/{owner}/{repo}/collaborators/{collaboratorUsername} -> No Content
 descripcion: Elimina un colaborador del repositorio.
 
-GET /v1/repos/{owner}/{repo}/contents/{filePath+} -> GetRepoContentsBody
-descripcion: Lista archivos y carpetas de una ruta del repositorio.
-
-PUT /v1/repos/{owner}/{repo}/contents/{filePath+} -> FileEntryDTO
-descripcion: Sube o actualiza un archivo en el repositorio.
-body: {
-  "content": string
-  "message": string
-  "branch": string
-}
-
-DELETE /v1/repos/{owner}/{repo}/contents/{filePath+} -> No Content
-descripcion: Elimina un archivo generando un commit de borrado.
-
 GET /v1/repos/{owner}/{repo}/forks -> ListRepositoryForksBody
 descripcion: Lista los forks de un repositorio.
 
@@ -460,18 +446,6 @@ body: {
   "name": string
   "targetOwner": string
 }
-
-PUT /v1/repos/{owner}/{repo}/star -> No Content
-descripcion: Da estrella a un repositorio.
-
-DELETE /v1/repos/{owner}/{repo}/star -> No Content
-descripcion: Quita la estrella de un repositorio.
-
-PUT /v1/user/starred/{owner}/{repo} -> No Content
-descripcion: Da estrella a un repositorio con ruta.
-
-DELETE /v1/user/starred/{owner}/{repo} -> No Content
-descripcion: Quita estrella a un repositorio con ruta.
 
 ```
 

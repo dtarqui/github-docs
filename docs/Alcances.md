@@ -8,5 +8,5 @@ El proyecto incluye las siguientes funcionalidades:
 - **Pull Requests:** Crear PRs entre branches, revisión con comentarios, aprobación y merge básico.
 - **Issues:** Crear, comentar, etiquetar, asignar y cerrar issues dentro de un repositorio.
 - **Búsqueda:** Búsqueda de repositorios por nombre y usuarios por username.
-- **Colaboración:** Dar/quitar estrellas a repositorios, gestión de colaboradores con roles por repositorio.
+- **Colaboración:** Gestión de colaboradores con roles por repositorio.
 - **API REST documentada:** Endpoints documentados con Swagger UI.

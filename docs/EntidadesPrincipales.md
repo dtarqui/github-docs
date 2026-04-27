@@ -38,8 +38,7 @@ El modelo de datos se enfoca en:
 | `branches`               | Repo Service  | PostgreSQL    |
 | `commits`                | Repo Service  | PostgreSQL    |
 | `files`                  | Repo Service  | PostgreSQL    |
-| `pull_requests`          | Repo Service  | PostgreSQL    |
-| `stars`                  | Repo Service  | PostgreSQL    |
+| `pull_requests`          | Issue Service | PostgreSQL    |
 | `issues`                 | Issue Service | PostgreSQL    |
 | `labels`                 | Issue Service | PostgreSQL    |
 | `issue_labels`           | Issue Service | PostgreSQL    |
@@ -102,17 +101,21 @@ Gestiona los tokens JWT activos para control de sesiones.
 
 ## Repository (Repositorio)
 
-Representa un repositorio Git creado por un usuario.  
+Representa un repositorio Git creado por un usuario.
 **Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`)
 
-| Campo       | Tipo                                         |
-| ----------- | -------------------------------------------- |
-| Id          | UUID (PK)                                    |
-| Name        | VARCHAR(150) NOT NULL                        |
-| Description | TEXT                                         |
-| IsPrivate   | BOOLEAN NOT NULL DEFAULT false               |
-| OwnerId     | UUID (FK → users)                            |
-| CreatedAt   | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
+| Campo         | Tipo                                         |
+| ------------- | -------------------------------------------- |
+| Id            | UUID (PK)                                    |
+| Name          | VARCHAR(150) NOT NULL                        |
+| Description   | TEXT                                         |
+| IsPrivate     | BOOLEAN NOT NULL DEFAULT false               |
+| OwnerId       | UUID (FK → users)                            |
+| DefaultBranch | VARCHAR(100) DEFAULT 'main'                  |
+| Language      | VARCHAR(50)                                  |
+| ForksCount    | INTEGER NOT NULL DEFAULT 0                   |
+| CreatedAt     | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
+| UpdatedAt     | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
 
 ---
 
@@ -126,21 +129,22 @@ Define los niveles de acceso de los usuarios a un repositorio.
 | Id           | UUID (PK)                                 |
 | UserId       | UUID (FK → users)                         |
 | RepositoryId | UUID (FK → repositories)                  |
-| Role         | VARCHAR(50) NOT NULL (Owner, Write, Read) |
+| Role         | VARCHAR(50) NOT NULL (Owner, Developer, Reporter) |
 
 ---
 
 ## Branch (Rama)
 
-Representa las ramas dentro de un repositorio.  
+Representa las ramas dentro de un repositorio.
 **Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`)
 
-| Campo        | Tipo                           |
-| ------------ | ------------------------------ |
-| Id           | UUID (PK)                      |
-| Name         | VARCHAR(100) NOT NULL          |
-| RepositoryId | UUID (FK → repositories)       |
-| IsDefault    | BOOLEAN NOT NULL DEFAULT false |
+| Campo        | Tipo                                         |
+| ------------ | -------------------------------------------- |
+| Id           | UUID (PK)                                    |
+| Name         | VARCHAR(100) NOT NULL                        |
+| RepositoryId | UUID (FK → repositories)                     |
+| IsDefault    | BOOLEAN NOT NULL DEFAULT false               |
+| CreatedAt    | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
 
 ---
 
@@ -162,21 +166,24 @@ Representa los commits realizados en el repositorio.
 
 ## File (Archivo)
 
-Representa los archivos versionados en un commit.  
-**Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`)
+Representa la metadata de archivos versionados. El contenido binario se almacena en MinIO/S3.
+**Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`) + MinIO/S3 (blobs)
 
-| Campo    | Tipo                        |
-| -------- | --------------------------- |
-| Id       | UUID (PK)                   |
-| Path     | VARCHAR(255) NOT NULL       |
-| Content  | TEXT                        |
-| CommitId | VARCHAR(100) (FK → commits) |
+| Campo       | Tipo                        |
+| ----------- | --------------------------- |
+| Id          | UUID (PK)                   |
+| Path        | VARCHAR(512) NOT NULL       |
+| StorageKey  | VARCHAR(512) NOT NULL       |
+| ContentType | VARCHAR(100)                |
+| SizeBytes   | BIGINT                      |
+| CommitId    | VARCHAR(100) (FK → commits) |
 
 ---
 
 ## PullRequest (Solicitud de Cambio)
 
 Permite proponer cambios entre ramas.
+**Servicio:** Issue Service | **Base de datos:** PostgreSQL (`issues_db`)
 
 | Campo          | Tipo                           |
 | -------------- | ------------------------------ |
@@ -255,24 +262,9 @@ Permite comentar en Issues y Pull Requests.
 
 ---
 
-## Star (Estrella)
-
-Registra que un usuario marcó un repositorio como favorito.  
-**Servicio:** Repo Service | **Base de datos:** PostgreSQL (`repos_db`)
-
-| Campo      | Tipo                                         |
-| ---------- | -------------------------------------------- |
-| id         | UUID (PK)                                    |
-| repo_id    | UUID (FK → repositories)                     |
-| user_id    | UUID NOT NULL — user_id de Auth Service      |
-| created_at | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP |
-
----
-
 # Relaciones entre Entidades
 
 ```
-
 User ──< Repository
 User ──< RepositoryPermission >── Repository
 
@@ -282,7 +274,5 @@ Repository ──< PullRequest ──< Comment
 User ──< OAuthAccount
 User ──< Session
 
-Repository ──< Star
 Issue >──< Label (via IssueLabel)
-
 ```

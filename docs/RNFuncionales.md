@@ -28,7 +28,7 @@
 
 | ID    | Requerimiento                                                |
 | ----- | ------------------------------------------------------------ |
-| RNF10 | El API Gateway debe responder en menos de 100ms.             |
+| RNF10 | El API Gateway debe responder en menos de 200ms (p95).       |
 | RNF11 | Los servicios deben poder escalar horizontalmente.           |
 | RNF12 | El sistema debe soportar al menos 100 usuarios concurrentes. |
 
@@ -58,7 +58,7 @@
 | RNF22 | El sistema debe exponer métricas de salud (health checks). |
 | RNF23 | Monitoreo con Prometheus/Grafana.                          |
 | RNF24 | Infraestructura como código (Terraform/Kubernetes).        |
-| RNF25 | Despliegues automatizados con rollback.                    |
+| RNF25 | Despliegues automatizados con rollback (infraestructura del equipo, no feature del producto - ver L-01). |
 | RNF26 | Ambientes de staging y producción separados.               |
 
 ---

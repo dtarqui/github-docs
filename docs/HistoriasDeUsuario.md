@@ -583,28 +583,6 @@
 
 ---
 
-### HU-24: Dar estrella a repositorios
-
-> **Como** usuario
-> **Quiero** marcar repositorios como favoritos
-> **Para** seguirlos o destacarlos
-
-**Criterios de aceptación:**
-
-- [ ] Botón de estrella en página del repo.
-- [ ] Contador de estrellas.
-- [ ] Lista de repositorios destacados en perfil.
-
-**Checklist de tareas:**
-
-- [ ] Endpoint `POST /api/repos/:repoId/star`.
-- [ ] Endpoint `DELETE /api/repos/:repoId/star`.
-- [ ] Contar estrellas en entidad repositorio.
-- [ ] UI con estado activo/inactivo.
-- [ ] Lista de repositorios marcados en dashboard.
-
----
-
 ## Épica 5: Búsqueda
 
 ### HU-25: Buscar repositorios por nombre
@@ -698,4 +676,4 @@
 
 ---
 
-_28 historias de usuario · 6 épicas_
+_27 historias de usuario · 6 épicas_

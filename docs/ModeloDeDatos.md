@@ -88,18 +88,25 @@ CREATE TABLE commits (
 );
 
 -- FILES
+-- Nota de diseño: el contenido binario se almacena en MinIO/S3.
+-- Esta tabla solo guarda metadata y la referencia al objeto en storage.
 CREATE TABLE files (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  path VARCHAR(255) NOT NULL,
-  content TEXT,
+  path VARCHAR(512) NOT NULL,
+  storage_key VARCHAR(512) NOT NULL,
+  content_type VARCHAR(100),
+  size_bytes BIGINT,
   commit_id VARCHAR(100) NOT NULL REFERENCES commits(id) ON DELETE CASCADE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX idx_files_storage_key ON files (storage_key);
 
 -- ISSUES
 -- Nota de diseño: repo_id es referencia lógica al repositorio (Repo Service),
 -- sin FK física cross-service para respetar database-per-service.
 -- La validez de repo_id se verifica en la capa de aplicación.
+-- author_id y assignee_id son referencias lógicas a users (Auth Service).
 CREATE TABLE issues (
   id           UUID   PRIMARY KEY DEFAULT gen_random_uuid(),
   repo_id      UUID   NOT NULL,
@@ -107,8 +114,8 @@ CREATE TABLE issues (
   title        VARCHAR(255) NOT NULL,
   body         TEXT,
   state        VARCHAR(20)  NOT NULL DEFAULT 'open',
-  author_id    UUID  NOT NULL REFERENCES users(id),
-  assignee_id  UUID REFERENCES users(id),
+  author_id    UUID  NOT NULL,
+  assignee_id  UUID,
   created_at   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
   closed_at    TIMESTAMP,
@@ -166,10 +173,11 @@ CREATE INDEX idx_pull_requests_author_id ON pull_requests (author_id);
 CREATE INDEX idx_pull_requests_status    ON pull_requests (status);
 
 -- COMMENTS
+-- Nota de diseño: author_id es referencia lógica a users (Auth Service).
 CREATE TABLE comments (
   id          UUID  PRIMARY KEY DEFAULT gen_random_uuid(),
   body        TEXT  NOT NULL,
-  author_id   UUID  NOT NULL REFERENCES users(id),
+  author_id   UUID  NOT NULL,
   issue_id    UUID REFERENCES issues(id) ON DELETE CASCADE,
   pull_request_id UUID REFERENCES pull_requests(id) ON DELETE CASCADE,
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -204,7 +212,6 @@ AUTH SERVICE (PostgreSQL)
 REPO SERVICE (PostgreSQL)
   repositories ──< branches
   repositories ──< commits ──< files
-  repositories ──< stars
   repositories ──< pull_requests
 
 ISSUE SERVICE (PostgreSQL)

@@ -50,8 +50,7 @@
 
 | ID     | Requerimiento                                                                                           |
 | ------ | ------------------------------------------------------------------------------------------------------- |
-| RF06.1 | El sistema debe permitir dar "star" a repositorios.                                                     |
-| RF06.2 | El sistema debe poder gestionar colaboradores de un repositorio con roles (Owner, Developer, Reporter). |
+| RF06.1 | El sistema debe poder gestionar colaboradores de un repositorio con roles (Owner, Developer, Reporter). |
 
 ### RF07 — Pull Requests
 
