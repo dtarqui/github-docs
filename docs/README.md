@@ -5,7 +5,21 @@
 Recreación simplificada de GitHub utilizando arquitectura de microservicios, contenedorización y despliegue en la nube.
 
 *Diseño técnico de Proyecto Github* Ingresar aquí ->  [Github Diseño Tecnico](https://github.com/dtarqui/github-docs/blob/main/docs/semana1/Github%20-%20Dise%C3%B1o%20T%C3%A9cnico.md) 
+## Repositorios
 
+| Respositorios                                                                      | Responsable    | Progreso                                                                           |
+|------------------------------------------------------------------------------------|----------------|------------------------------------------------------------------------------------|
+| **[Github-users-ms](https://github.com/Savitar465/Github-users-ms.git)**           | Jonas Maidana  | Se agregó docker compose con keycloak y base de datos, se implemento AuthZ y AuthN |
+| **[Github-files-ms](https://github.com/Savitar465/Github-files-ms.git)**           | David Rivas    | Repositorio creado con su proyecto smithy respectivo                               |
+| **[Github-repository-ms](https://github.com/Savitar465/Github-repository-ms.git)** | Daniel Tarqui  | Repositorio creado con su proyecto smithy respectivo                               |
+| **[Github-organizations-ms](https://github.com/dtarqui/Github-organizations-ms)**  | Harold Sanchez | Repositorio creado con su proyecto                                                 |
+| **[Github-pullrequests-ms](https://github.com/dtarqui/Github-pull-requests-ms)**   | Jonas Maidana  | Repositorio creado con su proyecto                                                 |
+| **[Github-Smithy](https://github.com/Savitar465/Github-Smithy)**           | Equipo         | Proyecto inicial de Smithy que se separará en los diferentes microservicios        |
+| **[Github-Cdk](https://github.com/Savitar465/Github-Cdk)**           | Equipo         | En progreso, se creó los recursos de prueba para eks                               |
+
+> **Nota:** Los roles pueden solaparse según el tamaño del equipo
+
+---
 ---
 
 ## Tabla de Contenidos
@@ -89,7 +103,6 @@ El objetivo principal es demostrar competencias en:
 | Código fuente         | Repositorio con todo el código del proyecto               |
 | Documentación técnica | README, diagramas de arquitectura, especificación de APIs |
 | Docker Compose        | Configuración para levantar todo el sistema localmente    |
-| Manifiestos K8s       | Archivos YAML para despliegue en Kubernetes               |
 | Demo funcional        | Aplicación desplegada y accesible en la nube              |
 | Presentación          | Slides y demo en vivo del proyecto                        |
 
@@ -102,14 +115,12 @@ El objetivo principal es demostrar competencias en:
 | Funcionalidad                          | Razón de Exclusión                                                  | Alternativa Implementada                                                   |
 | -------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | **Servidor Git enterprise**            | Alta complejidad operativa (HA, replicación, hardening avanzado)    | Microservicio Git hosteado con soporte básico HTTPS                        |
-| **Diff y merge de código**             | Algoritmos complejos de comparación de texto                        | Visualización de contenido sin comparación                                 |
 | **Branch protection avanzada**         | Reglas complejas de protección y políticas obligatorias             | Gestión básica de branches y validaciones mínimas                          |
 | **Code review avanzado**               | Comentarios en línea con sugerencias automáticas y flujos complejos | Comentarios en PR e issues (básico)                                        |
 | **GitHub Actions / CI en el producto** | Workflows, runners y ejecución de jobs como parte del sistema       | No incluido (L-01); sin CI/CD dentro del alcance funcional del GitHub |
 | **Wikis**                              | Feature secundaria                                                  | README del repositorio                                                     |
 | **GitHub Pages**                       | Hosting de sitios estáticos                                         | No incluido                                                                |
 | **Gists**                              | Snippets de código compartidos                                      | No incluido                                                                |
-| **Organizaciones**                     | Gestión de equipos y permisos complejos                             | Solo usuarios individuales                                                 |
 | **Notificaciones**                     | Email, push, tiempo real, WebSockets, SSE                           | No incluido (L-06); sin subsistema de notificaciones                       |
 | **GitHub Copilot / AI features**       | Integración con modelos de IA                                       | No incluido                                                                |
 | **Marketplace / Apps**                 | Ecosistema de integraciones                                         | No incluido                                                                |
@@ -148,7 +159,7 @@ El objetivo principal es demostrar competencias en:
 
 ---
 
-### Comparativa: GitHub vs GitHub Real
+### Comparativa: GitHub Propio vs GitHub Real
 
 | Característica       | GitHub Real       | GitHub     | Estado       |
 | -------------------- | ----------------- | --------------- | ------------ |
@@ -434,8 +445,8 @@ El objetivo principal es demostrar competencias en:
 ### Backend
 
 | Componente    | Tecnología            | Justificación                                           |
-| ------------- | --------------------- | ------------------------------------------------------- |
-| Lenguaje      | Node.js (TypeScript)  | Ecosistema maduro, async nativo                         |
+| ------------- |-----------------------| ------------------------------------------------------- |
+| Lenguaje      | Spring Boot (Java)    | Ecosistema maduro, async nativo                         |
 | Framework     | Express.js / Fastify  | Ligero, flexible, gran comunidad                        |
 | ORM SQL       | Prisma                | Type-safe, migraciones automáticas (Auth, Repo, Issues) |
 | Validación    | Zod / Joi             | Validación de schemas                                   |
