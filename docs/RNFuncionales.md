@@ -1,4 +1,4 @@
-## Mini GitHub - Requerimientos No Funcionales
+## GitHub - Requerimientos No Funcionales
 
 ### Arquitectura y Diseño
 

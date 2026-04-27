@@ -1,4 +1,4 @@
-# Repositorios del Ecosistema Mini-GitHub
+# Repositorios del Ecosistema GitHub
 
 Este documento centraliza los repositorios oficiales usados.
 

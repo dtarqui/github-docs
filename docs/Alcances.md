@@ -1,4 +1,4 @@
-## Mini GitHub - Alcances
+## GitHub - Alcances
 
 El proyecto incluye las siguientes funcionalidades:
 

@@ -29,7 +29,7 @@ Recreación simplificada de GitHub utilizando arquitectura de microservicios, co
 
 ## Descripción
 
-**Mini-GitHub** es una plataforma simplificada de control de versiones y colaboración que permite a los usuarios:
+**GitHub** es una plataforma simplificada de control de versiones y colaboración que permite a los usuarios:
 
 - Crear y gestionar repositorios
 - Subir y descargar archivos
@@ -105,7 +105,7 @@ El objetivo principal es demostrar competencias en:
 | **Diff y merge de código**             | Algoritmos complejos de comparación de texto                        | Visualización de contenido sin comparación                                 |
 | **Branch protection avanzada**         | Reglas complejas de protección y políticas obligatorias             | Gestión básica de branches y validaciones mínimas                          |
 | **Code review avanzado**               | Comentarios en línea con sugerencias automáticas y flujos complejos | Comentarios en PR e issues (básico)                                        |
-| **GitHub Actions / CI en el producto** | Workflows, runners y ejecución de jobs como parte del sistema       | No incluido (L-01); sin CI/CD dentro del alcance funcional del Mini-GitHub |
+| **GitHub Actions / CI en el producto** | Workflows, runners y ejecución de jobs como parte del sistema       | No incluido (L-01); sin CI/CD dentro del alcance funcional del GitHub |
 | **Wikis**                              | Feature secundaria                                                  | README del repositorio                                                     |
 | **GitHub Pages**                       | Hosting de sitios estáticos                                         | No incluido                                                                |
 | **Gists**                              | Snippets de código compartidos                                      | No incluido                                                                |
@@ -148,9 +148,9 @@ El objetivo principal es demostrar competencias en:
 
 ---
 
-### Comparativa: Mini-GitHub vs GitHub Real
+### Comparativa: GitHub vs GitHub Real
 
-| Característica       | GitHub Real       | Mini-GitHub     | Estado       |
+| Característica       | GitHub Real       | GitHub     | Estado       |
 | -------------------- | ----------------- | --------------- | ------------ |
 | Usuarios registrados | 100M+             | Demo (~100)     | Simplificado |
 | Repositorios         | Ilimitados        | Limitados       | Simplificado |
@@ -487,7 +487,7 @@ El objetivo principal es demostrar competencias en:
 ## Estructura del Proyecto
 
 ```
-mini-github/
+github/
 ├── README.md
 ├── docker-compose.yml
 ├── docker-compose.prod.yml
@@ -1095,7 +1095,7 @@ POST /api/repos/johndoe/my-project/issues
 │  └───────────────────────────────────────┬─────────────────────────────────────────┘    │
 │                                          │                                               │
 │  ┌───────────────────────────────────────┴─────────────────────────────────────────┐    │
-│  │                               NAMESPACE: mini-github                             │    │
+│  │                               NAMESPACE: github                             │    │
 │  │                                                                                  │    │
 │  │   ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐             │    │
 │  │   │   API Gateway   │    │   API Gateway   │    │   API Gateway   │             │    │
@@ -1162,8 +1162,8 @@ POST /api/repos/johndoe/my-project/issues
 1. **Clonar el repositorio**
 
 ```bash
-git clone https://github.com/tu-usuario/mini-github.git
-cd mini-github
+git clone https://github.com/tu-usuario/github.git
+cd github
 ```
 
 2. **Configurar variables de entorno**
@@ -1205,8 +1205,8 @@ JWT_SECRET=your-super-secret-jwt-key
 
 # Keycloak (SSO/OIDC)
 KEYCLOAK_BASE_URL=http://keycloak:8080
-KEYCLOAK_REALM=mini-github
-KEYCLOAK_CLIENT_ID=mini-github-web
+KEYCLOAK_REALM=github
+KEYCLOAK_CLIENT_ID=github-web
 KEYCLOAK_CLIENT_SECRET=change-me
 
 # Auth Service
@@ -1276,7 +1276,7 @@ kubectl apply -f infrastructure/kubernetes/ingress/
 
 ### CI/CD (Fuera del Alcance del Producto)
 
-Para esta implementación de Mini-GitHub no se codificará un pipeline CI/CD como funcionalidad del sistema (L-01 en `Limites.md`). No hay workflows, runners ni ejecución de jobs en contenedores dentro del producto.
+Para esta implementación de GitHub no se codificará un pipeline CI/CD como funcionalidad del sistema (L-01 en `Limites.md`). No hay workflows, runners ni ejecución de jobs en contenedores dentro del producto.
 
 Cualquier automatización que use el equipo para su propio repositorio de código queda fuera del alcance funcional documentado aquí.
 

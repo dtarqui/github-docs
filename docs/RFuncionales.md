@@ -1,4 +1,4 @@
-## Mini GitHub - Requerimientos Funcionales
+## GitHub - Requerimientos Funcionales
 
 ### RF01 — Gestión de Usuarios
 

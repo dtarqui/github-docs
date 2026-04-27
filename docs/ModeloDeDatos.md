@@ -1,4 +1,4 @@
-# Mini GitHub - Modelo de Datos
+# GitHub - Modelo de Datos
 
 # Modelo Relacional (SQL)
 

@@ -1,4 +1,4 @@
-# Historias de Usuario — Mini-GitHub
+# Historias de Usuario — GitHub
 
 ## Tabla de Contenidos
 

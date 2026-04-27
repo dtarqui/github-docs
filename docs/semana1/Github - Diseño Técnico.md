@@ -74,7 +74,7 @@ Fuera del alcance:
 | **RNF-P2** | El API Gateway debe ofrecer latencia razonable bajo carga académica.                                                              | p95 de latencia en rutas críticas **inferior a 200 ms** en pruebas con ~100 usuarios concurrentes simulados.         | Latencia                                                      |
 | **RNF-P3** | Las comunicaciones externas deben emplear **HTTPS (TLS 1.3)** y los secretos no deben almacenarse en código fuente.               | Endpoints públicos solo TLS; variables sensibles inyectadas por entorno o secretos de K8s.                           | Seguridad                                                     |
 | **RNF-P4** | Cada microservicio debe persistir en **su propia base PostgreSQL** (patrón _database per service_).                               | Tres instancias lógicas mínimas (`auth_db`, `repos_db`, `issues_db`) sin esquema compartido accidental.              | Consistencia de diseño / CAP (servicios débilmente acoplados) |
-| **RNF-P5** | El contrato REST debe permanecer **versionado y generado desde Smithy**, con documentación **OpenAPI/Swagger** accesible.         | Artefacto `MiniGitHubApi.openapi.json` reproducible por build; UI en `/api-docs` o equivalente por servicio/gateway. | Mantenibilidad                                                |
+| **RNF-P5** | El contrato REST debe permanecer **versionado y generado desde Smithy**, con documentación **OpenAPI/Swagger** accesible.         | Artefacto `GitHubApi.openapi.json` reproducible por build; UI en `/api-docs` o equivalente por servicio/gateway. | Mantenibilidad                                                |
 
 ### 1.3 Estimación de capacidad
 
@@ -113,7 +113,7 @@ Para una referencia detallada se tiene los APIs en el siguiente [recurso](../API
 
 ### 3.1 Protocolo y contrato
 
-Se adopta **REST** sobre JSON con autenticación **Bearer JWT**, conforme al servicio Smithy `com.minigithub#MiniGitHubApi` (`@httpBearerAuth`). El listado de operaciones agregadas en `model/service.smithy` agrupa los casos de uso por puertos lógicos de referencia: **3001** (auth), **3002** (repositorio y archivos), **3003** (issues y pull requests), **3004** (búsqueda).
+Se adopta **REST** sobre JSON con autenticación **Bearer JWT**, conforme al servicio Smithy `com.github#GitHubApi` (`@httpBearerAuth`). El listado de operaciones agregadas en `model/service.smithy` agrupa los casos de uso por puertos lógicos de referencia: **3001** (auth), **3002** (repositorio y archivos), **3003** (issues y pull requests), **3004** (búsqueda).
 
 Convención de versionado: la interfaz pública canónica se publica bajo prefijo **`/v1`**.
 
@@ -851,14 +851,14 @@ Punto de entrada operativo:
 
 Coexisten descripciones dispersas en `README.md` y el modelo formal del repositorio **Github-Smithy**. El equipo debe fijar un único artefacto que gobierne rutas, esquemas y documentación interoperable.
 
-- Opción 1 [RECOMENDADA] — **Smithy 2.0** con proyección a OpenAPI (`MiniGitHubApi.openapi.json`) y validación en build.
+- Opción 1 [RECOMENDADA] — **Smithy 2.0** con proyección a OpenAPI (`GitHubApi.openapi.json`) y validación en build.
 - Opción 2 — **OpenAPI 3.x escrito a mano** (YAML/JSON) sin IDL intermedio.
 - Opción 3 — **gRPC + Protobuf** como contrato binario entre servicios.
 - Opción 4 — **GraphQL** con esquema único para el cliente.
 
 #### Opción 1 [RECOMENDADA] — Smithy 2.0
 
-En este enfoque, el servicio `com.minigithub#MiniGitHubApi` centraliza operaciones; `./gradlew build` valida el modelo y `./gradlew smithyBuild` genera OpenAPI para Swagger y consumidores.
+En este enfoque, el servicio `com.github#GitHubApi` centraliza operaciones; `./gradlew build` valida el modelo y `./gradlew smithyBuild` genera OpenAPI para Swagger y consumidores.
 
 **Pros:**
 

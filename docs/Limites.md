@@ -1,4 +1,4 @@
-## Mini GitHub - Límites
+## GitHub - Límites
 
 Las siguientes funcionalidades quedan **fuera del alcance** del proyecto:
 

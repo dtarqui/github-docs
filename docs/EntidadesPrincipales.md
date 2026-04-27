@@ -1,8 +1,8 @@
-# Mini GitHub - Entidades Principales
+# GitHub - Entidades Principales
 
 ## Descripción del Sistema
 
-El sistema a desarrollar es una plataforma web tipo “Mini GitHub” que permitirá:
+El sistema a desarrollar es una plataforma web tipo “GitHub” que permitirá:
 
 - Gestión de usuarios
 - Creación de repositorios Git
