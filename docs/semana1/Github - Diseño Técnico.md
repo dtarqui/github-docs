@@ -142,14 +142,14 @@ Este documento resume solo las operaciones críticas. El inventario completo de 
 
 ### 3.3 APIs internas y eventos
 
-Las APIs internas son asíncronas mediante eventos en **RabbitMQ**, para desacoplar escritura transaccional e indexación/búsqueda.
+Las APIs internas se implementan con **gRPC** (unario y streaming), para desacoplar la API pública de los procesos de indexación/búsqueda y mantener contratos internos tipados.
 
-| Evento interno  | Productor     | Consumidor principal       | Payload mínimo                                        |
-| --------------- | ------------- | -------------------------- | ----------------------------------------------------- |
-| `repo.created`  | Repo Service  | Search Service             | `repoId`, `owner`, `name`, `visibility`, `timestamp`  |
-| `repo.updated`  | Repo Service  | Search Service             | `repoId`, campos modificados, `timestamp`             |
-| `issue.created` | Issue Service | Search Service             | `issueId`, `repoId`, `title`, `authorId`, `timestamp` |
-| `pr.merged`     | Issue Service | Search Service / Analytics | `prId`, `repoId`, `mergedBy`, `timestamp`             |
+| Operación interna gRPC           | Cliente      | Servidor                   | Request mínimo                                         |
+| -------------------------------- | ------------ | -------------------------- | ------------------------------------------------------ |
+| `Search.IndexRepository`         | Repo Service | Search Service             | `repoId`, `owner`, `name`, `visibility`, `timestamp`   |
+| `Search.UpdateRepository`        | Repo Service | Search Service             | `repoId`, campos modificados, `timestamp`              |
+| `Search.IndexIssue`              | Issue Service| Search Service             | `issueId`, `repoId`, `title`, `authorId`, `timestamp`  |
+| `Search.IndexPullRequestMerge`   | Issue Service| Search Service / Analytics | `prId`, `repoId`, `mergedBy`, `timestamp`              |
 
 Regla de consistencia: estas proyecciones son eventualmente consistentes; el estado fuente de verdad permanece en las bases transaccionales de cada servicio.
 
@@ -251,9 +251,9 @@ Tipos de datos complejos involucrados:
 - `PullRequest`: `id`, `number`, `status`, `base`, `head`, `authorId`, `mergedAt?`.
 - `ApiError`: `code`, `message`, `details?`, `traceId`.
 
-**Ejemplo C - API interna (evento): indexación de búsqueda**
+**Ejemplo C - API interna (gRPC): indexación de búsqueda**
 
-Operación interna: publicación de evento `repo.created` (RabbitMQ)
+Operación interna: invocación `Search.IndexRepository` vía gRPC
 
 ```json
 {
@@ -272,7 +272,7 @@ Resultado esperado: Search Service consume el evento y actualiza proyección en 
 
 ## 4. Flujo de datos
 
-El diagrama siguiente resume el camino desde el cliente hasta la persistencia y la emisión de evento.
+El diagrama siguiente resume el camino desde el cliente hasta la persistencia y la invocación interna a Search.
 
 ```mermaid
 sequenceDiagram
@@ -282,7 +282,7 @@ sequenceDiagram
     participant Auth as Auth Service
     participant Repo as Repo Service
     participant DB as PostgreSQL repos_db
-    participant Bus as RabbitMQ
+   participant Search as Search Service (gRPC)
 
     Usuario->>SPA: Solicita crear repositorio
     SPA->>GW: POST /v1/repositories + Bearer JWT
@@ -290,7 +290,7 @@ sequenceDiagram
     GW->>Repo: Reenvía petición autenticada
     Repo->>DB: INSERT repositorio y metadatos
     DB-->>Repo: Confirmación
-    Repo->>Bus: Publica repo.created
+   Repo->>Search: IndexRepository(repoId, owner, name, visibility)
     Repo-->>GW: 201 Created
     GW-->>SPA: Cuerpo con recurso creado
     SPA-->>Usuario: Confirmación en UI
@@ -347,7 +347,7 @@ Este diagrama ilustra el flujo completo desde que un usuario autenticado solicit
 3. **Validación de negocio:** El Repo Service verifica que el nombre del repositorio sea único para ese usuario
 4. **Persistencia:** Se crea el repositorio en PostgreSQL con sus metadatos (nombre, descripción, visibilidad)
 5. **Inicialización:** Se crea la rama `main` por defecto y un archivo README.md inicial en MinIO
-6. **Eventos:** Se publica evento `repo.created` a RabbitMQ para notificar al Search Service
+6. **Integración interna:** Repo Service invoca `Search.IndexRepository` por gRPC para notificar al Search Service
 7. **Respuesta:** Se retorna código HTTP 201 con los datos del repositorio creado
 
 **Validaciones clave:**
@@ -566,7 +566,7 @@ El diseño se apoya en servicios stateless detrás de API Gateway, con escalado 
 
 - Escalado horizontal: API Gateway, Auth, Repo, Issue y Search con réplicas según carga (RNF11).
 - Escalado vertical inicial: PostgreSQL por servicio (`db.t3.micro` en referencia académica) con posibilidad de subir clase de instancia antes de particionar.
-- Escalado por desacople: RabbitMQ absorbe picos y permite que indexación en Search no bloquee transacciones críticas.
+- Escalado por desacople: gRPC con reintentos/circuit breaker y procesamiento interno en Search evita bloquear transacciones críticas.
 
 **Cuellos de botella y mitigaciones**
 
@@ -618,7 +618,7 @@ Se define monitoreo operativo mínimo alineado con RNF (latencia, disponibilidad
 | API Gateway       | Error rate (5xx)       | > 2% por 5 min             | Equipo Backend    | TBD    | Detecta degradación de servicios aguas abajo                 |
 | Auth Service      | Fallas de login        | > 10% por 10 min           | Equipo Auth       | TBD    | Detecta caída de IdP, credenciales inválidas masivas o abuso |
 | Repo/Issue/Search | Health check `/health` | 2 fallas consecutivas      | Equipo Plataforma | TBD    | Disponibilidad de cada microservicio                         |
-| RabbitMQ          | Cola acumulada         | > 1000 mensajes pendientes | Equipo Plataforma | TBD    | Riesgo de atraso en indexación/eventos                       |
+| gRPC interno      | Error rate / timeout   | > 2% errores o p95 > 200ms | Equipo Plataforma | TBD    | Riesgo de atraso o fallo en indexación interna               |
 | PostgreSQL        | Uso de CPU             | > 80% por 10 min           | Equipo Datos      | TBD    | Señal de cuello de botella en BD                             |
 
 Respuesta operativa:
@@ -805,7 +805,7 @@ Estrategia de pruebas por capas:
 
 Dependencias para pruebas:
 
-- Contenedores de PostgreSQL, RabbitMQ, Redis, MinIO/S3 compatible.
+- Contenedores de PostgreSQL, Redis, MinIO/S3 compatible y servicios con puertos gRPC habilitados.
 - Keycloak de pruebas con realm dedicado.
 
 Criterios mínimos de salida:
@@ -820,7 +820,7 @@ Dependencias externas al código de negocio del equipo:
 
 - Keycloak (IdP OIDC) para autenticación/federación.
 - Proveedor cloud (AWS o equivalente) para cómputo, red y bases gestionadas.
-- RabbitMQ/Redis/Elasticsearch como componentes de plataforma.
+- gRPC/Redis/Elasticsearch como componentes de plataforma.
 - Repositorio de contrato (`Github-Smithy`) para artefacto OpenAPI canónico.
 
 ### 6.12 Operaciones
@@ -828,7 +828,7 @@ Dependencias externas al código de negocio del equipo:
 Operación diaria esperada (fase demo):
 
 - Verificar estado de servicios (`/health`) y conectividad con dependencias.
-- Revisar colas de RabbitMQ y latencia del gateway.
+- Revisar métricas de latencia/errores gRPC y latencia del gateway.
 - Rotar/revocar credenciales según política del entorno.
 - Ejecutar backup y prueba de restauración mínima planificada.
 
@@ -836,7 +836,7 @@ Runbooks mínimos recomendados:
 
 - Incidente de autenticación (fallo de login/OIDC).
 - Caída de base de datos de un servicio.
-- Atraso de cola de eventos y desincronización de búsqueda.
+- Fallas de llamadas gRPC internas y desincronización de búsqueda.
 - Degradación de latencia en API Gateway.
 
 Punto de entrada operativo:
@@ -1036,7 +1036,7 @@ La búsqueda de repositorios y usuarios puede resolverse con PostgreSQL, con un 
 **Pros:**
 
 - Relevancia, facets y escalado horizontal del índice sin cargar las BD transaccionales.
-- Coherente con el rol de **Search Service** y RabbitMQ en la arquitectura descrita.
+- Coherente con el rol de **Search Service** y gRPC interno en la arquitectura descrita.
 
 **Contras:**
 

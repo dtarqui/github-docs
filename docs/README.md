@@ -76,7 +76,7 @@ El objetivo principal es demostrar competencias en:
 | **Contenedorización** | 100% de servicios dockerizados                                                                                              |
 | **Orquestación**      | Docker Compose (desarrollo) + Kubernetes (producción)                                                                       |
 | **Bases de datos**    | Patrón database-per-service implementado                                                                                    |
-| **Mensajería**        | Comunicación asíncrona entre servicios via RabbitMQ                                                                         |
+| **Comunicación interna** | Comunicación servicio a servicio vía gRPC (unario/streaming según caso)                                                |
 | **Caché/Sesiones**    | Redis para caché y sesiones de aplicación                                                                                   |
 | **API Gateway**       | Punto único de entrada con autenticación centralizada                                                                       |
 | **Cloud**             | Despliegue funcional en al menos un proveedor cloud                                                                         |
@@ -277,13 +277,13 @@ El objetivo principal es demostrar competencias en:
                     └───────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           MESSAGE BROKER                                     │
-│                         (RabbitMQ + Redis)                                   │
+│                      INTERNAL SERVICE COMMUNICATION                          │
+│                             (gRPC + Redis)                                   │
 │                                                                              │
-│  Comunicación asíncrona entre servicios:                                     │
-│  - Eventos de creación de repos                                              │
-│  - Indexación de búsqueda                                                    │
-│  Redis se usa para caché/sesiones (no como broker principal de eventos).     │
+│  Comunicación interna entre servicios:                                       │
+│  - Invocaciones para indexación de búsqueda                                  │
+│  - Operaciones internas con contratos tipados (Proto)                        │
+│  Redis se usa para caché/sesiones y soporte de tareas internas.              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -294,7 +294,7 @@ El objetivo principal es demostrar competencias en:
 | **Microservicios**       | Cada funcionalidad es un servicio independiente  |
 | **API Gateway**          | Punto único de entrada para todas las peticiones |
 | **Database per Service** | Cada microservicio tiene su propia base de datos |
-| **Event-Driven**         | Comunicación asíncrona mediante eventos          |
+| **RPC Interno**          | Comunicación interna tipada con gRPC             |
 | **CQRS**                 | Separación de lecturas y escrituras (búsqueda)   |
 
 ---
@@ -470,7 +470,7 @@ El objetivo principal es demostrar competencias en:
 | Orquestación Dev  | Docker Compose         | Simple para desarrollo                                        |
 | Orquestación Prod | Kubernetes             | Escalabilidad, auto-healing                                   |
 | API Gateway       | Kong / Nginx           | Rate limiting, routing                                        |
-| Message Broker    | RabbitMQ               | Mensajería confiable                                          |
+| Internal RPC      | gRPC                   | Baja latencia y contratos tipados entre servicios             |
 | Object Storage    | MinIO / AWS S3         | Almacenamiento de archivos                                    |
 | Doc. API          | Swagger UI (OpenAPI 3) | Contrato explícito y pruebas desde el navegador (`/api-docs`) |
 
@@ -1069,11 +1069,11 @@ POST /api/repos/johndoe/my-project/issues
    │                    │                       │                        │ Success              │
    │                    │                       │                        │<─────────────────────│
    │                    │                       │                        │                      │
-   │                    │                       │      Emit: repo.created│                      │
-   │                    │                       │        (to RabbitMQ)   │                      │
-   │                    │                       │                        │─────────┐            │
-   │                    │                       │                        │         │            │
-   │                    │                       │                        │<────────┘            │
+  │                    │                       │   gRPC call to Search  │                      │
+  │                    │                       │   (IndexRepository)    │                      │
+  │                    │                       │                        │─────────┐            │
+  │                    │                       │                        │         │            │
+  │                    │                       │                        │<────────┘            │
    │                    │                       │                        │                      │
    │                    │ Repository Created    │                        │                      │
    │                    │<───────────────────────────────────────────────│                      │
@@ -1189,7 +1189,6 @@ docker-compose ps
 
 - Frontend: http://localhost:3000
 - API Gateway: http://localhost:8080
-- RabbitMQ Management: http://localhost:15672
 - MinIO Console: http://localhost:9001
 
 ### Variables de Entorno
@@ -1229,8 +1228,11 @@ ISSUE_DATABASE_URL=postgresql://user:pass@postgres:5432/issues_db
 SEARCH_SERVICE_PORT=3004
 ELASTICSEARCH_URL=http://elasticsearch:9200
 
-# RabbitMQ
-RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+# gRPC (comunicación interna)
+AUTH_GRPC_ADDR=auth-service:50051
+REPO_GRPC_ADDR=repo-service:50052
+ISSUE_GRPC_ADDR=issue-service:50053
+SEARCH_GRPC_ADDR=search-service:50054
 
 # Redis
 REDIS_URL=redis://redis:6379
