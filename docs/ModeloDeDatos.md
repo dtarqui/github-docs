@@ -191,6 +191,91 @@ CREATE TABLE comments (
 
 CREATE INDEX idx_comments_issue_id ON comments (issue_id);
 CREATE INDEX idx_comments_pull_request_id ON comments (pull_request_id);
+
+
+-- ORGANIZATIONS
+CREATE TABLE organizations (
+    id           UUID         NOT NULL DEFAULT gen_random_uuid(),
+    name         VARCHAR(50)  NOT NULL,
+    display_name VARCHAR(100) NOT NULL,
+    description  TEXT,
+    avatar_url   VARCHAR(500),
+    website      VARCHAR(500),
+    visibility   VARCHAR(20)  NOT NULL DEFAULT 'public'
+                              CHECK (visibility IN ('public', 'private')),
+    owner_id     UUID         NOT NULL,
+    created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT pk_organizations PRIMARY KEY (id),
+    CONSTRAINT uq_org_name UNIQUE (name)
+);
+
+CREATE INDEX idx_org_owner ON organizations (owner_id);
+
+-- ORG_MEMBERS
+CREATE TABLE org_members (
+    organization_id UUID        NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    user_id         UUID        NOT NULL,
+    username        VARCHAR(50) NOT NULL,
+    avatar_url      VARCHAR(500),
+    role            VARCHAR(20) NOT NULL DEFAULT 'member'
+                                CHECK (role IN ('owner', 'member')),
+    joined_at       TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (organization_id, user_id)
+);
+
+CREATE INDEX idx_org_members_username ON org_members (organization_id, username);
+CREATE INDEX idx_org_members_user     ON org_members (user_id);
+
+-- TEAMS
+CREATE TABLE teams (
+    id              UUID        NOT NULL DEFAULT gen_random_uuid(),
+    organization_id UUID        NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    name            VARCHAR(50) NOT NULL,
+    description     TEXT,
+    permission      VARCHAR(20) NOT NULL DEFAULT 'read'
+                                CHECK (permission IN ('read', 'write', 'admin')),
+    created_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    CONSTRAINT uq_team_name_per_org UNIQUE (organization_id, name)
+);
+
+CREATE INDEX idx_teams_org ON teams (organization_id);
+
+-- TEAM_MEMBERS
+
+CREATE TABLE team_members (
+    team_id    UUID        NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    user_id    UUID        NOT NULL,
+    username   VARCHAR(50) NOT NULL,
+    avatar_url VARCHAR(500),
+    added_at   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (team_id, user_id)
+);
+
+CREATE INDEX idx_team_members_user ON team_members (user_id);
+
+-- TEAM_REPOS
+CREATE TABLE team_repos (
+    team_id     UUID        NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    repo_id     UUID        NOT NULL,
+    repo_name   VARCHAR(100) NOT NULL,
+    full_name   VARCHAR(200) NOT NULL,
+    permission  VARCHAR(20) NOT NULL DEFAULT 'read'
+                            CHECK (permission IN ('read', 'write', 'admin')),
+    assigned_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (team_id, repo_id)
+);
+
+CREATE INDEX idx_team_repos_repo_name ON team_repos (team_id, repo_name);
+
+
+
 ```
 
 ---

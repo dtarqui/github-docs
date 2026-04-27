@@ -557,7 +557,6 @@ erDiagram
     ISSUES ||--o{ COMMENTS : receives
     PULL_REQUESTS ||--o{ COMMENTS : receives
 ```
-
 ### 6.2 Escalabilidad e infraestructura
 
 El diseño se apoya en servicios stateless detrás de API Gateway, con escalado horizontal en capa de aplicación y escalado vertical controlado en datos.
