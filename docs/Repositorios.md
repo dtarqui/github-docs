@@ -13,6 +13,7 @@ Este documento centraliza los repositorios oficiales usados.
 | Github-users-ms            | Microservicio de usuarios (autenticacion/perfil)                                  | https://github.com/Savitar465/Github-users-ms                                                          |
 | Github-files-ms            | Microservicio de gestion de archivos y contenido                                  | https://github.com/Savitar465/Github-files-ms                                                          |
 | Github-repository-ms       | Microservicio de repositorios y metadatos                                         | https://github.com/Savitar465/Github-repository-ms                                                     |
+| Github-front               | Interfaz de usuario del proyecto GitHub                                           | https://github.com/Savitar465/Github-front                                                              |
 
 ## Uso recomendado en entregables
 
@@ -24,3 +25,4 @@ Este documento centraliza los repositorios oficiales usados.
 - Para gestion de usuarios, usar Github-users-ms.
 - Para operaciones de archivos, usar Github-files-ms.
 - Para gestion de repositorios, usar Github-repository-ms.
+- Para interfaz de usuario, usar Github-front.
