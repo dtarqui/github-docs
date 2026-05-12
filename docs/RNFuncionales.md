@@ -14,7 +14,6 @@
 | ----- | ---------------------------------------------------------- |
 | RNF04 | Todos los servicios deben estar contenedorizados.          |
 | RNF05 | El sistema debe usar Docker Compose para desarrollo local. |
-| RNF06 | El sistema debe poder desplegarse en Kubernetes.           |
 
 ### Cloud y Despliegue
 
@@ -57,7 +56,7 @@
 | RNF21 | El sistema debe tener logging centralizado y estructurado. |
 | RNF22 | El sistema debe exponer métricas de salud (health checks). |
 | RNF23 | Monitoreo con Prometheus/Grafana.                          |
-| RNF24 | Infraestructura como código (Terraform/Kubernetes).        |
+| RNF24 | Infraestructura como código (Terraform).                   |
 | RNF25 | Despliegues automatizados con rollback (infraestructura del equipo, no feature del producto - ver L-01). |
 | RNF26 | Ambientes de staging y producción separados.               |
 

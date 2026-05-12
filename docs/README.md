@@ -15,7 +15,8 @@ Recreación simplificada de GitHub utilizando arquitectura de microservicios, co
 | **[Github-organizations-ms](https://github.com/dtarqui/Github-organizations-ms)**  | Harold Sanchez | Repositorio creado con su proyecto                                                 |
 | **[Github-pullrequests-ms](https://github.com/Savitar465/Github-pullrequests-ms)**   | Jonas Maidana  | Repositorio creado con su proyecto                                                 |
 | **[Github-Smithy](https://github.com/Savitar465/Github-Smithy)**           | Equipo         | Proyecto inicial de Smithy que se separará en los diferentes microservicios        |
-| **[Github-Cdk](https://github.com/Savitar465/Github-Cdk)**           | Equipo         | En progreso, se creó los recursos de prueba para eks                               |
+| **[Github-Cdk](https://github.com/Savitar465/Github-Cdk)**           | Equipo         | En progreso, despliegue de Keycloak en ECS con RDS PostgreSQL y ALB                |
+| **[Github-issues-ms](https://github.com/Savitar465/Github-issues-ms.git)**           | Harold Sanchez | Repositorio creado con su proyecto |
 
 > **Nota:** Los roles pueden solaparse según el tamaño del equipo
 
@@ -26,18 +27,18 @@ Recreación simplificada de GitHub utilizando arquitectura de microservicios, co
 
 - [Descripción](#descripción)
 - [Alcances y Límites](#alcances-y-límites)
-- [Arquitectura](#arquitectura)
 - [Requisitos Funcionales (RF)](#requisitos-funcionales-rf)
 - [Requisitos No Funcionales (RNF)](#requisitos-no-funcionales-rnf)
+- [Plan de Trabajo (4 Semanas)](#plan-de-trabajo-4-semanas)
+- [Base de Datos](#base-de-datos)
+- [API Endpoints](#api-endpoints)
+- [Arquitectura](#arquitectura)
 - [Stack Tecnológico](#stack-tecnológico)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Microservicios](#microservicios)
-- [Base de Datos](#base-de-datos)
-- [API Endpoints](#api-endpoints)
 - [Diagramas](#diagramas)
 - [Instalación y Configuración](#instalación-y-configuración)
 - [Despliegue](#despliegue)
-- [Plan de Trabajo (4 Semanas)](#plan-de-trabajo-4-semanas)
 
 ---
 
@@ -54,7 +55,6 @@ El objetivo principal es demostrar competencias en:
 
 - Diseño de arquitectura de microservicios
 - Contenedorización con Docker
-- Orquestación con Kubernetes
 - Despliegue en servicios cloud
 - Patrones de comunicación entre servicios
 - AuthN/AuthZ con OIDC usando Keycloak
@@ -88,10 +88,9 @@ El objetivo principal es demostrar competencias en:
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | **Microservicios**    | Mínimo 4 servicios independientes y desplegables                                                                            |
 | **Contenedorización** | 100% de servicios dockerizados                                                                                              |
-| **Orquestación**      | Docker Compose (desarrollo) + Kubernetes (producción)                                                                       |
+| **Orquestación**      | Docker Compose                                                                                                              |
 | **Bases de datos**    | Patrón database-per-service implementado                                                                                    |
 | **Comunicación interna** | Comunicación servicio a servicio vía gRPC (unario/streaming según caso)                                                |
-| **Caché/Sesiones**    | Redis para caché y sesiones de aplicación                                                                                   |
 | **API Gateway**       | Punto único de entrada con autenticación centralizada                                                                       |
 | **Cloud**             | Despliegue funcional en al menos un proveedor cloud                                                                         |
 | **CI/CD**             | Sin pipeline integrado en el producto (L-01 en Limites.md); despliegue manual o automatización externa al alcance funcional |
@@ -153,8 +152,6 @@ El objetivo principal es demostrar competencias en:
 | Aspecto           | Limitación                        | Solución Futura (No implementada) |
 | ----------------- | --------------------------------- | --------------------------------- |
 | **Base de datos** | Instancias únicas sin replicación | Réplicas de lectura, sharding     |
-| **Caché**         | Redis single-node                 | Redis Cluster                     |
-| **Búsqueda**      | Elasticsearch single-node         | Cluster con múltiples nodos       |
 | **Storage**       | MinIO single-node                 | Distribución con erasure coding   |
 
 ---
@@ -198,7 +195,7 @@ El objetivo principal es demostrar competencias en:
 | Dependencia     | Tipo                   | Riesgo si no está disponible      |
 | --------------- | ---------------------- | --------------------------------- |
 | Docker Hub      | Imágenes base          | Medio - se pueden usar mirrors    |
-| npm Registry    | Paquetes Node.js       | Alto - crítico para el build      |
+| npm Registry    | Paquetes Node.js (frontend) / Maven Central (backend) | Alto - crítico para el build |
 | Proveedor Cloud | Despliegue             | Alto - no hay demo en producción  |
 | GitHub          | Repositorio del código | Medio - se puede usar alternativa |
 | MinIO/S3        | Almacenamiento         | Alto - archivos no funcionan      |
@@ -225,88 +222,9 @@ El objetivo principal es demostrar competencias en:
 | Criterio | Descripción                                            |
 | -------- | ------------------------------------------------------ |
 | CD-01    | SSO con Keycloak funcionando (login federado opcional) |
-| CD-02    | Búsqueda con Elasticsearch                             |
-| CD-03    | Métricas y health checks expuestos                     |
+| CD-02    | Métricas y health checks expuestos                     |
 | CD-04    | Tests automatizados (>50% coverage)                    |
 | CD-05    | Logs centralizados                                     |
-| CD-06    | Kubernetes con auto-scaling configurado                |
-
----
-
-## Arquitectura
-
-### Diagrama de Arquitectura General
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                                   CLIENTE                                    │
-│                            (React + TypeScript)                              │
-└─────────────────────────────────────┬───────────────────────────────────────┘
-                                      │ HTTPS
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                               LOAD BALANCER                                  │
-│                            (Nginx / Cloud LB)                                │
-└─────────────────────────────────────┬───────────────────────────────────────┘
-                                      │
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                                API GATEWAY                                   │
-│                          (Kong / Express Gateway)                            │
-│  - Enrutamiento de peticiones                                                │
-│  - Rate limiting                                                             │
-│  - Autenticación JWT                                                         │
-│  - Logging centralizado                                                      │
-└───────────┬─────────────────┬─────────────────┬─────────────────┬───────────┘
-            │                 │                 │                 │
-            ▼                 ▼                 ▼                 ▼
-┌───────────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────────┐
-│   AUTH SERVICE    │ │ REPO SERVICE  │ │ ISSUE SERVICE │ │  SEARCH SERVICE   │
-│                   │ │               │ │               │ │                   │
-│ - Registro        │ │ - CRUD repos  │ │ - CRUD issues │ │ - Elasticsearch   │
-│ - Login/Logout    │ │ - Permisos    │ │ - Comentarios │ │ - Indexación      │
-│ - JWT tokens      │ │ - Branches    │ │ - Labels      │ │ - Búsqueda repos  │
-│ - OIDC (Keycloak) │ │ - Archivos    │ │ - Asignados   │ │ - Búsqueda código │
-│                   │ │               │ │               │ │                   │
-│ Puerto: 3001      │ │ Puerto: 3002  │ │ Puerto: 3003  │ │ Puerto: 3004      │
-└────────┬──────────┘ └───────┬───────┘ └───────┬───────┘ └─────────┬─────────┘
-         │                    │                 │                   │
-         ▼                    ▼                 ▼                   ▼
-┌───────────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────────┐
-│    PostgreSQL     │ │  PostgreSQL   │ │  PostgreSQL   │ │  Elasticsearch    │
-│   (users, auth)   │ │ (repos, files)│ │   (issues)    │ │    (índices)      │
-└───────────────────┘ └───────┬───────┘ └───────────────┘ └───────────────────┘
-                              │
-                              ▼
-                    ┌───────────────────┐
-                    │   FILE STORAGE    │
-                    │   (MinIO / S3)    │
-                    │                   │
-                    │ - Archivos repos  │
-                    │ - Avatares        │
-                    │ - Assets          │
-                    └───────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                      INTERNAL SERVICE COMMUNICATION                          │
-│                             (gRPC + Redis)                                   │
-│                                                                              │
-│  Comunicación interna entre servicios:                                       │
-│  - Invocaciones para indexación de búsqueda                                  │
-│  - Operaciones internas con contratos tipados (Proto)                        │
-│  Redis se usa para caché/sesiones y soporte de tareas internas.              │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-### Patrón de Arquitectura
-
-| Patrón                   | Descripción                                      |
-| ------------------------ | ------------------------------------------------ |
-| **Microservicios**       | Cada funcionalidad es un servicio independiente  |
-| **API Gateway**          | Punto único de entrada para todas las peticiones |
-| **Database per Service** | Cada microservicio tiene su propia base de datos |
-| **RPC Interno**          | Comunicación interna tipada con gRPC             |
-| **CQRS**                 | Separación de lecturas y escrituras (búsqueda)   |
 
 ---
 
@@ -391,7 +309,6 @@ El objetivo principal es demostrar competencias en:
 | ----- | --------------------------------------------------------- | ---------------------------- |
 | RNF04 | Todos los servicios deben estar contenedorizados          | 100% servicios en Docker     |
 | RNF05 | El sistema debe usar Docker Compose para desarrollo local | docker-compose.yml funcional |
-| RNF06 | El sistema debe poder desplegarse en Kubernetes           | Manifiestos K8s completos    |
 
 ### Cloud y Despliegue
 
@@ -434,389 +351,73 @@ El objetivo principal es demostrar competencias en:
 | RNF21 | El sistema debe tener logging centralizado y estructurado | Logs en formato JSON            |
 | RNF22 | El sistema debe exponer métricas de salud (health checks) | Endpoints /health en cada servicio |
 | RNF23 | Monitoreo con Prometheus/Grafana                       | Dashboards operativos              |
-| RNF24 | Infraestructura como código (Terraform/Kubernetes)     | 100% IaC versionado                |
+| RNF24 | Infraestructura como código (Terraform)                | 100% IaC versionado                |
 | RNF25 | Despliegues automatizados con rollback (infraestructura del equipo, no feature del producto) | Pipeline de despliegue funcional |
 | RNF26 | Ambientes de staging y producción separados            | 2 ambientes mínimo                 |
 
 ---
 
-## Stack Tecnológico
+## Plan de Trabajo (4 Semanas)
 
-### Backend
+### Semana 1: Fundamentos y Auth Service
 
-| Componente    | Tecnología            | Justificación                                           |
-| ------------- |-----------------------| ------------------------------------------------------- |
-| Lenguaje      | Spring Boot (Java)    | Ecosistema maduro, async nativo                         |
-| Framework     | Express.js / Fastify  | Ligero, flexible, gran comunidad                        |
-| ORM SQL       | Prisma                | Type-safe, migraciones automáticas (Auth, Repo, Issues) |
-| Validación    | Zod / Joi             | Validación de schemas                                   |
-| Autenticación | Keycloak (OIDC) + JWT | SSO estandar, gestion centralizada de identidad         |
+| Día | Tareas                                                          |
+| --- | --------------------------------------------------------------- |
+| 1-2 | Setup del proyecto, estructura de carpetas, Docker Compose base |
+| 3-4 | Auth Service: registro, login, JWT                              |
+| 5   | API Gateway básico con routing                                  |
+| 6-7 | Frontend: páginas de login/registro                             |
 
-### Frontend
+**Entregables:**
 
-| Componente       | Tecnología              | Justificación                    |
-| ---------------- | ----------------------- | -------------------------------- |
-| Framework        | React 18                | Componentes, hooks, ecosistema   |
-| Lenguaje         | TypeScript              | Tipado estático, menos errores   |
-| State Management | Zustand / Redux Toolkit | Simple y escalable               |
-| Styling          | Tailwind CSS            | Utility-first, rápido desarrollo |
-| HTTP Client      | Axios / TanStack Query  | Caché, reintentos, estados       |
-| Routing          | React Router v6         | Estándar de la industria         |
+- [ ] Estructura del proyecto
+- [ ] Auth Service funcionando
+- [ ] API Gateway con autenticación
+- [ ] UI de autenticación
 
-### Bases de Datos
+### Semana 2: Repo Service y Archivos
 
-| Servicio       | Base de Datos | Justificación                                  |
-| -------------- | ------------- | ---------------------------------------------- |
-| Auth Service   | PostgreSQL    | Datos relacionales, ACID                       |
-| Repo Service   | PostgreSQL    | Metadatos y relaciones ACID; blobs en MinIO/S3 |
-| Issue Service  | PostgreSQL    | Relaciones complejas                           |
-| Search Service | Elasticsearch | Full-text search optimizado                    |
-| Caché          | Redis         | Sesiones, caché, pub/sub                       |
+| Día | Tareas                                                  |
+| --- | ------------------------------------------------------- |
+| 1-2 | Repo Service: CRUD de repositorios                      |
+| 3-4 | Integración con MinIO para archivos                     |
+| 5   | Upload/download de archivos                             |
+| 6-7 | Frontend: dashboard, crear repo, explorador de archivos |
 
-### Infraestructura
+**Entregables:**
 
-| Componente        | Tecnología             | Justificación                                                 |
-| ----------------- | ---------------------- | ------------------------------------------------------------- |
-| Contenedores      | Docker                 | Estándar de la industria                                      |
-| Orquestación Dev  | Docker Compose         | Simple para desarrollo                                        |
-| Orquestación Prod | Kubernetes             | Escalabilidad, auto-healing                                   |
-| API Gateway       | Kong / Nginx           | Rate limiting, routing                                        |
-| Internal RPC      | gRPC                   | Baja latencia y contratos tipados entre servicios             |
-| Object Storage    | MinIO / AWS S3         | Almacenamiento de archivos                                    |
-| Doc. API          | Swagger UI (OpenAPI 3) | Contrato explícito y pruebas desde el navegador (`/api-docs`) |
+- [ ] CRUD de repositorios
+- [ ] Gestión de archivos
+- [ ] UI de repositorios
 
-### Cloud (elegir uno)
+### Semana 3: Issues
 
-| Proveedor | Servicios a Usar                               |
-| --------- | ---------------------------------------------- |
-| **AWS**   | EKS, RDS, S3, ElastiCache, ECR                 |
-| **GCP**   | GKE, Cloud SQL, Cloud Storage, Memorystore     |
-| **Azure** | AKS, Azure Database, Blob Storage, Azure Cache |
+| Día | Tareas                        |
+| --- | ----------------------------- |
+| 1-2 | Issue Service: CRUD de issues |
+| 3   | Comentarios en issues         |
+| 4-7 | Frontend: issues              |
 
----
+**Entregables:**
 
-## Estructura del Proyecto
+- [ ] Sistema de issues completo
+- [ ] UI de issues
 
-```
-github/
-├── README.md
-├── docker-compose.yml
-├── docker-compose.prod.yml
-├── .env.example
-├── .gitignore
-│
-├── docs/
-│   ├── architecture.md
-│   ├── api-specification.md
-│   ├── database-schemas.md
-│   └── deployment-guide.md
-│
-├── infrastructure/
-│   ├── kubernetes/
-│   │   ├── namespace.yaml
-│   │   ├── configmaps/
-│   │   │   └── app-config.yaml
-│   │   ├── secrets/
-│   │   │   └── app-secrets.yaml
-│   │   ├── deployments/
-│   │   │   ├── api-gateway.yaml
-│   │   │   ├── auth-service.yaml
-│   │   │   ├── repo-service.yaml
-│   │   │   ├── issue-service.yaml
-│   │   │   └── search-service.yaml
-│   │   ├── services/
-│   │   │   ├── api-gateway-svc.yaml
-│   │   │   ├── auth-service-svc.yaml
-│   │   │   ├── repo-service-svc.yaml
-│   │   │   ├── issue-service-svc.yaml
-│   │   │   └── search-service-svc.yaml
-│   │   └── ingress/
-│   │       └── ingress.yaml
-│   │
-│   └── terraform/
-│       ├── main.tf
-│       ├── variables.tf
-│       ├── outputs.tf
-│       └── modules/
-│           ├── eks/
-│           ├── rds/
-│           └── s3/
-│
-├── services/
-│   │
-│   ├── api-gateway/
-│   │   ├── Dockerfile
-│   │   ├── package.json
-│   │   ├── tsconfig.json
-│   │   └── src/
-│   │       ├── index.ts
-│   │       ├── config/
-│   │       │   └── gateway.config.ts
-│   │       ├── middleware/
-│   │       │   ├── auth.middleware.ts
-│   │       │   ├── rateLimit.middleware.ts
-│   │       │   └── logging.middleware.ts
-│   │       └── routes/
-│   │           └── proxy.routes.ts
-│   │
-│   ├── auth-service/
-│   │   ├── Dockerfile
-│   │   ├── package.json
-│   │   ├── tsconfig.json
-│   │   ├── prisma/
-│   │   │   ├── schema.prisma
-│   │   │   └── migrations/
-│   │   └── src/
-│   │       ├── index.ts
-│   │       ├── config/
-│   │       │   └── database.ts
-│   │       ├── controllers/
-│   │       │   └── auth.controller.ts
-│   │       ├── services/
-│   │       │   └── auth.service.ts
-│   │       ├── repositories/
-│   │       │   └── user.repository.ts
-│   │       ├── middleware/
-│   │       │   └── validate.middleware.ts
-│   │       ├── routes/
-│   │       │   └── auth.routes.ts
-│   │       ├── schemas/
-│   │       │   └── auth.schema.ts
-│   │       ├── utils/
-│   │       │   ├── jwt.utils.ts
-│   │       │   └── password.utils.ts
-│   │       └── types/
-│   │           └── auth.types.ts
-│   │
-│   ├── repo-service/
-│   │   ├── Dockerfile
-│   │   ├── package.json
-│   │   ├── tsconfig.json
-│   │   └── src/
-│   │       ├── index.ts
-│   │       ├── config/
-│   │       │   ├── database.ts
-│   │       │   └── storage.ts
-│   │       ├── controllers/
-│   │       │   ├── repo.controller.ts
-│   │       │   └── file.controller.ts
-│   │       ├── services/
-│   │       │   ├── repo.service.ts
-│   │       │   └── file.service.ts
-│   │       ├── repositories/
-│   │       │   └── repo.repository.ts
-│   │       ├── routes/
-│   │       │   ├── repo.routes.ts
-│   │       │   └── file.routes.ts
-│   │       ├── models/
-│   │       │   ├── repo.model.ts
-│   │       │   └── file.model.ts
-│   │       └── types/
-│   │           └── repo.types.ts
-│   │
-│   ├── issue-service/
-│   │   ├── Dockerfile
-│   │   ├── package.json
-│   │   ├── tsconfig.json
-│   │   ├── prisma/
-│   │   │   ├── schema.prisma
-│   │   │   └── migrations/
-│   │   └── src/
-│   │       ├── index.ts
-│   │       ├── config/
-│   │       │   └── database.ts
-│   │       ├── controllers/
-│   │       │   ├── issue.controller.ts
-│   │       │   └── comment.controller.ts
-│   │       ├── services/
-│   │       │   ├── issue.service.ts
-│   │       │   └── comment.service.ts
-│   │       ├── repositories/
-│   │       │   ├── issue.repository.ts
-│   │       │   └── comment.repository.ts
-│   │       ├── routes/
-│   │       │   └── issue.routes.ts
-│   │       └── types/
-│   │           └── issue.types.ts
-│   │
-│   └── search-service/
-│       ├── Dockerfile
-│       ├── package.json
-│       ├── tsconfig.json
-│       └── src/
-│           ├── index.ts
-│           ├── config/
-│           │   └── elasticsearch.ts
-│           ├── controllers/
-│           │   └── search.controller.ts
-│           ├── services/
-│           │   └── search.service.ts
-│           ├── routes/
-│           │   └── search.routes.ts
-│           └── consumers/
-│               └── indexer.consumer.ts
-│
-├── frontend/
-│   ├── Dockerfile
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── vite.config.ts
-│   ├── tailwind.config.js
-│   ├── index.html
-│   └── src/
-│       ├── main.tsx
-│       ├── App.tsx
-│       ├── vite-env.d.ts
-│       ├── assets/
-│       │   └── logo.svg
-│       ├── components/
-│       │   ├── common/
-│       │   │   ├── Button.tsx
-│       │   │   ├── Input.tsx
-│       │   │   ├── Modal.tsx
-│       │   │   └── Navbar.tsx
-│       │   ├── auth/
-│       │   │   ├── LoginForm.tsx
-│       │   │   └── RegisterForm.tsx
-│       │   ├── repo/
-│       │   │   ├── RepoCard.tsx
-│       │   │   ├── RepoList.tsx
-│       │   │   ├── FileExplorer.tsx
-│       │   │   └── FileViewer.tsx
-│       │   └── issue/
-│       │       ├── IssueCard.tsx
-│       │       ├── IssueList.tsx
-│       │       └── IssueForm.tsx
-│       ├── pages/
-│       │   ├── Home.tsx
-│       │   ├── Login.tsx
-│       │   ├── Register.tsx
-│       │   ├── Dashboard.tsx
-│       │   ├── RepoView.tsx
-│       │   ├── RepoCreate.tsx
-│       │   ├── IssueView.tsx
-│       │   └── Profile.tsx
-│       ├── hooks/
-│       │   ├── useAuth.ts
-│       │   ├── useRepos.ts
-│       │   └── useIssues.ts
-│       ├── services/
-│       │   ├── api.ts
-│       │   ├── auth.service.ts
-│       │   ├── repo.service.ts
-│       │   └── issue.service.ts
-│       ├── store/
-│       │   ├── index.ts
-│       │   ├── authSlice.ts
-│       │   └── repoSlice.ts
-│       ├── types/
-│       │   ├── auth.types.ts
-│       │   ├── repo.types.ts
-│       │   └── issue.types.ts
-│       └── utils/
-│           ├── constants.ts
-│           └── helpers.ts
-│
-├── shared/
-│   └── types/
-│       ├── api.types.ts
-│       └── events.types.ts
-│
-└── .github/
-    └── workflows/
-        ├── ci.yml
-        ├── cd-staging.yml
-        └── cd-production.yml
-```
+### Semana 4: Cloud, Despliegue y Documentación
 
----
+| Día | Tareas                                                                             |
+| --- | ---------------------------------------------------------------------------------- |
+| 1-2 | Configuración de infraestructura cloud                                             |
+| 3-4 | Preparación de despliegue y validación operativa (sin pipeline CI/CD del producto) |
+| 5   | Despliegue en cloud (AWS/GCP/Azure)                                                |
+| 6-7 | Testing, documentación, presentación                                               |
 
-## Microservicios
+**Entregables:**
 
-### 1. API Gateway (Puerto 3000)
-
-**Responsabilidades:**
-
-- Punto único de entrada
-- Enrutamiento de peticiones
-- Autenticación/Autorización
-- Rate limiting
-- Logging centralizado
-- CORS handling
-
-**Tecnologías:** Express.js, http-proxy-middleware
-
-### 2. Auth Service (Puerto 3001)
-
-**Responsabilidades:**
-
-- Registro de usuarios
-- Login/Logout
-- Generación y validación de JWT
-- Integración OIDC/SSO con Keycloak
-- Gestión de sesiones
-
-**Base de datos:** PostgreSQL
-
-**Eventos que emite:**
-
-- `user.created`
-- `user.updated`
-- `user.deleted`
-
-### 3. Repo Service (Puerto 3002)
-
-**Responsabilidades:**
-
-- CRUD de repositorios
-- Gestión de archivos
-- Control de permisos
-- Gestión de branches (básico)
-- Forks
-
-**Base de datos:** PostgreSQL (`repos_db`) + MinIO (archivos)
-
-**Eventos que emite:**
-
-- `repo.created`
-- `repo.updated`
-- `repo.deleted`
-- `file.uploaded`
-
-### 4. Issue Service (Puerto 3003)
-
-**Responsabilidades:**
-
-- CRUD de issues
-- Gestión de comentarios
-- Labels y milestones
-- Asignación de usuarios
-
-**Base de datos:** PostgreSQL
-
-**Eventos que emite:**
-
-- `issue.created`
-- `issue.updated`
-- `issue.closed`
-- `comment.created`
-
-### 5. Search Service (Puerto 3004)
-
-**Responsabilidades:**
-
-- Indexación de repositorios
-- Búsqueda full-text
-- Filtrado y ordenamiento
-- Sugerencias
-
-**Base de datos:** Elasticsearch
-
-**Eventos que consume:**
-
-- `repo.created`
-- `repo.updated`
-- `repo.deleted`
+- [ ] Aplicación desplegada en cloud
+- [ ] Despliegue validado (sin pipeline CI/CD del producto)
+- [ ] Documentación completa
+- [ ] Demo funcional
 
 ---
 
@@ -1042,13 +643,308 @@ POST /api/repos/johndoe/my-project/issues
 }
 ```
 
-### Search Service
+---
 
-| Método | Endpoint                      | Descripción         |
-| ------ | ----------------------------- | ------------------- |
-| GET    | `/api/search/repositories?q=` | Buscar repositorios |
-| GET    | `/api/search/users?q=`        | Buscar usuarios     |
-| GET    | `/api/search/issues?q=`       | Buscar issues       |
+## Arquitectura
+
+### Diagrama de Arquitectura General
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                   CLIENTE                                    │
+│                            (React + TypeScript)                              │
+└─────────────────────────────────────┬───────────────────────────────────────┘
+                                      │ HTTPS
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                               LOAD BALANCER                                  │
+│                            (Nginx / Cloud LB)                                │
+└─────────────────────────────────────┬───────────────────────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                API GATEWAY                                   │
+│                          (Kong / Nginx / AWS ALB)                            │
+│  - Enrutamiento de peticiones                                                │
+│  - Rate limiting                                                             │
+│  - Autenticación JWT                                                         │
+│  - Logging centralizado                                                      │
+└───────────┬─────────────────┬─────────────────┬───────────────────────────────┘
+            │                 │                 │
+            ▼                 ▼                 ▼
+┌───────────────────┐ ┌───────────────┐ ┌───────────────┐
+│   AUTH SERVICE    │ │ REPO SERVICE  │ │ ISSUE SERVICE │
+│                   │ │               │ │               │
+│ - Registro        │ │ - CRUD repos  │ │ - CRUD issues │
+│ - Login/Logout    │ │ - Permisos    │ │ - Comentarios │
+│ - JWT tokens      │ │ - Branches    │ │ - Labels      │
+│ - OIDC (Keycloak) │ │ - Archivos    │ │ - Asignados   │
+│                   │ │               │ │               │
+│ Puerto: 8081      │ │ Puerto: 8090  │ │ Puerto: 8084  │
+└────────┬──────────┘ └───────┬───────┘ └───────┬───────┘
+         │                    │                 │
+         ▼                    ▼                 ▼
+┌───────────────────┐ ┌───────────────┐ ┌───────────────┐
+│    PostgreSQL     │ │  PostgreSQL   │ │  PostgreSQL   │
+│   (users, auth)   │ │ (repos, files)│ │   (issues)    │
+└───────────────────┘ └───────┬───────┘ └───────────────┘
+                              │
+                              ▼
+                    ┌───────────────────┐
+                    │   FILE STORAGE    │
+                    │   (MinIO / S3)    │
+                    │                   │
+                    │ - Archivos repos  │
+                    │ - Avatares        │
+                    │ - Assets          │
+                    └───────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      INTERNAL SERVICE COMMUNICATION                          │
+│                                  (gRPC)                                      │
+│                                                                              │
+│  Comunicación interna entre servicios:                                       │
+│  - Operaciones internas con contratos tipados (Proto)                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Patrón de Arquitectura
+
+| Patrón                   | Descripción                                      |
+| ------------------------ | ------------------------------------------------ |
+| **Microservicios**       | Cada funcionalidad es un servicio independiente  |
+| **API Gateway**          | Punto único de entrada para todas las peticiones |
+| **Database per Service** | Cada microservicio tiene su propia base de datos |
+| **RPC Interno**          | Comunicación interna tipada con gRPC             |
+| **CQRS**                 | Separación de lecturas y escrituras (búsqueda)   |
+
+---
+
+## Stack Tecnológico
+
+### Backend
+
+| Componente        | Tecnología                              | Justificación                                                    |
+| ----------------- | --------------------------------------- | ---------------------------------------------------------------- |
+| Lenguaje          | Java 25                                 | LTS moderno, records, sealed classes, rendimiento mejorado       |
+| Framework         | Spring Boot 4.0.x (issues-ms + organizations-ms: 3.4.5) | Ecosistema maduro, integración nativa con Spring Security |
+| Build             | Maven (mvnw wrapper)                    | Gestión de dependencias estándar en el ecosistema Java           |
+| Definición de API | Smithy (generación de código)           | Contract-first; genera controllers y DTOs automáticamente        |
+| Mapeo de objetos  | MapStruct + Lombok                      | Mapeos en tiempo de compilación, boilerplate reducido            |
+| Seguridad         | Keycloak · OAuth2 Resource Server · JWT | SSO estándar, gestión centralizada de identidad                  |
+| Documentación     | SpringDoc / Swagger UI                  | Generación automática desde anotaciones Spring MVC               |
+| Observabilidad    | Spring Boot Actuator                    | Endpoints `/health`, `/info` y `/metrics` expuestos nativamente  |
+| Contenedorización | Docker (eclipse-temurin JRE)            | Imagen base oficial para JVM en contenedores                     |
+
+### Frontend
+
+| Componente  | Tecnología  | Justificación                                          |
+| ----------- | ----------- | ------------------------------------------------------ |
+| Framework   | Next.js     | SSR/SSG, API Routes nativas, enrutamiento file-based   |
+| Lenguaje    | TypeScript  | Tipado estático, menos errores en tiempo de desarrollo |
+| Styling     | Tailwind CSS| Utility-first, rápido desarrollo                       |
+| HTTP Client | Axios       | Solicitudes HTTP con interceptores y manejo de errores |
+
+### Bases de Datos
+
+| Servicio              | Base de Datos | Justificación                                                        |
+| --------------------- | ------------- | -------------------------------------------------------------------- |
+| Github-users-ms       | PostgreSQL    | Usuarios, cuentas OAuth y sesiones — datos relacionales ACID         |
+| Github-files-ms       | PostgreSQL    | Metadatos de archivos, commits y repos — ACID, pool HikariCP         |
+| Github-repository-ms  | MongoDB       | Documentos de repos, branches, colaboradores y estrellas — flexible  |
+| Github-issues-ms      | PostgreSQL    | Issues, labels y comentarios (`githubx_issues`) — relaciones complejas ACID |
+| Github-organizations-ms| PostgreSQL   | Organizaciones, miembros y equipos — SSL vía env vars para AWS RDS   |
+| Github-pullrequests-ms| PostgreSQL    | PRs, revisiones y comentarios en línea — ACID                        |
+
+### Infraestructura
+
+| Componente        | Tecnología             | Justificación                                                 |
+| ----------------- | ---------------------- | ------------------------------------------------------------- |
+| Contenedores      | Docker                 | Estándar de la industria                                      |
+| Orquestación Dev  | Docker Compose         | Simple para desarrollo y producción                           |
+| API Gateway       | Kong / Nginx           | Rate limiting, routing                                        |
+| Internal RPC      | gRPC                   | Baja latencia y contratos tipados entre servicios             |
+| Object Storage    | MinIO / AWS S3         | Almacenamiento de archivos                                    |
+| Doc. API          | Swagger UI (OpenAPI 3) | Contrato explícito y pruebas desde el navegador (`/api-docs`) |
+
+### Cloud (elegir uno)
+
+| Proveedor | Servicios a Usar                               |
+| --------- | ---------------------------------------------- |
+| **AWS**   | EKS, RDS, S3, ECR                 |
+| **GCP**   | GKE, Cloud SQL, Cloud Storage     |
+| **Azure** | AKS, Azure Database, Blob Storage |
+
+---
+
+## Estructura del Proyecto
+
+El ecosistema está organizado como repositorios Git independientes. La estructura tipo de un microservicio Spring Boot es:
+
+```
+Github-<servicio>-ms/
+├── pom.xml                        ← Dependencias Maven
+├── mvnw / mvnw.cmd                ← Maven wrapper
+├── Dockerfile                     ← Build multistage (Smithy + Maven → JRE)
+├── .github/
+│   └── workflows/                 ← CI/CD GitHub Actions
+└── src/
+    └── main/
+        ├── java/com/githubx/<servicio>/
+        │   ├── <Servicio>Application.java
+        │   ├── config/            ← SecurityConfig, GrpcConfig, DataSourceConfig
+        │   ├── controller/        ← REST controllers (generados por Smithy)
+        │   ├── service/           ← Lógica de negocio
+        │   ├── repository/        ← Spring Data JPA / MongoDB repositories
+        │   ├── entity/            ← Entidades JPA / documentos Mongo
+        │   ├── dto/               ← DTOs (generados por Smithy + MapStruct)
+        │   ├── mapper/            ← MapStruct mappers
+        │   └── grpc/              ← Implementaciones gRPC (XxxServiceImpl)
+        ├── proto/                 ← Definiciones Protocol Buffers (.proto)
+        └── resources/
+            ├── application.yml    ← Configuración base
+            ├── application-aws.yml← Perfil producción AWS
+            └── schema.sql         ← DDL inicial (organizations-ms y pullrequests-ms)
+```
+
+**Repositorios del ecosistema:**
+
+| Repositorio             | Stack / Notas                                                      |
+| ----------------------- | ------------------------------------------------------------------ |
+| `Github-users-ms`       | Spring Boot 4, Java 25, PostgreSQL, gRPC 9092                      |
+| `Github-files-ms`       | Spring Boot 4, Java 25, PostgreSQL, gRPC 9093, perfil aws          |
+| `Github-repository-ms`  | Spring Boot 4, Java 25, **MongoDB**, gRPC 9092, integra Git real   |
+| `Github-issues-ms`      | Spring Boot **3.4.5**, Java **25**, PostgreSQL (`githubx_issues`), gRPC 9091 |
+| `Github-organizations-ms`| Spring Boot **3.4.5**, Java **25**, PostgreSQL + SSL AWS RDS       |
+| `Github-pullrequests-ms`| Spring Boot 4, Java 25, PostgreSQL, gRPC 9092                      |
+| `Github-front`          | Next.js, TypeScript, Tailwind CSS                                  |
+| `Github-Smithy`         | Contrato API (Smithy 2.0), genera OpenAPI + controllers            |
+| `Github-Cdk`            | Infraestructura AWS (EKS, RDS, Keycloak) con AWS CDK               |
+
+---
+
+## Microservicios
+
+### 1. Github-users-ms — Gestión de usuarios
+
+**Puertos:** REST `8081` · gRPC `9092`  
+**Base de datos:** PostgreSQL (`usuario_database`, schema `usuarios_nuevo`)  
+**BD de identidad:** Keycloak (Admin API + Direct Access Grants)
+
+**Responsabilidades:**
+
+- CRUD de usuarios con criterios dinámicos (`SearchSpecification`)
+- Gestión completa del ciclo de vida de Keycloak: roles, clientes, permisos
+- Login / logout delegado a Keycloak
+- Auditoría de transacciones (`TransactionUtil`)
+
+**gRPC:**
+- `UserPublicApi` — lectura pública sin autenticación (`GetUser`)
+- `UserApi` — operaciones protegidas con JWT: `ListUsers`, `CreateUser`, `EditUser`, `DeleteUser`
+
+**Particularidades:** interceptor gRPC con validación JWT (`GrpcJwtInterceptor`).
+
+---
+
+### 2. Github-files-ms — Gestión de archivos y contenido Git
+
+**Puertos:** REST `8081` (local) / `8080` (contenedor) · gRPC `9093` · Context path: `/api`  
+**Base de datos:** PostgreSQL (`github_files_db`) con pool HikariCP
+
+**Responsabilidades:**
+
+- CRUD de archivos y carpetas en repositorios
+- Historial de commits y comparación de ramas
+- Streaming de contenido de directorios
+
+**Entidades:** `FileEntity`, `CommitEntity`, `CommitFileEntity`, `RepositoryEntity`
+
+**gRPC:**
+- `FilePublicApi` — lectura pública: repositorios, archivos, directorios
+- `FileApi` — mutaciones protegidas: crear/actualizar/eliminar archivos y carpetas
+
+**Particularidades:** descarga certificado SSL de AWS RDS en el Dockerfile. Soporta perfiles `aws` y `dev`. Tiene directorio `/infra`.
+
+---
+
+### 3. Github-repository-ms — Repositorios, ramas y colaboradores
+
+**Puertos:** REST `8090` · gRPC `9092`  
+**Base de datos:** MongoDB (`github_repository_ms`) — único servicio con MongoDB
+
+**Responsabilidades:**
+
+- CRUD de repositorios, forks, ramas (`branches`)
+- Colaboradores con roles: `READ`, `WRITE`, `ADMIN`, `OWNER`
+- Estrellas (social), comparación entre ramas
+- Proxy Git HTTP y gestión de acceso SSH
+
+**Documentos Mongo:** `RepositoryDocument`, `BranchDocument`, `CollaboratorDocument`, `FileEntryDocument`, `StarDocument`
+
+**gRPC:**
+- `RepoPublicService` — lectura pública: repositorios, forks, ramas
+- `RepoService` — operaciones protegidas (15+ RPCs): crear, actualizar, eliminar, colaboradores, estrellas
+
+**Particularidades:** integra con un servidor Git real (Gitea/Gogs) vía HTTP (`9080`) y SSH (`2222`). El Dockerfile hace build multistage Smithy + Maven. Tiene `docker-compose.yml` propio.
+
+---
+
+### 4. Github-issues-ms — Gestión de issues
+
+**Puertos:** REST `8084` · gRPC `9091`  
+**Java:** 25 · **Spring Boot:** 3.4.5  
+**Base de datos:** PostgreSQL (`githubx_issues`)
+
+**Responsabilidades:**
+
+- CRUD de issues con filtros opcionales
+- Gestión de comentarios (crear, actualizar, eliminar)
+- Labels por repositorio
+
+**gRPC:**
+- `IssuePublicService` — lectura pública: issues, comentarios, labels
+- `IssueService` — operaciones protegidas: crear/actualizar issues y comentarios, crear labels
+
+---
+
+### 5. Github-organizations-ms — Organizaciones y equipos
+
+**Puertos:** REST `8085` · gRPC `9090`  
+**Base de datos:** PostgreSQL con SSL vía variables de entorno (`sslmode=verify-full` + `global-bundle.pem` → AWS RDS)  
+**Java:** 25 · **Spring Boot:** 3.4.5 (versión diferente a users/files/repo/pullrequests)
+
+**Responsabilidades:**
+
+- CRUD de organizaciones, miembros con roles (`OWNER`, `MEMBER`)
+- Equipos (`Team`): miembros, repositorios con permisos (`READ`, `WRITE`, `ADMIN`)
+
+**gRPC:**
+- `OrgPublicService` — lectura pública
+- `OrgService` — operaciones protegidas (16+ RPCs)
+
+**Particularidades:** tiene `schema.sql` con DDL completo y `smithy-build.json` independiente. Servicio más maduro en configuración de producción (SSL, pool HikariCP bien configurado).
+
+---
+
+### 6. Github-pullrequests-ms — Pull Requests y revisiones
+
+**Puertos:** REST `8082` (local) / `8080` (contenedor) · gRPC `9092` · Context path: `/api`  
+**Base de datos:** PostgreSQL (`github_pullrequest_db`)
+
+**Responsabilidades:**
+
+- CRUD de pull requests y revisiones (`APPROVED`, `CHANGES_REQUESTED`, `COMMENTED`)
+- Merge con estrategias: `MERGE`, `SQUASH`, `REBASE`
+- Comentarios en línea con `file_path` y `line_number`
+- Verificación de mergeabilidad y detección de conflictos
+
+**Entidades:** `PullRequestEntity`, `PullRequestReviewEntity`, `PullRequestCommentEntity`, `RepositoryEntity`
+
+**gRPC:**
+- `PullRequestPublicService` — lectura pública + verificación de mergeabilidad
+- `PullRequestService` — operaciones protegidas: crear, revisar, merge, comentar
+
+**Particularidades:** tiene `schema.sql` con DDL propio. Servicio más completo en lógica de negocio Git.
 
 ---
 
@@ -1094,79 +990,17 @@ POST /api/repos/johndoe/my-project/issues
    │                    │                       │                        │                      │
 ```
 
-### Diagrama de Despliegue - Kubernetes
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                                    KUBERNETES CLUSTER                                    │
-│                                                                                          │
-│  ┌─────────────────────────────────────────────────────────────────────────────────┐    │
-│  │                              INGRESS CONTROLLER                                  │    │
-│  │                                 (nginx-ingress)                                  │    │
-│  └───────────────────────────────────────┬─────────────────────────────────────────┘    │
-│                                          │                                               │
-│  ┌───────────────────────────────────────┴─────────────────────────────────────────┐    │
-│  │                               NAMESPACE: github                             │    │
-│  │                                                                                  │    │
-│  │   ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐             │    │
-│  │   │   API Gateway   │    │   API Gateway   │    │   API Gateway   │             │    │
-│  │   │   (Pod 1)       │    │   (Pod 2)       │    │   (Pod 3)       │             │    │
-│  │   └────────┬────────┘    └────────┬────────┘    └────────┬────────┘             │    │
-│  │            │                      │                      │                       │    │
-│  │            └──────────────────────┼──────────────────────┘                       │    │
-│  │                                   │                                              │    │
-│  │                    ┌──────────────┴──────────────┐                               │    │
-│  │                    │      Service: api-gateway   │                               │    │
-│  │                    │      (ClusterIP)            │                               │    │
-│  │                    └──────────────┬──────────────┘                               │    │
-│  │                                   │                                              │    │
-│  │   ┌───────────────────────────────┼───────────────────────────────┐              │    │
-│  │   │                               │                               │              │    │
-│  │   ▼                               ▼                               ▼              │    │
-│  │ ┌─────────────┐             ┌─────────────┐             ┌─────────────┐          │    │
-│  │ │Auth Service │             │Repo Service │             │Issue Service│          │    │
-│  │ │ Deployment  │             │ Deployment  │             │ Deployment  │          │    │
-│  │ │ replicas: 2 │             │ replicas: 3 │             │ replicas: 2 │          │    │
-│  │ └──────┬──────┘             └──────┬──────┘             └──────┬──────┘          │    │
-│  │        │                           │                           │                 │    │
-│  │        ▼                           ▼                           ▼                 │    │
-│  │ ┌─────────────┐             ┌─────────────┐             ┌─────────────┐          │    │
-│  │ │  Service    │             │  Service    │             │  Service    │          │    │
-│  │ │ ClusterIP   │             │ ClusterIP   │             │ ClusterIP   │          │    │
-│  │ └─────────────┘             └─────────────┘             └─────────────┘          │    │
-│  │                                                                                  │    │
-│  └──────────────────────────────────────────────────────────────────────────────────┘    │
-│                                                                                          │
-│  ┌──────────────────────────────────────────────────────────────────────────────────┐   │
-│  │                              NAMESPACE: databases                                 │   │
-│  │                                                                                   │   │
-│  │   ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐                │   │
-│  │   │   PostgreSQL    │   │   PostgreSQL    │   │  Elasticsearch  │                │   │
-│  │   │ (auth / issues) │   │    (repos_db)   │   │   (índices)     │                │   │
-│  │   │   StatefulSet   │   │   StatefulSet   │   │   StatefulSet   │                │   │
-│  │   └────────┬────────┘   └────────┬────────┘   └────────┬────────┘                │   │
-│  │            │                     │                     │                          │   │
-│  │            ▼                     ▼                     ▼                          │   │
-│  │   ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐                │   │
-│  │   │  PVC: 10Gi      │   │  PVC: 20Gi      │   │  PVC: 10Gi      │                │   │
-│  │   │  (SSD)          │   │  (SSD)          │   │  (SSD)          │                │   │
-│  │   └─────────────────┘   └─────────────────┘   └─────────────────┘                │   │
-│  │                                                                                   │   │
-│  └───────────────────────────────────────────────────────────────────────────────────┘   │
-│                                                                                          │
-└──────────────────────────────────────────────────────────────────────────────────────────┘
-```
-
 ---
 
 ## Instalación y Configuración
 
 ### Prerrequisitos
 
-- Node.js 18+
+- Java 25
+- Maven 3.9+ (o usar el wrapper `./mvnw`)
 - Docker y Docker Compose
 - Git
-- (Opcional) kubectl y acceso a cluster Kubernetes
+- (Frontend) Node.js 20+ y npm
 
 ### Desarrollo Local
 
@@ -1184,69 +1018,92 @@ cp .env.example .env
 # Editar .env con tus configuraciones
 ```
 
-3. **Levantar servicios con Docker Compose**
+3. **Compilar y empaquetar un microservicio**
+
+```bash
+cd Github-<servicio>-ms
+./mvnw clean package -DskipTests
+```
+
+4. **Levantar servicios con Docker Compose** (cuando aplica)
 
 ```bash
 docker-compose up -d
 ```
 
-4. **Verificar que todos los servicios están corriendo**
+5. **Verificar que todos los servicios están corriendo**
 
 ```bash
 docker-compose ps
 ```
 
-5. **Acceder a la aplicación**
+6. **Acceder a los servicios**
 
-- Frontend: http://localhost:3000
-- API Gateway: http://localhost:8080
-- MinIO Console: http://localhost:9001
+- Github-users-ms: http://localhost:8081
+- Github-files-ms: http://localhost:8081/api
+- Github-repository-ms: http://localhost:8090
+- Github-issues-ms: http://localhost:8084
+- Github-organizations-ms: http://localhost:8085
+- Github-pullrequests-ms: http://localhost:8082/api
+- Swagger UI (por servicio): http://localhost:{puerto}/swagger-ui.html
+- Actuator health: http://localhost:{puerto}/actuator/health
 
 ### Variables de Entorno
 
+Las variables se inyectan como propiedades de Spring Boot (o mediante variables de entorno del servicio cloud). Cada servicio tiene su `application.yml` con los valores por defecto para desarrollo local.
+
 ```env
-# General
-NODE_ENV=development
-LOG_LEVEL=debug
-
-# API Gateway
-API_GATEWAY_PORT=8080
-JWT_SECRET=your-super-secret-jwt-key
-
-# Keycloak (SSO/OIDC)
+# Keycloak (común a todos los servicios)
 KEYCLOAK_BASE_URL=http://keycloak:8080
 KEYCLOAK_REALM=github
-KEYCLOAK_CLIENT_ID=github-web
+KEYCLOAK_CLIENT_ID=github-backend
 KEYCLOAK_CLIENT_SECRET=change-me
 
-# Auth Service
-AUTH_SERVICE_PORT=3001
-AUTH_DATABASE_URL=postgresql://user:pass@postgres:5432/auth_db
+# Github-users-ms
+USERS_DB_URL=jdbc:postgresql://postgres:5432/usuario_database
+USERS_DB_USER=postgres
+USERS_DB_PASSWORD=change-me
+USERS_GRPC_PORT=9092
 
-# Repo Service
-REPO_SERVICE_PORT=3002
-REPO_DATABASE_URL=postgresql://user:pass@postgres:5432/repos_db
-MINIO_ENDPOINT=minio
-MINIO_PORT=9000
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin
+# Github-files-ms
+FILES_DB_URL=jdbc:postgresql://postgres:5432/github_files_db
+FILES_DB_USER=postgres
+FILES_DB_PASSWORD=change-me
+FILES_GRPC_PORT=9093
 
-# Issue Service
-ISSUE_SERVICE_PORT=3003
-ISSUE_DATABASE_URL=postgresql://user:pass@postgres:5432/issues_db
+# Github-repository-ms
+REPO_MONGO_URI=mongodb://mongo:27017/github_repository_ms
+REPO_GRPC_PORT=9092
+GIT_SERVER_HTTP=http://192.168.100.150:9080
+GIT_SERVER_SSH=192.168.100.150:2222
 
-# Search Service
-SEARCH_SERVICE_PORT=3004
-ELASTICSEARCH_URL=http://elasticsearch:9200
+# Github-issues-ms
+ISSUES_DB_URL=jdbc:postgresql://postgres:5432/githubx_issues
+ISSUES_DB_USER=postgres
+ISSUES_DB_PASSWORD=change-me
+ISSUES_SERVER_PORT=8084
+ISSUES_GRPC_PORT=9091
 
-# gRPC (comunicación interna)
-AUTH_GRPC_ADDR=auth-service:50051
-REPO_GRPC_ADDR=repo-service:50052
-ISSUE_GRPC_ADDR=issue-service:50053
-SEARCH_GRPC_ADDR=search-service:50054
+# Github-organizations-ms
+ORGS_DB_URL=jdbc:postgresql://rds-host:5432/orgs_db?sslmode=verify-full
+ORGS_DB_USER=postgres
+ORGS_DB_PASSWORD=change-me
+ORGS_SERVER_PORT=8085
+ORGS_GRPC_PORT=9090
 
-# Redis
-REDIS_URL=redis://redis:6379
+# Github-pullrequests-ms
+PR_DB_URL=jdbc:postgresql://postgres:5432/github_pullrequest_db
+PR_DB_USER=postgres
+PR_DB_PASSWORD=change-me
+PR_GRPC_PORT=9092
+
+# gRPC inter-servicio (addresses)
+USERS_GRPC_ADDR=users-service:9092
+FILES_GRPC_ADDR=files-service:9093
+REPO_GRPC_ADDR=repo-service:9092
+ISSUES_GRPC_ADDR=issues-service:9091
+ORGS_GRPC_ADDR=orgs-service:9090
+PR_GRPC_ADDR=pr-service:9092
 ```
 
 ---
@@ -1259,105 +1116,11 @@ REDIS_URL=redis://redis:6379
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
-### Kubernetes
-
-1. **Crear namespace**
-
-```bash
-kubectl apply -f infrastructure/kubernetes/namespace.yaml
-```
-
-2. **Aplicar ConfigMaps y Secrets**
-
-```bash
-kubectl apply -f infrastructure/kubernetes/configmaps/
-kubectl apply -f infrastructure/kubernetes/secrets/
-```
-
-3. **Desplegar servicios**
-
-```bash
-kubectl apply -f infrastructure/kubernetes/deployments/
-kubectl apply -f infrastructure/kubernetes/services/
-```
-
-4. **Configurar Ingress**
-
-```bash
-kubectl apply -f infrastructure/kubernetes/ingress/
-```
-
 ### CI/CD (Fuera del Alcance del Producto)
 
 Para esta implementación de GitHub no se codificará un pipeline CI/CD como funcionalidad del sistema (L-01 en `Limites.md`). No hay workflows, runners ni ejecución de jobs en contenedores dentro del producto.
 
 Cualquier automatización que use el equipo para su propio repositorio de código queda fuera del alcance funcional documentado aquí.
-
----
-
-## Plan de Trabajo (4 Semanas)
-
-### Semana 1: Fundamentos y Auth Service
-
-| Día | Tareas                                                          |
-| --- | --------------------------------------------------------------- |
-| 1-2 | Setup del proyecto, estructura de carpetas, Docker Compose base |
-| 3-4 | Auth Service: registro, login, JWT                              |
-| 5   | API Gateway básico con routing                                  |
-| 6-7 | Frontend: páginas de login/registro                             |
-
-**Entregables:**
-
-- [ ] Estructura del proyecto
-- [ ] Auth Service funcionando
-- [ ] API Gateway con autenticación
-- [ ] UI de autenticación
-
-### Semana 2: Repo Service y Archivos
-
-| Día | Tareas                                                  |
-| --- | ------------------------------------------------------- |
-| 1-2 | Repo Service: CRUD de repositorios                      |
-| 3-4 | Integración con MinIO para archivos                     |
-| 5   | Upload/download de archivos                             |
-| 6-7 | Frontend: dashboard, crear repo, explorador de archivos |
-
-**Entregables:**
-
-- [ ] CRUD de repositorios
-- [ ] Gestión de archivos
-- [ ] UI de repositorios
-
-### Semana 3: Issues y Búsqueda
-
-| Día | Tareas                           |
-| --- | -------------------------------- |
-| 1-2 | Issue Service: CRUD de issues    |
-| 3   | Comentarios en issues            |
-| 4-5 | Search Service con Elasticsearch |
-| 6-7 | Frontend: issues, búsqueda       |
-
-**Entregables:**
-
-- [ ] Sistema de issues completo
-- [ ] Búsqueda funcionando
-- [ ] UI de issues y búsqueda
-
-### Semana 4: Cloud, Despliegue y Documentación
-
-| Día | Tareas                                                                             |
-| --- | ---------------------------------------------------------------------------------- |
-| 1-2 | Manifiestos Kubernetes                                                             |
-| 3-4 | Preparación de despliegue y validación operativa (sin pipeline CI/CD del producto) |
-| 5   | Despliegue en cloud (AWS/GCP/Azure)                                                |
-| 6-7 | Testing, documentación, presentación                                               |
-
-**Entregables:**
-
-- [ ] Aplicación desplegada en cloud
-- [ ] Despliegue validado (sin pipeline CI/CD del producto)
-- [ ] Documentación completa
-- [ ] Demo funcional
 
 ---
 
@@ -1369,7 +1132,7 @@ Cualquier automatización que use el equipo para su propio repositorio de códig
 | **Backend Developer 2** | Repo Service, File Storage       |
 | **Backend Developer 3** | Issue Service, Search Service    |
 | **Frontend Developer**  | React App, integración con APIs  |
-| **DevOps**              | Docker, Kubernetes, CI/CD, Cloud |
+| **DevOps**              | Docker, CI/CD, Cloud |
 
 > **Nota:** Los roles pueden solaparse según el tamaño del equipo
 
