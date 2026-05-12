@@ -13,7 +13,7 @@ Recreación simplificada de GitHub utilizando arquitectura de microservicios, co
 | **[Github-files-ms](https://github.com/Savitar465/Github-files-ms.git)**           | David Rivas    | Repositorio creado con su proyecto smithy respectivo                               |
 | **[Github-repository-ms](https://github.com/Savitar465/Github-repository-ms.git)** | Daniel Tarqui  | Repositorio creado con su proyecto smithy respectivo                               |
 | **[Github-organizations-ms](https://github.com/dtarqui/Github-organizations-ms)**  | Harold Sanchez | Repositorio creado con su proyecto                                                 |
-| **[Github-pullrequests-ms](https://github.com/dtarqui/Github-pull-requests-ms)**   | Jonas Maidana  | Repositorio creado con su proyecto                                                 |
+| **[Github-pullrequests-ms](https://github.com/Savitar465/Github-pullrequests-ms)**   | Jonas Maidana  | Repositorio creado con su proyecto                                                 |
 | **[Github-Smithy](https://github.com/Savitar465/Github-Smithy)**           | Equipo         | Proyecto inicial de Smithy que se separará en los diferentes microservicios        |
 | **[Github-Cdk](https://github.com/Savitar465/Github-Cdk)**           | Equipo         | En progreso, se creó los recursos de prueba para eks                               |
 

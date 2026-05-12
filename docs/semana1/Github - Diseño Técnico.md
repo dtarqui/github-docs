@@ -4,15 +4,15 @@
 
 ---
 
-## Resumen
+## 1. Definición del Problema
+
+### 1.1 Resumen
 
 GitHub es un proyecto académico que implementa una forja de código simplificada con arquitectura de microservicios. El sistema permite autenticación (local y OIDC con Keycloak), gestión de repositorios, operaciones Git básicas por HTTPS (sin SSH), issues, pull requests en flujo básico y búsqueda. La solución se documenta a partir de un contrato API en Smithy/OpenAPI y se despliega en entorno cloud/local con PostgreSQL por servicio, almacenamiento de objetos y mensajería asíncrona.
 
 Nuestros clientes son principalmente estudiantes, docentes y evaluadores que usan la demo para validar capacidades técnicas del equipo. El valor que entregamos es una plataforma entendible, desplegable y demostrable en tiempos académicos, con foco en seguridad básica, trazabilidad y alcance realista (sin funcionalidades enterprise como CI/CD integrado, notificaciones y reglas avanzadas de protección de ramas).
 
----
-
-## Supuestos
+### 1.2 Supuestos
 
 1. Se asume la disponibilidad de un proveedor **cloud** (p. ej. AWS) con permisos suficientes para desplegar EKS, RDS y recursos de red asociados, o bien un entorno local equivalente (p. ej. Docker Compose) para desarrollo.
 2. Se asume que **Keycloak** queda operativo —ya sea mediante el stack CDK de referencia o un despliegue equivalente— con _realm_ y clientes configurados para el flujo OIDC descrito en este documento.
@@ -20,9 +20,7 @@ Nuestros clientes son principalmente estudiantes, docentes y evaluadores que usa
 4. Se asume que el proyecto se desarrollará en un plazo máximo de **4 semanas**.
 5. Se asume un equipo de hasta **4 integrantes** con disponibilidad suficiente para sostener el marco de trabajo ágil acordado.
 
----
-
-## Alcance y fases
+### 1.3 Alcance y fases
 
 La Fase 1 incluye:
 
@@ -56,9 +54,9 @@ Fuera del alcance:
 
 ---
 
-## 1. Requerimientos
+## 2. Requerimientos
 
-### 1.1 Requerimientos Funcionales
+### 2.1 Requerimientos Funcionales
 
 1. **RF-P1 (Alta).** Los usuarios registrados deben poder **autenticarse** mediante correo y contraseña o, alternativamente, mediante **OIDC/SSO** con Keycloak (incluida federación con proveedores externos configurados en el _realm_), **para** acceder a recursos protegidos sin depender de un único mecanismo de credenciales.
 
@@ -66,7 +64,7 @@ Fuera del alcance:
 
 3. **RF-P3 (Media).** Los colaboradores autorizados deben poder **gestionar issues y pull requests en flujo básico** (creación, comentarios, revisión y merge simplificado), **para** coordinar cambios sin implementar el ecosistema completo de revisiones de GitHub.
 
-### 1.2 Requerimientos no funcionales
+### 2.2 Requerimientos no funcionales
 
 | ID         | Enunciado                                                                                                                         | Métrica o criterio de verificación                                                                                   | Dimensión                                                     |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
@@ -76,13 +74,69 @@ Fuera del alcance:
 | **RNF-P4** | Cada microservicio debe persistir en **su propia base PostgreSQL** (patrón _database per service_).                               | Tres instancias lógicas mínimas (`auth_db`, `repos_db`, `issues_db`) sin esquema compartido accidental.              | Consistencia de diseño / CAP (servicios débilmente acoplados) |
 | **RNF-P5** | El contrato REST debe permanecer **versionado y generado desde Smithy**, con documentación **OpenAPI/Swagger** accesible.         | Artefacto `GitHubApi.openapi.json` reproducible por build; UI en `/api-docs` o equivalente por servicio/gateway. | Mantenibilidad                                                |
 
-### 1.3 Estimación de capacidad
+---
+
+## 3. Estimaciones
+
+### 3.1 Estimación de capacidad
 
 Para el alcance académico, se adopta el orden de magnitud ya consensuado en la documentación general: aproximadamente **100 usuarios concurrentes**, almacenamiento total del orden de **gigabytes** en tier gratuito o de demostración, y tráfico de búsqueda dominado por lecturas. Por tanto, no se justifica particionamiento agresivo en la fase inicial; no obstante, el Search Service y Elasticsearch permiten evolucionar hacia mayor volumen si el proyecto lo requiere.
 
+### 3.2 Escalabilidad e infraestructura
+
+El diseño se apoya en servicios stateless detrás de API Gateway, con escalado horizontal en capa de aplicación y escalado vertical controlado en datos.
+
+**Estrategia de escalado**
+
+- Escalado horizontal: API Gateway, Auth, Repo, Issue y Search con réplicas según carga (RNF11).
+- Escalado vertical inicial: PostgreSQL por servicio (`db.t3.micro` en referencia académica) con posibilidad de subir clase de instancia antes de particionar.
+- Escalado por desacople: gRPC con reintentos/circuit breaker y procesamiento interno en Search evita bloquear transacciones críticas.
+
+**Cuellos de botella y mitigaciones**
+
+- Base de datos: riesgo en picos de escritura. Mitigación: índices en columnas de filtro frecuentes, pooling y paginación obligatoria.
+- Búsqueda: latencia por reindexado. Mitigación: consumo asíncrono por lotes y control de `limit` en API de búsqueda.
+- Almacenamiento de objetos: latencia en archivos grandes. Mitigación: límites de tamaño y flujo por streaming.
+
+**Capacidad objetivo (alineada con docs)**
+
+- Concurrencia mínima objetivo: **100 usuarios concurrentes**.
+- Objetivo de latencia gateway: p95 < **100-200 ms** según entorno de prueba (RNF10 y ajuste académico de esta entrega).
+- Patrón de tráfico esperado: predominio de lecturas (búsqueda y consultas de repositorio) sobre escrituras.
+
+**Estimación de costo mensual (orden de magnitud, 1 región x 1 etapa)**
+
+```text
+Total = sumaDeTodosLosServicios * paresDeRegionEtapa
+```
+
+- EKS (control plane): ~USD 70/mes
+- Nodos de cómputo (2 instancias medianas): ~USD 60/mes
+- PostgreSQL (3 instancias pequeñas): ~USD 45/mes
+- Elasticsearch/OpenSearch (nivel básico): ~USD 35/mes
+- Object storage (50 GB): ~USD 1-2/mes
+- Tráfico y extras operativos: ~USD 10-20/mes
+
+**Total estimado:** ~USD 220-230/mes (orden de magnitud para demo cloud). En Docker Compose local, el costo cloud puede reducirse casi a cero para desarrollo.
+
+**Flujo de tráfico de red esperado (aprox.)**
+
+Supuesto: 50 QPS promedio y 30 KB por solicitud-respuesta agregada.
+
+```text
+50 req/s * 30 KB = 1.5 MB/s
+1.5 MB/s * 60 = 90 MB/min
+90 MB/min * 60 = 5.4 GB/h
+5.4 GB/h * 24 = 129.6 GB/día
+```
+
+Limitaciones aceptadas para esta fase: sin multi-región, sin autoscaling avanzado por métrica de negocio y sin HA enterprise del servidor Git.
+
 ---
 
-## 2. Entidades principales
+## 4. Modelo de datos y API
+
+### 4.1 Entidades principales
 
 El modelo conceptual se alinea con `EntidadesPrincipales.md` y el esquema relacional consolidado en `ModeloDeDatos.md`. A continuación se sintetizan los agregados más relevantes y su pertenencia por servicio.
 
@@ -105,70 +159,259 @@ El modelo conceptual se alinea con `EntidadesPrincipales.md` y el esquema relaci
 
 En este sentido, la separación por servicio permite evolucionar el esquema de issues sin migrar la base de autenticación, a la vez que impone el uso de **identificadores UUID** compartidos como referencias lógicas entre contextos acotados.
 
----
-
-## 3. API o Interfaz del Sistema
+### 4.2 API o Interfaz del Sistema
 
 Para una referencia detallada se tiene los APIs en el siguiente [recurso](../APIS_RESUMEN.md)
 
-### 3.1 Protocolo y contrato
+#### 4.2.1 Protocolo y contrato
 
 Se adopta **REST** sobre JSON con autenticación **Bearer JWT**, conforme al servicio Smithy `com.github#GitHubApi` (`@httpBearerAuth`). El listado de operaciones agregadas en `model/service.smithy` agrupa los casos de uso por puertos lógicos de referencia: **3001** (auth), **3002** (repositorio y archivos), **3003** (issues y pull requests), **3004** (búsqueda).
 
 Convención de versionado: la interfaz pública canónica se publica bajo prefijo **`/v1`**.
 
-### 3.2 Operaciones representativas
+#### 4.2.2 Operaciones representativas
 
-Este documento resume solo las operaciones críticas. El inventario completo de endpoints públicos se mantiene en `README.md` (sección **API Endpoints**) y el contrato canónico permanece en Smithy/OpenAPI.
+Inventario completo de endpoints REST organizados por microservicio. El contrato canónico permanece en Smithy/OpenAPI por servicio.
 
-**APIs públicas (REST) prioritarias**
+**Github-users-ms**
 
-| Operación          | Método y ruta                                                      | Entrada (request)                                | Salida (response)                          | Excepciones HTTP                         | Restricciones clave                                             |
-| ------------------ | ------------------------------------------------------------------ | ------------------------------------------------ | ------------------------------------------ | ---------------------------------------- | --------------------------------------------------------------- |
-| Register           | `POST /v1/users`                                                   | `username`, `email`, `password` (requeridos)     | `user`, `accessToken`, `refreshToken`      | `400`, `409`, `422`                      | `email` válido; contraseña con política mínima                  |
-| Login              | `POST /v1/sessions`                                                | `email`, `password` (requeridos)                 | `accessToken`, `refreshToken`, `expiresIn` | `400`, `401`, `429`                      | bloqueo temporal por intentos fallidos                          |
-| CreateRepository   | `POST /v1/repositories`                                            | `name` (requerido), `description?`, `visibility` | metadatos del repositorio creado           | `400`, `401`, `403`, `409`               | `name` único por propietario; `visibility` en {public, private} |
-| GetFileContent     | `GET /v1/repositories/{owner}/{repo}/contents/{path}`              | `owner`, `repo`, `path` (ruta); `ref?` (query)   | contenido, `sha`, metadatos                | `400`, `401`, `403`, `404`               | `path` obligatorio y normalizado                                |
-| CreateIssue        | `POST /v1/repositories/{owner}/{repo}/issues`                      | `title` (requerido), `body?`, `labels?`          | issue creado con `id` y `number`           | `400`, `401`, `403`, `404`, `422`        | `title` no vacío; labels válidos en el repo                     |
-| CreatePullRequest  | `POST /v1/repositories/{owner}/{repo}/pull-requests`               | `title`, `base`, `head` (requeridos), `body?`    | PR creado (`id`, `status`)                 | `400`, `401`, `403`, `404`, `409`        | no se permite PR si `base == head`                              |
-| MergePullRequest   | `POST /v1/repositories/{owner}/{repo}/pull-requests/{prId}/merges` | `prId` (ruta), `commitMessage?`                  | estado final de PR (`merged`)              | `400`, `401`, `403`, `404`, `409`, `422` | solo PR abierto y mergeable                                     |
-| SearchRepositories | `GET /v1/search/repositories?q={texto}`                            | `q` (requerido), `page?`, `limit?`               | lista paginada de repositorios             | `400`, `401`, `422`                      | `limit` acotado (p. ej. max 100)                                |
+| Método | Ruta | Descripción |
+| ------ | ---- | ----------- |
+| GET | `/v1/users` | Listar usuarios paginados |
+| POST | `/v1/users` | Registrar nuevo usuario |
+| GET | `/v1/users/{userId}` | Obtener usuario por ID |
+| PUT | `/v1/users/{userId}` | Editar usuario |
+| DELETE | `/v1/users/{userId}` | Eliminar usuario |
+| POST | `/v1/users/search` | Buscar usuarios por filtro |
+| GET | `/v1/keycloak/clients` | Listar clientes Keycloak |
+| GET | `/v1/keycloak/roles/realm` | Listar roles del realm |
+| GET | `/v1/keycloak/roles/client/{clientUuid}` | Listar roles de un cliente |
+| GET | `/v1/keycloak/roles/{rolId}` | Obtener rol por ID |
+| GET | `/v1/keycloak/permissions/client/{clientUuid}` | Listar permisos de un cliente |
+| GET | `/v1/keycloak/permissions/client/{clientUuid}/rol/{rolId}` | Listar permisos por rol |
+| PUT | `/v1/keycloak/permissions/client/{clientUuid}/permission/{permissionId}` | Actualizar permiso |
 
-**Tipos de datos complejos**
+**Github-repository-ms**
 
-- `Repository`: `id`, `owner`, `name`, `visibility`, `defaultBranch`, `createdAt`.
-- `Issue`: `id`, `number`, `title`, `body`, `state`, `labels[]`, `authorId`.
-- `PullRequest`: `id`, `title`, `base`, `head`, `status`, `authorId`, `mergedAt?`.
+| Método | Ruta | Descripción |
+| ------ | ---- | ----------- |
+| GET | `/v1/repos` | Listar repositorios del usuario |
+| POST | `/v1/repos` | Crear repositorio |
+| GET | `/v1/repos/{owner}/{repo}` | Obtener repositorio |
+| PATCH | `/v1/repos/{owner}/{repo}` | Actualizar repositorio |
+| DELETE | `/v1/repos/{owner}/{repo}` | Eliminar repositorio |
+| POST | `/v1/repos/{owner}/{repo}/forks` | Forkear repositorio |
+| GET | `/v1/repos/{owner}/{repo}/forks` | Listar forks |
+| GET | `/v1/repos/{owner}/{repo}/branches` | Listar ramas |
+| GET | `/v1/repos/{owner}/{repo}/branches/{branch}` | Obtener rama |
+| POST | `/v1/repos/{owner}/{repo}/branches` | Crear rama |
+| DELETE | `/v1/repos/{owner}/{repo}/branches/{branch}` | Eliminar rama |
+| GET | `/v1/repos/{owner}/{repo}/collaborators` | Listar colaboradores |
+| GET | `/v1/repos/{owner}/{repo}/collaborators/{collaboratorUsername}` | Obtener colaborador |
+| PUT | `/v1/repos/{owner}/{repo}/collaborators/{collaboratorUsername}` | Agregar colaborador por username |
+| POST | `/v1/repos/{owner}/{repo}/collaborators` | Agregar colaborador con rol |
+| PATCH | `/v1/repos/{owner}/{repo}/collaborators/{collaboratorUsername}` | Actualizar rol de colaborador |
+| DELETE | `/v1/repos/{owner}/{repo}/collaborators/{collaboratorUsername}` | Eliminar colaborador |
+| GET | `/v1/repos/{owner}/{repo}/contents` | Listar contenidos del repositorio |
+| PUT | `/v1/repos/{owner}/{repo}/contents` | Subir/actualizar archivo |
+| DELETE | `/v1/repos/{owner}/{repo}/contents` | Eliminar archivo |
+| GET | `/v1/repos/{owner}/{repo}/archive` | Descargar repositorio como ZIP |
+| PUT | `/v1/repos/{owner}/{repo}/star` | Dar estrella |
+| DELETE | `/v1/repos/{owner}/{repo}/star` | Quitar estrella |
+| PUT | `/v1/user/starred/{owner}/{repo}` | Dar estrella (ruta usuario) |
+| DELETE | `/v1/user/starred/{owner}/{repo}` | Quitar estrella (ruta usuario) |
+| GET | `/repos/{owner}/{repo}/compare/{base}...{head}` | Comparar ramas |
+| ANY | `/{owner}/{repo:.+\.git}/**` | Proxy protocolo Git HTTP |
+| GET | `/internal/ssh-access` | Verificación de acceso SSH (interno) |
 
-### 3.3 APIs internas y eventos
+**Github-files-ms**
 
-Las APIs internas se implementan con **gRPC** (unario y streaming), para desacoplar la API pública de los procesos de indexación/búsqueda y mantener contratos internos tipados.
+| Método | Ruta | Descripción |
+| ------ | ---- | ----------- |
+| GET | `/v1/repos/{owner}/{repo}/contents/{filePath+}` | Obtener contenido de archivo o directorio |
+| GET | `/v1/repos/{owner}/{repo}/contents` | Listar contenidos por query path |
+| GET | `/v1/repos/{owner}/{repo}/download` | Descargar archivo raw (binario) |
+| PUT | `/v1/repos/{owner}/{repo}/contents/{filePath+}` | Crear/subir archivo |
+| PATCH | `/v1/repos/{owner}/{repo}/contents/{filePath+}` | Actualizar archivo existente |
+| DELETE | `/v1/repos/{owner}/{repo}/contents/{filePath+}` | Eliminar archivo (genera commit) |
+| POST | `/v1/repos/{owner}/{repo}/folders` | Crear carpeta con .gitkeep |
+| GET | `/v1/repos/{owner}/{repo}/commits` | Listar historial de commits |
+| GET | `/v1/repos/{owner}/{repo}/commits/{sha}` | Obtener detalle de un commit |
+| GET | `/v1/repos/{owner}/{repo}/commits/{sha}/diff` | Obtener diff de un commit |
+| GET | `/v1/repos/{owner}/{repo}/compare/{baseBranch}/{headBranch}` | Comparar dos ramas |
 
-| Operación interna gRPC           | Cliente      | Servidor                   | Request mínimo                                         |
-| -------------------------------- | ------------ | -------------------------- | ------------------------------------------------------ |
-| `Search.IndexRepository`         | Repo Service | Search Service             | `repoId`, `owner`, `name`, `visibility`, `timestamp`   |
-| `Search.UpdateRepository`        | Repo Service | Search Service             | `repoId`, campos modificados, `timestamp`              |
-| `Search.IndexIssue`              | Issue Service| Search Service             | `issueId`, `repoId`, `title`, `authorId`, `timestamp`  |
-| `Search.IndexPullRequestMerge`   | Issue Service| Search Service / Analytics | `prId`, `repoId`, `mergedBy`, `timestamp`              |
+**Github-issues-ms**
 
-Regla de consistencia: estas proyecciones son eventualmente consistentes; el estado fuente de verdad permanece en las bases transaccionales de cada servicio.
+| Método | Ruta | Descripción |
+| ------ | ---- | ----------- |
+| GET | `/v1/repos/{owner}/{repo}/issues` | Listar issues con filtros opcionales |
+| POST | `/v1/repos/{owner}/{repo}/issues` | Crear issue |
+| GET | `/v1/repos/{owner}/{repo}/issues/{issueNumber}` | Obtener issue por número |
+| PATCH | `/v1/repos/{owner}/{repo}/issues/{issueNumber}` | Actualizar issue |
+| GET | `/v1/repos/{owner}/{repo}/issues/{issueNumber}/comments` | Listar comentarios de un issue |
+| POST | `/v1/repos/{owner}/{repo}/issues/{issueNumber}/comments` | Agregar comentario a issue |
+| GET | `/v1/repos/{owner}/{repo}/issues/comments` | Listar todos los comentarios del repo |
+| GET | `/v1/repos/{owner}/{repo}/issues/comments/{commentId}` | Obtener comentario por ID |
+| PATCH | `/v1/repos/{owner}/{repo}/issues/comments/{commentId}` | Actualizar comentario |
+| DELETE | `/v1/repos/{owner}/{repo}/issues/comments/{commentId}` | Eliminar comentario |
+| GET | `/v1/repos/{owner}/{repo}/labels` | Listar labels del repositorio |
+| POST | `/v1/repos/{owner}/{repo}/labels` | Crear label |
 
-# Seguridad y Autenticación
+**Github-pullrequests-ms**
 
-El sistema utiliza Keycloak como proveedor de identidad.
+| Método | Ruta | Descripción |
+| ------ | ---- | ----------- |
+| GET | `/v1/repos/{owner}/{repo}/pulls` | Listar pull requests |
+| POST | `/v1/repos/{owner}/{repo}/pulls` | Crear pull request |
+| GET | `/v1/repos/{owner}/{repo}/pulls/{prNumber}` | Obtener pull request |
+| PATCH | `/v1/repos/{owner}/{repo}/pulls/{prNumber}/review` | Revisar PR (aprobar/rechazar/comentar) |
+| POST | `/v1/repos/{owner}/{repo}/pulls/{prNumber}/merge` | Ejecutar merge del PR |
+| GET | `/v1/repos/{owner}/{repo}/pulls/{prNumber}/comments` | Listar comentarios del PR |
+| POST | `/v1/repos/{owner}/{repo}/pulls/{prNumber}/comments` | Agregar comentario al PR |
+| GET | `/v1/repos/{owner}/{repo}/pulls/{prNumber}/mergeability` | Verificar mergeabilidad y conflictos |
 
-## Características implementadas
+**Github-organizations-ms**
 
-- OAuth2/OIDC
-- JWT Authentication
-- Role-Based Access Control (RBAC)
-- Gestión de permisos
-- Gestión de roles
-- Validación JWT
-- Logout seguro
-- Interceptores JWT para gRPC
+| Método | Ruta | Descripción |
+| ------ | ---- | ----------- |
+| GET | `/v1/user/orgs` | Listar organizaciones del usuario autenticado |
+| POST | `/v1/orgs` | Crear organización |
+| GET | `/v1/orgs/{orgName}` | Obtener datos de la organización |
+| PATCH | `/v1/orgs/{orgName}` | Actualizar organización |
+| DELETE | `/v1/orgs/{orgName}` | Eliminar organización |
+| GET | `/v1/orgs/{orgName}/members` | Listar miembros de la organización |
+| POST | `/v1/orgs/{orgName}/members` | Agregar miembro |
+| PATCH | `/v1/orgs/{orgName}/members/{username}` | Actualizar rol de miembro |
+| DELETE | `/v1/orgs/{orgName}/members/{username}` | Eliminar miembro |
+| GET | `/v1/orgs/{orgName}/teams` | Listar equipos |
+| POST | `/v1/orgs/{orgName}/teams` | Crear equipo |
+| GET | `/v1/orgs/{orgName}/teams/{teamId}` | Obtener equipo |
+| PATCH | `/v1/orgs/{orgName}/teams/{teamId}` | Actualizar equipo |
+| DELETE | `/v1/orgs/{orgName}/teams/{teamId}` | Eliminar equipo |
+| GET | `/v1/orgs/{orgName}/teams/{teamId}/members` | Listar miembros del equipo |
+| PUT | `/v1/orgs/{orgName}/teams/{teamId}/members/{username}` | Agregar miembro al equipo |
+| DELETE | `/v1/orgs/{orgName}/teams/{teamId}/members/{username}` | Eliminar miembro del equipo |
+| GET | `/v1/orgs/{orgName}/teams/{teamId}/repos` | Listar repos del equipo |
+| PUT | `/v1/orgs/{orgName}/teams/{teamId}/repos/{repoName}` | Asignar repo al equipo |
+| DELETE | `/v1/orgs/{orgName}/teams/{teamId}/repos/{repoName}` | Remover repo del equipo |
+| GET | `/v1/orgs/{orgName}/repos` | Listar repos de la organización |
 
-### 3.4 Validación y seguridad de entrada
+**Github-front** (Next.js API Route)
+
+| Método | Ruta | Descripción |
+| ------ | ---- | ----------- |
+| GET | `/api/token` | Obtener service token de Keycloak |
+
+#### 4.2.3 APIs internas y eventos
+
+Las APIs internas se implementan con **gRPC**, siguiendo el patrón uniforme de dos servicios por microservicio: uno público (sin autenticación) y uno protegido (requiere JWT en metadata del interceptor).
+
+**Github-users-ms**
+
+| Servicio gRPC | RPC | Auth | Descripción |
+| ------------- | --- | ---- | ----------- |
+| `UserPublicApi` | `GetUser` | Sin auth | Obtener usuario por ID |
+| `UserApi` | `ListUsers` | JWT | Listar usuarios paginados |
+| `UserApi` | `CreateUser` | JWT | Crear usuario |
+| `UserApi` | `EditUser` | JWT | Editar usuario |
+| `UserApi` | `DeleteUser` | JWT | Eliminar usuario |
+
+**Github-repository-ms**
+
+| Servicio gRPC | RPC | Auth | Descripción |
+| ------------- | --- | ---- | ----------- |
+| `RepoPublicService` | `GetRepository` | Sin auth | Obtener repositorio |
+| `RepoPublicService` | `ListRepositoryForks` | Sin auth | Listar forks |
+| `RepoPublicService` | `ListBranches` | Sin auth | Listar ramas |
+| `RepoPublicService` | `GetBranch` | Sin auth | Obtener rama |
+| `RepoService` | `CreateRepository` | JWT | Crear repositorio |
+| `RepoService` | `UpdateRepository` | JWT | Actualizar repositorio |
+| `RepoService` | `DeleteRepository` | JWT | Eliminar repositorio |
+| `RepoService` | `ListMyRepositories` | JWT | Listar repositorios del usuario |
+| `RepoService` | `ForkRepository` | JWT | Forkear repositorio |
+| `RepoService` | `CreateBranch` | JWT | Crear rama |
+| `RepoService` | `DeleteBranch` | JWT | Eliminar rama |
+| `RepoService` | `AddCollaborator` | JWT | Agregar colaborador |
+| `RepoService` | `GetCollaborator` | JWT | Obtener colaborador |
+| `RepoService` | `ListCollaborators` | JWT | Listar colaboradores |
+| `RepoService` | `RemoveCollaborator` | JWT | Eliminar colaborador |
+| `RepoService` | `UpdateCollaboratorRole` | JWT | Actualizar rol de colaborador |
+| `RepoService` | `StarRepository` | JWT | Dar estrella |
+| `RepoService` | `UnstarRepository` | JWT | Quitar estrella |
+
+**Github-files-ms**
+
+| Servicio gRPC | RPC | Auth | Descripción |
+| ------------- | --- | ---- | ----------- |
+| `FilePublicApi` | `GetRepository` | Sin auth | Obtener metadata del repositorio |
+| `FilePublicApi` | `ListRepositories` | Sin auth | Listar repositorios |
+| `FilePublicApi` | `GetFileContent` | Sin auth | Obtener contenido de archivo |
+| `FilePublicApi` | `GetDirectoryContents` | Sin auth | Obtener contenido de directorio |
+| `FileApi` | `CreateRepository` | JWT | Crear repositorio |
+| `FileApi` | `DeleteRepository` | JWT | Eliminar repositorio |
+| `FileApi` | `CreateFile` | JWT | Crear archivo |
+| `FileApi` | `UpdateFile` | JWT | Actualizar archivo |
+| `FileApi` | `DeleteFile` | JWT | Eliminar archivo |
+| `FileApi` | `CreateFolder` | JWT | Crear carpeta |
+
+**Github-issues-ms**
+
+| Servicio gRPC | RPC | Auth | Descripción |
+| ------------- | --- | ---- | ----------- |
+| `IssuePublicService` | `GetIssue` | Sin auth | Obtener issue por número |
+| `IssuePublicService` | `ListIssues` | Sin auth | Listar issues con filtros |
+| `IssuePublicService` | `ListIssueComments` | Sin auth | Listar comentarios de un issue |
+| `IssuePublicService` | `ListLabels` | Sin auth | Listar labels del repositorio |
+| `IssueService` | `CreateIssue` | JWT | Crear issue |
+| `IssueService` | `UpdateIssue` | JWT | Actualizar issue |
+| `IssueService` | `GetIssueComment` | JWT | Obtener comentario por ID |
+| `IssueService` | `CreateIssueComment` | JWT | Agregar comentario |
+| `IssueService` | `UpdateIssueComment` | JWT | Actualizar comentario |
+| `IssueService` | `DeleteIssueComment` | JWT | Eliminar comentario |
+| `IssueService` | `CreateLabel` | JWT | Crear label |
+
+**Github-pullrequests-ms**
+
+| Servicio gRPC | RPC | Auth | Descripción |
+| ------------- | --- | ---- | ----------- |
+| `PullRequestPublicService` | `GetPullRequest` | Sin auth | Obtener PR |
+| `PullRequestPublicService` | `ListPullRequests` | Sin auth | Listar PRs |
+| `PullRequestPublicService` | `ListPullRequestComments` | Sin auth | Listar comentarios del PR |
+| `PullRequestPublicService` | `GetPullRequestMergeability` | Sin auth | Verificar mergeabilidad |
+| `PullRequestService` | `CreatePullRequest` | JWT | Crear PR |
+| `PullRequestService` | `ReviewPullRequest` | JWT | Revisar PR (aprobar/rechazar) |
+| `PullRequestService` | `MergePullRequest` | JWT | Ejecutar merge |
+| `PullRequestService` | `CreatePullRequestComment` | JWT | Agregar comentario al PR |
+
+**Github-organizations-ms**
+
+| Servicio gRPC | RPC | Auth | Descripción |
+| ------------- | --- | ---- | ----------- |
+| `OrgPublicService` | `GetOrganization` | Sin auth | Obtener organización |
+| `OrgPublicService` | `ListOrgRepos` | Sin auth | Listar repos de la organización |
+| `OrgService` | `ListMyOrganizations` | JWT | Listar mis organizaciones |
+| `OrgService` | `CreateOrganization` | JWT | Crear organización |
+| `OrgService` | `UpdateOrganization` | JWT | Actualizar organización |
+| `OrgService` | `DeleteOrganization` | JWT | Eliminar organización |
+| `OrgService` | `ListOrgMembers` | JWT | Listar miembros |
+| `OrgService` | `AddOrgMember` | JWT | Agregar miembro |
+| `OrgService` | `UpdateOrgMemberRole` | JWT | Actualizar rol de miembro |
+| `OrgService` | `RemoveOrgMember` | JWT | Eliminar miembro |
+| `OrgService` | `ListOrgTeams` | JWT | Listar equipos |
+| `OrgService` | `CreateTeam` | JWT | Crear equipo |
+| `OrgService` | `GetTeam` | JWT | Obtener equipo |
+| `OrgService` | `UpdateTeam` | JWT | Actualizar equipo |
+| `OrgService` | `DeleteTeam` | JWT | Eliminar equipo |
+| `OrgService` | `ListTeamMembers` | JWT | Listar miembros del equipo |
+| `OrgService` | `AddTeamMember` | JWT | Agregar miembro al equipo |
+| `OrgService` | `RemoveTeamMember` | JWT | Eliminar miembro del equipo |
+| `OrgService` | `ListTeamRepos` | JWT | Listar repos del equipo |
+| `OrgService` | `AddTeamRepo` | JWT | Asignar repo al equipo |
+| `OrgService` | `RemoveTeamRepo` | JWT | Remover repo del equipo |
+
+Regla de consistencia: las operaciones de lectura públicas no requieren autenticación y se usan principalmente para consultas cross-service. Las operaciones protegidas requieren el JWT del usuario en el metadata del interceptor gRPC.
+
+#### 4.2.4 Validación y seguridad de entrada
 
 Las entradas se validan en el borde (gateway/controlador) contra el esquema derivado del contrato, con controles explícitos de seguridad:
 
@@ -179,7 +422,7 @@ Las entradas se validan en el borde (gateway/controlador) contra el esquema deri
 - Parametrización de consultas y prohibición de SQL dinámico concatenado para prevenir inyección SQL.
 - Códigos de error consistentes (`400`, `401`, `403`, `404`, `409`, `422`) y cuerpo de error uniforme (`code`, `message`, `details?`).
 
-### 3.5 Ejemplos de contrato
+#### 4.2.5 Ejemplos de contrato
 
 **Ejemplo A - API pública (REST): crear repositorio**
 
@@ -283,25 +526,27 @@ Operación interna: invocación `Search.IndexRepository` vía gRPC
 
 Resultado esperado: Search Service consume el evento y actualiza proyección en Elasticsearch (consistencia eventual).
 
----
-
-### 3.6 Comunicación Interna con gRPC
+#### 4.2.6 Comunicación Interna con gRPC
 
 El sistema implementa comunicación interna entre microservicios utilizando gRPC para mejorar rendimiento y reducir latencia.
 
-## Servicios implementados
+**Servicios implementados**
 
 - GrpcUserServiceImpl
 - GrpcUserPublicServiceImpl
 
-## Características
+**Características**
 
 - Comunicación síncrona de alta velocidad
 - Serialización con Protocol Buffers
 - Validación JWT en interceptores gRPC
 - Seguridad entre microservicios
 
-## 4. Flujo de datos
+---
+
+## 5. Arquitectura
+
+### 5.1 Flujo de datos
 
 El diagrama siguiente resume el camino desde el cliente hasta la persistencia y la invocación interna a Search.
 
@@ -327,45 +572,41 @@ sequenceDiagram
     SPA-->>Usuario: Confirmación en UI
 ```
 
-### 4.2 Flujo de indexación
+#### 5.1.1 Flujo de indexación
 
 Cuando el Search Service consume `repo.created`, actualiza el índice en Elasticsearch. Por tanto, la consistencia entre lectura en búsqueda y escritura en Repo es **eventual**, coherente con un patrón CQRS ligero.
 
----
+### 5.2 Diseño de alto nivel
 
-## 5. Diseño de alto nivel
+#### 5.2.1 Modelos C4
 
-### 5.1 Componentes y comunicaciones
-
-### 5.1 Modelos C4
-
-#### Diagrama de contexto
+##### Diagrama de contexto
 
 ![Diagrama de contexto](imagenes/c4-contexto.png)
 
-#### Diagrama de contenedores
+##### Diagrama de contenedores
 
 ![Diagrama de contenedores](imagenes/c4-contenedores.png)
 
 ![Diagrama de contenedores services](imagenes/c4-contenedores-services.png)
 
-#### Diagrama de componentes
+##### Diagrama de componentes
 
 ![Diagrama de componentes](imagenes/c4-componentes-front.png)
 
 ![Diagrama de componentes](imagenes/c4-componentes-back.png)
 
-### 5.2 Componentes y comunicaciones
+#### 5.2.2 Componentes y comunicaciones
 
 ![Diagrama de componentes](imagenes/componentes.png)
 
 Este diagrama resume la topología documentada en `README.md` de github-docs. Además, conecta el rol de **Keycloak** como proveedor OIDC externo a los microservicios.
 
-### 5.2 Diagramas de Secuencia - Gestión de Repositorios
+#### 5.2.3 Diagramas de Secuencia - Gestión de Repositorios
 
 A continuación se presentan los diagramas de secuencia detallados para las operaciones principales de gestión de repositorios, mostrando la interacción entre componentes del sistema.
 
-#### 5.2.1 Crear Repositorio Nuevo
+##### 5.2.3.1 Crear Repositorio Nuevo
 
 Este diagrama ilustra el flujo completo desde que un usuario autenticado solicita crear un repositorio hasta que el sistema persiste los datos y retorna la confirmación.
 
@@ -391,7 +632,7 @@ Este diagrama ilustra el flujo completo desde que un usuario autenticado solicit
 - `400 Bad Request`: Si el formato del nombre es inválido
 - `401 Unauthorized`: Si el token JWT es inválido o ha expirado
 
-#### 5.2.2 Listar Repositorios de Usuario
+##### 5.2.3.2 Listar Repositorios de Usuario
 
 Este diagrama muestra cómo el sistema recupera y presenta la lista de repositorios asociados a un usuario específico.
 
@@ -421,7 +662,7 @@ Este diagrama muestra cómo el sistema recupera y presenta la lista de repositor
 - Cache de resultados en Redis por 5 minutos para usuarios con muchos repositorios
 - Carga eager de relaciones frecuentes (owner, default_branch)
 
-#### 5.2.3 Editar Información de Repositorio
+##### 5.2.3.3 Editar Información de Repositorio
 
 Este diagrama detalla el proceso de actualización de metadatos de un repositorio existente.
 
@@ -459,7 +700,7 @@ Este diagrama detalla el proceso de actualización de metadatos de un repositori
 - Cambio de visibilidad a `private` revoca acceso a no-colaboradores
 - Cambio de `default_branch` valida que la rama exista
 
-#### 5.2.4 Eliminar Repositorio
+##### 5.2.3.4 Eliminar Repositorio
 
 Este diagrama muestra el proceso de eliminación permanente de un repositorio y todos sus recursos asociados.
 
@@ -518,17 +759,7 @@ COMMIT;
 - `repo.deleted`: Payload con `repo_id`, `owner_id`, `name`, `timestamp`
 - Consumidores: Search Service (remover índice), Analytics Service (métricas)
 
-### 5.3 Infraestructura AWS (referencia Github-Cdk)
-
-El stack `KeycloakStack` compone **GithubVpc**, **KubeCluster** (EKS), **GithubDatabase** (RDS PostgreSQL) y **KeycloakManifests**. En consecuencia, la identidad del despliegue académico puede anclarse a un entorno Kubernetes gestionado en AWS, si bien los microservicios de negocio pueden desplegarse en fases posteriores sobre el mismo clúster o en compose local.
-
-[Repo CDK](https://github.com/Savitar465/Github-Cdk.git)
-
----
-
-## 6. Inmersiones profundas
-
-### 6.1 Esquema de base de datos
+### 5.3 Esquema de base de datos
 
 La fuente de verdad del esquema relacional se mantiene en [ModeloDeDatos.md](../ModeloDeDatos.md). Esta seccion resume los cambios de esquema relevantes para el diseno y su impacto de compatibilidad.
 
@@ -588,76 +819,21 @@ erDiagram
     ISSUES ||--o{ COMMENTS : receives
     PULL_REQUESTS ||--o{ COMMENTS : receives
 ```
-### 6.2 Escalabilidad e infraestructura
 
-El diseño se apoya en servicios stateless detrás de API Gateway, con escalado horizontal en capa de aplicación y escalado vertical controlado en datos.
+### 5.4 Seguridad y Autenticación
 
-**Estrategia de escalado**
+El sistema utiliza Keycloak como proveedor de identidad.
 
-- Escalado horizontal: API Gateway, Auth, Repo, Issue y Search con réplicas según carga (RNF11).
-- Escalado vertical inicial: PostgreSQL por servicio (`db.t3.micro` en referencia académica) con posibilidad de subir clase de instancia antes de particionar.
-- Escalado por desacople: gRPC con reintentos/circuit breaker y procesamiento interno en Search evita bloquear transacciones críticas.
+**Características implementadas**
 
-**Cuellos de botella y mitigaciones**
-
-- Base de datos: riesgo en picos de escritura. Mitigación: índices en columnas de filtro frecuentes, pooling y paginación obligatoria.
-- Búsqueda: latencia por reindexado. Mitigación: consumo asíncrono por lotes y control de `limit` en API de búsqueda.
-- Almacenamiento de objetos: latencia en archivos grandes. Mitigación: límites de tamaño y flujo por streaming.
-
-**Capacidad objetivo (alineada con docs)**
-
-- Concurrencia mínima objetivo: **100 usuarios concurrentes**.
-- Objetivo de latencia gateway: p95 < **100-200 ms** según entorno de prueba (RNF10 y ajuste académico de esta entrega).
-- Patrón de tráfico esperado: predominio de lecturas (búsqueda y consultas de repositorio) sobre escrituras.
-
-**Estimación de costo mensual (orden de magnitud, 1 región x 1 etapa)**
-
-```text
-Total = sumaDeTodosLosServicios * paresDeRegionEtapa
-```
-
-- EKS (control plane): ~USD 70/mes
-- Nodos de cómputo (2 instancias medianas): ~USD 60/mes
-- PostgreSQL (3 instancias pequeñas): ~USD 45/mes
-- Elasticsearch/OpenSearch (nivel básico): ~USD 35/mes
-- Object storage (50 GB): ~USD 1-2/mes
-- Tráfico y extras operativos: ~USD 10-20/mes
-
-**Total estimado:** ~USD 220-230/mes (orden de magnitud para demo cloud). En Docker Compose local, el costo cloud puede reducirse casi a cero para desarrollo.
-
-**Flujo de tráfico de red esperado (aprox.)**
-
-Supuesto: 50 QPS promedio y 30 KB por solicitud-respuesta agregada.
-
-```text
-50 req/s * 30 KB = 1.5 MB/s
-1.5 MB/s * 60 = 90 MB/min
-90 MB/min * 60 = 5.4 GB/h
-5.4 GB/h * 24 = 129.6 GB/día
-```
-
-Limitaciones aceptadas para esta fase: sin multi-región, sin autoscaling avanzado por métrica de negocio y sin HA enterprise del servidor Git.
-
-### 6.3 Métricas y Monitoreo
-
-Se define monitoreo operativo mínimo alineado con RNF (latencia, disponibilidad, salud y seguridad), con alarmas accionables.
-
-| Sistema           | Métrica                | Umbral de Alarma           | Responsable       | Enlace | Descripción                                                  |
-| ----------------- | ---------------------- | -------------------------- | ----------------- | ------ | ------------------------------------------------------------ |
-| API Gateway       | Latencia p95           | > 200 ms sostenido 5 min   | Equipo Backend    | TBD    | Control de SLO de rutas críticas                             |
-| API Gateway       | Error rate (5xx)       | > 2% por 5 min             | Equipo Backend    | TBD    | Detecta degradación de servicios aguas abajo                 |
-| Auth Service      | Fallas de login        | > 10% por 10 min           | Equipo Auth       | TBD    | Detecta caída de IdP, credenciales inválidas masivas o abuso |
-| Repo/Issue/Search | Health check `/health` | 2 fallas consecutivas      | Equipo Plataforma | TBD    | Disponibilidad de cada microservicio                         |
-| gRPC interno      | Error rate / timeout   | > 2% errores o p95 > 200ms | Equipo Plataforma | TBD    | Riesgo de atraso o fallo en indexación interna               |
-| PostgreSQL        | Uso de CPU             | > 80% por 10 min           | Equipo Datos      | TBD    | Señal de cuello de botella en BD                             |
-
-Respuesta operativa:
-
-- Alarma crítica abre incidente y notifica canal del equipo.
-- Se ejecuta SOP de diagnóstico (API, DB, mensajería, IdP).
-- Se registra causa raíz y acción correctiva.
-
-### 6.4 Seguridad
+- OAuth2/OIDC
+- JWT Authentication
+- Role-Based Access Control (RBAC)
+- Gestión de permisos
+- Gestión de roles
+- Validación JWT
+- Logout seguro
+- Interceptores JWT para gRPC
 
 Controles de seguridad aplicados para la fase actual:
 
@@ -676,7 +852,7 @@ Riesgos y mitigaciones prioritarias:
 
 ![alt Diagrama de seguridad](imagenes/seguridad.png)
 
-#### 6.4.1 Flujo de autenticación OIDC (AuthN)
+#### 5.4.1 Flujo de autenticación OIDC (AuthN)
 
 Flujo adoptado: **Authorization Code Flow con PKCE** (cliente público SPA + backend API).
 
@@ -711,7 +887,7 @@ Claims esperados en tokens:
 | `id_token`     | `sub`, `email`, `preferred_username`, `name`, `iat`, `exp` |
 | `access_token` | `sub`, `scope`, `roles`, `aud`, `iat`, `exp`, `iss`        |
 
-#### 6.4.2 Modelo de autorización (AuthZ)
+#### 5.4.2 Modelo de autorización (AuthZ)
 
 Modelo: **RBAC por repositorio** con soporte por scopes OAuth2.
 
@@ -730,7 +906,7 @@ Mapeo de scopes a operaciones API:
 | `issues:write` | `POST/PATCH /v1/repositories/{owner}/{repo}/issues`                 |
 | `pulls:write`  | `POST /v1/repositories/{owner}/{repo}/pull-requests` y `.../merges` |
 
-#### 6.4.3 Integración SSO y ciclo de tokens
+#### 5.4.3 Integración SSO y ciclo de tokens
 
 - Header de autorización: `Authorization: Bearer <access_token>`.
 - Expiración objetivo: `access_token` 15 minutos; `refresh_token` 7 días.
@@ -738,7 +914,26 @@ Mapeo de scopes a operaciones API:
 - Secretos: solo por variables de entorno/secret manager, nunca hardcoded.
 - Regla de seguridad: identidad de usuario derivada de `sub` del token, no de campos en body.
 
-### 6.5 Extensibilidad
+### 5.5 Métricas y Monitoreo
+
+Se define monitoreo operativo mínimo alineado con RNF (latencia, disponibilidad, salud y seguridad), con alarmas accionables.
+
+| Sistema           | Métrica                | Umbral de Alarma           | Responsable       | Enlace | Descripción                                                  |
+| ----------------- | ---------------------- | -------------------------- | ----------------- | ------ | ------------------------------------------------------------ |
+| API Gateway       | Latencia p95           | > 200 ms sostenido 5 min   | Equipo Backend    | TBD    | Control de SLO de rutas críticas                             |
+| API Gateway       | Error rate (5xx)       | > 2% por 5 min             | Equipo Backend    | TBD    | Detecta degradación de servicios aguas abajo                 |
+| Auth Service      | Fallas de login        | > 10% por 10 min           | Equipo Auth       | TBD    | Detecta caída de IdP, credenciales inválidas masivas o abuso |
+| Repo/Issue/Search | Health check `/health` | 2 fallas consecutivas      | Equipo Plataforma | TBD    | Disponibilidad de cada microservicio                         |
+| gRPC interno      | Error rate / timeout   | > 2% errores o p95 > 200ms | Equipo Plataforma | TBD    | Riesgo de atraso o fallo en indexación interna               |
+| PostgreSQL        | Uso de CPU             | > 80% por 10 min           | Equipo Datos      | TBD    | Señal de cuello de botella en BD                             |
+
+Respuesta operativa:
+
+- Alarma crítica abre incidente y notifica canal del equipo.
+- Se ejecuta SOP de diagnóstico (API, DB, mensajería, IdP).
+- Se registra causa raíz y acción correctiva.
+
+### 5.6 Extensibilidad
 
 El diseño favorece extensibilidad por separación de dominios, contrato explícito de API y eventos de dominio.
 
@@ -754,7 +949,7 @@ No objetivos explícitos en esta fase:
 - Funciones enterprise completas de Git host (HA multi-región, hardening avanzado, reglas complejas de protección de ramas).
 - CI/CD como feature del producto.
 
-### 6.6 Arquitectura a Mayor Escala
+### 5.7 Arquitectura a Mayor Escala
 
 A mayor escala, se mantiene la separación de límites por dominio para evitar acoplamiento accidental:
 
@@ -769,7 +964,17 @@ Decisiones de partición funcional:
 - Mantener Issue separado de Repo para evolución independiente de flujos de trabajo.
 - Evitar FK cross-service: integración por UUID lógico y validación en capa de aplicación.
 
-### 6.7 Proceso de Lanzamiento
+---
+
+## 6. Infraestructura
+
+### 6.1 Infraestructura AWS (referencia Github-Cdk)
+
+El stack `KeycloakStack` compone **GithubVpc**, **KubeCluster** (EKS), **GithubDatabase** (RDS PostgreSQL) y **KeycloakManifests**. En consecuencia, la identidad del despliegue académico puede anclarse a un entorno Kubernetes gestionado en AWS, si bien los microservicios de negocio pueden desplegarse en fases posteriores sobre el mismo clúster o en compose local.
+
+[Repo CDK](https://github.com/Savitar465/Github-Cdk.git)
+
+### 6.2 Proceso de Lanzamiento
 
 El lanzamiento se plantea por etapas, coherente con el alcance académico y L-01:
 
@@ -785,7 +990,7 @@ Rollback operativo:
 - Si falla un servicio no crítico (p. ej. Search), mantener operación degradada documentada.
 - Cambios de esquema solo con migraciones reversibles o plan de contingencia.
 
-### 6.8 Despliegues Regionales
+### 6.3 Despliegues Regionales
 
 Estrategia regional para la fase actual:
 
@@ -797,7 +1002,7 @@ Compatibilidad de servicios:
 
 - Si la región seleccionada no ofrece un componente gestionado requerido, usar alternativa equivalente dentro de la misma región o en entorno local para demo.
 
-### 6.9 Retención de Datos
+### 6.4 Retención de Datos
 
 Política propuesta de retención:
 
@@ -823,7 +1028,7 @@ Estimación de crecimiento:
 - Inicio: 20-50 GB en objetos + 10-20 GB en metadatos.
 - Crecimiento esperado: lineal por actividad de cargas y forks.
 
-### 6.10 Metodología de Pruebas
+### 6.5 Metodología de Pruebas
 
 Estrategia de pruebas por capas:
 
@@ -844,7 +1049,7 @@ Criterios mínimos de salida:
 - p95 dentro de objetivo acordado para rutas críticas.
 - No regresiones en autenticación y autorización.
 
-### 6.11 Dependencias
+### 6.6 Dependencias
 
 Dependencias externas al código de negocio del equipo:
 
@@ -853,7 +1058,7 @@ Dependencias externas al código de negocio del equipo:
 - gRPC/Redis/Elasticsearch como componentes de plataforma.
 - Repositorio de contrato (`Github-Smithy`) para artefacto OpenAPI canónico.
 
-### 6.12 Operaciones
+### 6.7 Operaciones
 
 Operación diaria esperada (fase demo):
 
@@ -899,7 +1104,7 @@ En este enfoque, el servicio `com.github#GitHubApi` centraliza operaciones; `./g
 **Contras:**
 
 - Curva de aprendizaje de la sintaxis Smithy.
-- Comunidad y plugins menores que en OpenAPI “puro”.
+- Comunidad y plugins menores que en OpenAPI "puro".
 
 #### Opción 2 — OpenAPI manual
 
@@ -1001,7 +1206,7 @@ Debe decidirse si los servicios comparten una misma instancia PostgreSQL, usan e
 
 **Pros:** simplicidad inicial y un solo punto de backup.
 
-**Contras:** alto acoplamiento; riesgo de conflictos de esquema y de “monolito disfrazado”.
+**Contras:** alto acoplamiento; riesgo de conflictos de esquema y de "monolito disfrazado".
 
 #### Opción 3 — Schema por servicio en una instancia
 
@@ -1193,10 +1398,10 @@ El cuerpo del documento incluye diagramas en **Mermaid**. Si la consigna exige *
 1. Crear la carpeta **`docs/semana1/imagenes/`** en el repositorio `github-docs` (si no existe).
 2. Renderizar los diagramas con [Mermaid Live Editor](https://mermaid.live), **draw.io** (plugin Mermaid) o la extensión de diagramas del IDE.
 3. Guardar como mínimo:
-   - `diagrama-authn-oidc.png` — secuencia del flujo OIDC (sección 6.4.1).
-   - `diagrama-authz-rbac.png` — modelo de autorización (sección 6.4.2).
-   - `diagrama-componentes.png` — figura de la sección 5.1.
-   - `diagrama-secuencia-repo.png` — figura de la sección 4.1.
+   - `diagrama-authn-oidc.png` — secuencia del flujo OIDC (sección 5.4.1).
+   - `diagrama-authz-rbac.png` — modelo de autorización (sección 5.4.2).
+   - `diagrama-componentes.png` — figura de la sección 5.2.2.
+   - `diagrama-secuencia-repo.png` — figura de la sección 5.1.
 4. En una revisión posterior del documento, insertar referencias Markdown del tipo `![AuthN OIDC](imagenes/diagrama-authn-oidc.png)`.
 
 _Motivo:_ la generación de binarios (PNG/SVG) no forma parte del flujo automático del repositorio; la exportación es responsabilidad explícita del equipo.
