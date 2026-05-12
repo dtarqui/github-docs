@@ -153,6 +153,21 @@ Las APIs internas se implementan con **gRPC** (unario y streaming), para desacop
 
 Regla de consistencia: estas proyecciones son eventualmente consistentes; el estado fuente de verdad permanece en las bases transaccionales de cada servicio.
 
+# Seguridad y Autenticación
+
+El sistema utiliza Keycloak como proveedor de identidad.
+
+## Características implementadas
+
+- OAuth2/OIDC
+- JWT Authentication
+- Role-Based Access Control (RBAC)
+- Gestión de permisos
+- Gestión de roles
+- Validación JWT
+- Logout seguro
+- Interceptores JWT para gRPC
+
 ### 3.4 Validación y seguridad de entrada
 
 Las entradas se validan en el borde (gateway/controlador) contra el esquema derivado del contrato, con controles explícitos de seguridad:
@@ -269,6 +284,22 @@ Operación interna: invocación `Search.IndexRepository` vía gRPC
 Resultado esperado: Search Service consume el evento y actualiza proyección en Elasticsearch (consistencia eventual).
 
 ---
+
+### 3.6 Comunicación Interna con gRPC
+
+El sistema implementa comunicación interna entre microservicios utilizando gRPC para mejorar rendimiento y reducir latencia.
+
+## Servicios implementados
+
+- GrpcUserServiceImpl
+- GrpcUserPublicServiceImpl
+
+## Características
+
+- Comunicación síncrona de alta velocidad
+- Serialización con Protocol Buffers
+- Validación JWT en interceptores gRPC
+- Seguridad entre microservicios
 
 ## 4. Flujo de datos
 
