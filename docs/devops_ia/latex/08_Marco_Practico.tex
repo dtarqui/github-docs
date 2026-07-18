@@ -1,0 +1,141 @@
+% No modificar estas líneas de código, por favor dirigirse a MARCO PRÁCTICO
+%
+% NOTA: capítulo reescrito para el proyecto "DevOps e IA - Mini-GitHub".
+%   Figuras en la misma carpeta: fig_arquitectura.png, fig_flujo_resumidor.png,
+%   fig_pipeline_mlops.png, fig_despliegue_ecs.png (generadas con gen_figuras_diagramas.py).
+%   Detalle extenso (código, tablas completas) -> Anexos.
+%
+\newpage
+
+%------------------------
+%
+%       MARCO PRÁCTICO
+%
+%------------------------
+
+\section{MARCO PRÁCTICO}
+
+En este capítulo se documenta la ingeniería del proyecto: la propuesta de solución, los requerimientos, la arquitectura, el desarrollo de los dos modelos de aprendizaje automático, su encapsulamiento como microservicios de inferencia, la automatización del ciclo de vida (\acrshort{MLOps}), la integración con la plataforma y el despliegue en la nube. La construcción siguió el marco \acrshort{CRISPDM}, coherente con lo comprometido en la introducción.
+
+\subsection{Propuesta de solución}
+
+\textbf{Tema:} \textit{``Incorporación de dos modelos de aprendizaje automático —clasificación de \textit{issues} y resumen de \textit{commits}— en la plataforma de microservicios Mini-GitHub''}.
+
+\vspace{0.4em}
+
+Se propuso dotar a la plataforma Mini-GitHub de dos capacidades asistidas por \acrfull{IA}, entrenadas por el equipo a partir de conjuntos de datos públicos y sin emplear modelos de lenguaje de gran escala de terceros. La primera, un clasificador que, a partir del título y la descripción de un \textit{issue}, sugiere su \textbf{tipo} (\textit{bug}, \textit{feature} o \textit{question}) y su \textbf{severidad} (crítica, alta, media o baja). La segunda, un modelo generativo que produce un \textbf{resumen} en lenguaje natural del cambio de código (\textit{diff}) de un \textit{commit}. Ambas capacidades se exponen como microservicios \acrshort{REST} independientes, se integran en el frontend como sugerencias editables y se despliegan en la nube junto al resto de la plataforma.
+
+\subsection{Requerimientos}
+
+\subsubsection{Requerimientos funcionales (RF)}
+\begin{itemize}\itemsep=1pt
+    \item \textbf{RF1:} El sistema clasifica un \textit{issue} por tipo y por severidad a partir de su texto.
+    \item \textbf{RF2:} El sistema genera un resumen del cambio de un \textit{commit} a partir de su \textit{diff}.
+    \item \textbf{RF3:} Ambos modelos se exponen mediante \acrshort{API} \acrshort{REST} documentadas con autenticación por \textit{token} JWT.
+    \item \textbf{RF4:} El frontend consume ambas capacidades como sugerencias que el usuario puede aceptar o modificar.
+    \item \textbf{RF5:} El ciclo de entrenamiento, evaluación y despliegue de los modelos se automatiza mediante un orquestador.
+\end{itemize}
+
+\subsubsection{Requerimientos no funcionales (RNF)}
+\begin{itemize}\itemsep=1pt
+    \item \textbf{RNF1:} Los modelos se entrenan por el equipo, sin modelos preentrenados de terceros (restricción académica del proyecto).
+    \item \textbf{RNF2:} La inferencia se ejecuta en \acrshort{CPU} (restricción de despliegue), con modelos ligeros.
+    \item \textbf{RNF3:} El desempeño se mide con métricas estándar: \textbf{F1-score macro} (clasificación) y \acrshort{BLEU}/\acrshort{ROUGE} (resumen).
+    \item \textbf{RNF4:} Cada modelo se conteneriza (Docker) y se despliega de forma reproducible.
+    \item \textbf{RNF5:} La solución mantiene el bajo acoplamiento de la arquitectura de microservicios existente.
+\end{itemize}
+
+\subsection{Arquitectura de la solución}
+
+La solución se incorpora a la arquitectura de microservicios de Mini-GitHub como dos servicios nuevos, sin alterar los servicios de negocio existentes. Como se observa en la Figura~\ref{fig:arquitectura}, el frontend (Next.js) es el punto de entrada del usuario y, autenticado mediante Keycloak (JWT), consume tanto los microservicios de negocio (Java/Spring) como los dos \textbf{servicios de \acrshort{IA}} (Python/FastAPI): el clasificador de \textit{issues} y el resumidor de \textit{commits}. Este diseño preserva la separación de responsabilidades: los modelos son piezas desacopladas que se comunican por contratos \acrshort{REST} tipados.
+
+\begin{figure}[H]
+    \centering
+    \caption{Arquitectura de la plataforma con los dos servicios de IA incorporados.}
+    \includegraphics[width=14cm]{fig_arquitectura.png}
+
+    \centering{\textit{Nota.} Fuente: Elaboración propia, 2026}
+    \label{fig:arquitectura}
+\end{figure}
+
+\subsection{Modelo 1 — Clasificación de \textit{issues} (tipo y severidad)}
+
+\textbf{Conjuntos de datos.} El clasificador de tipo se entrenó con el dataset \textit{GitHub Bugs Prediction} (Kaggle), $\sim$150.000 \textit{issues} reales con título, cuerpo y etiqueta (\textit{bug}/\textit{feature}/\textit{question}). El de severidad se entrenó con el \textit{Eclipse and Mozilla Defect Tracking Dataset} \citep{Lamkanfi2010} (214.903 reportes), aplicando un mapeo de las severidades de Bugzilla a los cuatro niveles del proyecto (\textit{blocker}/\textit{critical}$\rightarrow$crítica, \textit{major}$\rightarrow$alta, \textit{normal}$\rightarrow$media, \textit{minor}/\textit{trivial}$\rightarrow$baja).
+
+\textbf{Preparación.} Se concatenaron título y cuerpo; la limpieza reemplaza bloques de código por el token \texttt{CODE} y las \acrshort{URL}s por \texttt{URL} —preservando su \textit{presencia} como señal sin el ruido léxico—, elimina \acrshort{HTML} y normaliza a minúsculas. La partición fue estratificada 80/10/10 con semilla 42.
+
+\textbf{Modelado.} Se empleó vectorización \acrfull{TFIDF} (100.000 rasgos, unigramas y bigramas) y se comparó \textit{Regresión Logística} frente a \textit{Support Vector Machine} lineal, ambos con \texttt{class\_weight=balanced} para atenuar el desbalance de clases, seleccionando el de mayor F1-score macro en validación. Los modelos lineales sobre \acrshort{TFIDF} constituyen un \textit{baseline} fuerte, rápido y apto para inferencia en \acrshort{CPU}. El resultado es un \textit{pipeline} de \textit{scikit-learn} (vectorizador + clasificador) serializado como artefacto \texttt{.joblib}. Los resultados cuantitativos se presentan en el Capítulo de Análisis de Resultados.
+
+\subsection{Modelo 2 — Resumen de \textit{commits} (\textit{diff} $\rightarrow$ mensaje)}
+
+\textbf{Conjunto de datos.} Se utilizó el corpus limpio de \textbf{NNGen} (Liu et al., 2018), derivado del corpus de \cite{Jiang2017}, con pares \textit{diff}$\rightarrow$mensaje de los 1.000 proyectos Java más populares de GitHub ($\sim$22.000 pares), ampliado con pares de Python, JavaScript, C++ y C\# del dataset \textit{MCMD} para un modelo multilenguaje.
+
+\textbf{Arquitectura.} Se entrenó \textbf{desde cero} un modelo secuencia a secuencia ($\sim$35 millones de parámetros en su versión multilenguaje desplegada): codificador \textit{GRU} bidireccional, decodificador con \textbf{atención de Luong} y un mecanismo \textit{pointer-generator} \citep{See2017} que permite \textbf{copiar identificadores} del \textit{diff} (nombres de métodos, versiones) al mensaje, superando la debilidad del seq2seq base ante vocabulario fuera de rango. Corresponde a la línea de \acrfull{NMT} aplicada a mensajes de \textit{commit}.
+
+\textbf{Sistema híbrido de inferencia.} El servicio no delega la respuesta únicamente a la red neuronal: implementa una cascada de cuatro niveles (Figura~\ref{fig:flujoresumidor}) que responde con el primer nivel cuya condición se cumple: (1) heurísticas de ingeniería de software (línea ChangeScribe) que extraen patrones verificables del propio \textit{diff}; (2) recuperación estilo NNGen cuando existe un \textit{diff} vecino suficientemente similar; (3) el modelo generativo \textit{pointer-generator} con \textit{beam search}; y (4) un respaldo por nombres de archivo. Esta estrategia prioriza la información verificable del cambio y mejora la robustez sobre \textit{diffs} fuera de distribución.
+
+\begin{figure}[H]
+    \centering
+    \caption{Sistema híbrido en cascada del resumidor de \textit{commits}.}
+    \includegraphics[width=13cm]{fig_flujo_resumidor.png}
+
+    \centering{\textit{Nota.} Fuente: Elaboración propia, 2026}
+    \label{fig:flujoresumidor}
+\end{figure}
+
+\subsection{Microservicios de inferencia}
+
+Cada modelo se encapsula en un microservicio \textit{FastAPI} independiente, contenerizado con Docker y protegido con validación de \textit{token} JWT contra Keycloak, replicando el patrón de seguridad de los microservicios de negocio. El modelo viaja \textbf{dentro de la imagen}, de modo que cada versión de imagen queda ligada a una versión exacta del modelo (\acrshort{MLOps} básico). Los contratos se resumen en la Tabla~\ref{tab:endpoints_ia}.
+
+\begin{table}[H]
+\centering
+\caption{Contratos REST de los servicios de IA}
+{\small
+\begin{tabular}{|l|c|l|p{4.6cm}|}
+\hline
+\textbf{Servicio} & \textbf{Puerto} & \textbf{Endpoint} & \textbf{Entrada $\rightarrow$ Salida} \\
+\hline
+issue-classifier & 8095 & \texttt{POST /v1/classify} & \texttt{\{title, body\}} $\rightarrow$ \texttt{\{tipo, severidad, confianza\}} \\
+\hline
+commit-summarizer & 8096 & \texttt{POST /v1/summarize} & \texttt{\{diff\}} $\rightarrow$ \texttt{\{resumen\}} \\
+\hline
+\end{tabular}
+}
+
+\centering{\textit{Nota.} Fuente: Elaboración propia, 2026}
+\label{tab:endpoints_ia}
+\end{table}
+
+\subsection{Automatización del ciclo de vida (\acrshort{MLOps})}
+
+El ciclo de vida de los modelos se automatizó con un orquestador \textit{Apache Airflow}. Los tres modelos (tipo, severidad y resumidor) comparten un mismo grafo de tareas, parametrizado por una fábrica de \textit{DAG}. Como ilustra la Figura~\ref{fig:pipelinemlops}, el flujo encadena \texttt{preprocess} $\rightarrow$ \texttt{train} $\rightarrow$ \texttt{evaluate} y, mediante una \textbf{compuerta de calidad} (\textit{quality gate}), sólo registra y despliega el modelo si supera un umbral configurable (F1-score macro para la clasificación, \acrshort{BLEU} para el resumen); en caso contrario lo rechaza. El registro versiona cada modelo y el despliegue se realiza por \textit{hot-swap} (recarga en caliente del servicio, sin reinicio).
+
+\begin{figure}[H]
+    \centering
+    \caption{Pipeline MLOps con compuerta de calidad, registro y despliegue en caliente.}
+    \includegraphics[width=15cm]{fig_pipeline_mlops.png}
+
+    \centering{\textit{Nota.} Fuente: Elaboración propia, 2026}
+    \label{fig:pipelinemlops}
+\end{figure}
+
+\subsection{Integración con la plataforma}
+
+La integración con el frontend se implementó mediante una capa de servicio (\texttt{ai.ts}) que enruta las peticiones a ambos modelos y adjunta el \textit{token} del usuario. En el formulario de creación de \textit{issue}, un botón \textit{``Sugerir tipo y severidad''} invoca al clasificador y muestra el tipo (con su nivel de confianza) y la severidad como etiquetas de color; el usuario puede \textbf{aplicarlas como \textit{labels} editables}. En el editor de archivos, un botón \textit{``Sugerir mensaje''} construye el \textit{diff}, invoca al resumidor y rellena el campo del mensaje de \textit{commit}, que el usuario puede ajustar antes de confirmar. En ambos casos la \acrshort{IA} actúa como asistencia y la decisión final es del usuario.
+
+\subsection{Despliegue en la nube}
+
+La plataforma completa se despliega en \textbf{AWS ECS Fargate} mediante infraestructura como código (AWS CDK). Como muestra la Figura~\ref{fig:despliegueecs}, un único \textit{stack} provisiona la red (VPC), el \textit{cluster} \texttt{github-ecs}, la base de datos gestionada (RDS PostgreSQL), el descubrimiento de servicios (Cloud Map) y los balanceadores (ALB) que exponen el frontend y las \acrshort{API}s. Los once servicios corren como tareas Fargate; los dos servicios de \acrshort{IA} se publican desde \textbf{ECR} y son consumidos internamente por el frontend. Complementariamente, cada microservicio de \acrshort{IA} incorpora un flujo de integración y entrega continua (GitHub Actions) que, ante un cambio en la rama principal, construye la imagen, la publica en ECR y actualiza el servicio en ECS.
+
+\begin{figure}[H]
+    \centering
+    \caption{Despliegue de la plataforma en AWS ECS Fargate (CDK).}
+    \includegraphics[width=15cm]{fig_despliegue_ecs.png}
+
+    \centering{\textit{Nota.} Fuente: Elaboración propia, 2026}
+    \label{fig:despliegueecs}
+\end{figure}
+
+\subsection{Metodología aplicada}
+
+El desarrollo siguió el marco \acrfull{CRISPDM}: (i) \textit{comprensión del problema}, alineada con los objetivos de la introducción; (ii) \textit{comprensión y preparación de los datos}, con el análisis exploratorio, la limpieza y el particionamiento descritos; (iii) \textit{modelado}, con la selección de algoritmos por validación; (iv) \textit{evaluación}, con métricas estándar (Capítulo de Análisis de Resultados); y (v) \textit{despliegue}, materializado en los microservicios, el pipeline \acrshort{MLOps} y la infraestructura en la nube. El detalle de implementación (código, notebooks y tablas completas) se documenta en los apéndices.

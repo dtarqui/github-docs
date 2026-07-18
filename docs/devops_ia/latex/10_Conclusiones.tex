@@ -1,0 +1,50 @@
+% No modificar estas líneas de código, por favor dirigirse a CONCLUSIONES
+%
+% NOTA: capítulo reescrito para "DevOps e IA - Mini-GitHub".
+%
+\newpage
+\phantomsection\addcontentsline{toc}{section}{CONCLUSIONES}
+
+%------------------------
+%
+%       CONCLUSIONES
+%
+%------------------------
+
+\section*{CONCLUSIONES}
+
+El presente capítulo sintetiza los logros alcanzados durante el desarrollo e integración de los dos modelos de aprendizaje automático en la plataforma Mini-GitHub, analizando el cumplimiento de los objetivos específicos y los aprendizajes generados.
+
+\vspace{0.5em}
+
+\textbf{Conclusiones por objetivo específico:}
+
+\begin{itemize}\itemsep=2pt
+
+    \item \textbf{OE1 — Preparación de los conjuntos de datos:} Se recolectaron y prepararon los datasets públicos requeridos: \textit{GitHub Bugs Prediction} (Kaggle) para el tipo, el \textit{Eclipse and Mozilla Defect Tracking Dataset} \citep{Lamkanfi2010} para la severidad, y el corpus NNGen ampliado con MCMD para el resumen de \textit{commits}. Se aplicó análisis exploratorio, limpieza, tokenización y partición estratificada 80/10/10 con semilla 42, garantizando la reproducibilidad.
+
+    \item \textbf{OE2 — Clasificador de \textit{issues} (tipo y severidad):} Se entrenó y validó un modelo de clasificación supervisada (\acrshort{TFIDF} + clasificador lineal), alcanzando \textbf{F1-score macro de 0{,}710} en tipo y \textbf{0{,}442} en severidad, con desempeño sólido en las clases mayoritarias y en la detección de lo crítico. El modelo se sirve en el microservicio \texttt{issue-classifier-ms}.
+
+    \item \textbf{OE3 — Resumidor de \textit{commits}:} Se construyó desde cero un modelo secuencia a secuencia con mecanismo \textit{pointer-generator}, sin modelos preentrenados de terceros, que alcanzó un \acrshort{BLEU}-4 global de \textbf{11{,}79} en su versión multilenguaje. El mecanismo de copia mejoró el \acrshort{BLEU}-4 en un +74\% respecto al seq2seq base. El servicio complementa la red con una estrategia híbrida de heurísticas y recuperación.
+
+    \item \textbf{OE4 — Integración en la plataforma:} Ambos modelos se encapsularon como microservicios \acrshort{REST} (FastAPI, Docker, autenticación JWT), se integraron en el frontend como sugerencias editables, y se desplegaron en producción sobre AWS ECS Fargate. El ciclo de vida se automatizó con un \textit{pipeline} \acrshort{MLOps} (Apache Airflow con compuerta de calidad, registro y despliegue en caliente) y con integración/entrega continua hacia el registro de contenedores.
+
+\end{itemize}
+
+\vspace{0.5em}
+
+\textbf{Conclusiones generales:}
+
+\vspace{0.3em}
+
+El proyecto cumplió satisfactoriamente su objetivo general: incorporar dos modelos de aprendizaje automático, entrenados por el propio equipo y sin recurrir a modelos de lenguaje de gran escala de terceros, en la plataforma de microservicios Mini-GitHub, y validarlos en un entorno real desplegado en la nube. Más allá del modelado, el trabajo integró de manera efectiva las dos dimensiones del módulo —\textit{DevOps} e \acrfull{IA}—: al modelado supervisado y generativo se sumaron prácticas de \acrshort{MLOps} (orquestación del ciclo de vida con compuertas de calidad y versionado de modelos), de contenerización e integración continua, y de infraestructura como código para el despliegue en la nube.
+
+Las limitaciones identificadas —el desempeño modesto de la severidad en las clases intermedias y el \acrshort{BLEU} moderado del resumidor— son consistentes con la literatura y con el alcance académico del proyecto, y no comprometen el valor de la solución: al presentarse como \textit{asistencia editable}, ambos modelos aportan una sugerencia útil que el usuario conserva bajo su criterio.
+
+\vspace{0.5em}
+
+\textbf{Conclusión integradora:}
+
+\vspace{0.3em}
+
+En síntesis, el proyecto demuestra que es viable construir, entrenar y operar modelos de aprendizaje automático propios como parte de una plataforma de software real, siguiendo un proceso sistemático y reproducible (\acrshort{CRISPDM}) y sosteniendo su ciclo de vida con prácticas de \textit{DevOps} y \acrshort{MLOps}. El resultado no es únicamente un par de modelos con métricas medidas, sino un sistema integrado y desplegado que asiste al desarrollador en dos tareas cotidianas —clasificar incidencias y documentar cambios—, consolidando competencias en ingeniería de software, ciencia de datos y operación de sistemas de inteligencia artificial.

@@ -1,0 +1,31 @@
+Nueva Version, Plantilla Documento para Tesis/Trabajo de Grado UCB Cochabamba.Junio 2020
+
+ADVERTENCIA
+ Esta nueva version utiliza un compilador mejorado además de algunos cambios en el diseño
+ y las fuentes, al migrar de una version más antigua su documento corre el riesgo de ser
+ modificado, asegurece de tener un respaldo y revisar cuidadosamente sus apartados.
+
+IMPORTANTE
+ Esta version usa XeLateX como compilador en lugar de PDFLatex,
+ Para habilitar XelateX en OverLeaf:
+	- Entre a su Documento
+	- Entre a la pestaña "Menu"
+	- En la Seccion "Settings" Ubique el Compilador "Compiler"
+	- Cambie el Compilador de "pdfLatex" a "XeLateX"
+	- Cambie la version del "TeXLive" a "2019"
+
+
+
+
+LOG de cambios
+ Cambio de compilador a XeLateX
+ Actualizacion de modelo de caratula
+ Cambio de fuente principal, de fontenc modif a Times New Roman
+ Modificacion de punteado en indice
+ Modificacino de identacion en indice
+ Actualizacion de Formato de Anexos y Apendices
+ Desactivacion de Transparencias
+ Actualizacion de interlineado
+ Modificacion de organigrama
+ Actualizacion de librerias
+ Limpieza de comandos

@@ -1,0 +1,109 @@
+% No es necesario realizar ninguna modificación en este archivo. 
+% Si se lo realiza es bajo la responsabilidad del editor, siendo que podrá alterar el formato de la institución. 
+
+\begin{titlepage}
+    \begin{tikzpicture}[remember picture, overlay]
+        \draw[line width=1pt, black]
+            ($(current page.north west) + (2.5cm,-2.5cm)$)
+            rectangle
+            ($(current page.south east) + (-2.5cm,2.5cm)$);
+            
+        % Imagen de barras (ajusta posición y tamaño según necesites)  
+        \node[anchor=north west] at ($(current page.north west) + (2.5cm,-8.5cm)$) {
+            \includegraphics[height=14cm]{Figuras/barras.png}
+        };
+        
+        % Escudo (posicionado independientemente)
+        \node[anchor=north west] at ($(current page.north west) + (3.5cm,-3.5cm)$) {
+            \includegraphics[height=3cm]{Figuras/escudo.png}
+        };
+    \end{tikzpicture}
+
+    \begin{center}
+         
+        \newfontfamily{\Arial}{Arial}
+          \definecolor{UCBblack}{rgb}{0, 0, 0}
+              \hspace*{1.5cm} 
+              \begin{minipage}[c]{0.90\textwidth}
+                \centering
+                \vspace{0.3cm}
+                \textcolor{UCBblack}{\Arial\fontsize{14}{16.8}\selectfont \universidad} \\[0.2em]
+                \textcolor{UCBblack}{\Arial\fontsize{12}{16.8}\selectfont \facultad} \\[0.2em]
+                \textcolor{UCBblack}{\Arial\fontsize{12}{16.8}\selectfont \departamento}
+            
+                % ↓ Todo lo siguiente se alinea a este bloque (no al centro de la página)
+                \vspace{1.2cm}
+
+                \setlength{\fboxsep}{0.55cm}
+                \fbox{%
+                  \begin{minipage}{8.19cm}
+                    \centering
+                    \fontsize{10}{12}\selectfont
+                    \MakeUppercase{Modulo: “\diplomado”} \\[1em]
+                    \MakeUppercase{\titulacion}
+                  \end{minipage}%
+                }
+            
+                \vspace{0.5cm}
+            
+                \fbox{%
+                  \begin{minipage}{9cm}
+                    \centering
+                    \fontsize{14}{18}\selectfont
+                    \MakeUppercase{\thetitle}
+                  \end{minipage}%
+                }
+            \end{minipage}
+
+        %{\fontsize{14}{19.2}\selectfont\textbf{\thetitle}\par}
+        \vspace{0.7cm}
+
+        \fontsize{11}{16.8}{Realizado por:}\\
+        \vspace{0.1cm}
+        {\fontsize{14}{16.8}\selectfont{\theauthor}}
+        \vspace{0.5cm}
+
+        \fontsize{11}{16.8}{Revisor:}\\
+        \vspace{0.1cm}
+        {\fontsize{14}{16.8}\selectfont{\relator}}
+        \vspace{0.6cm}
+
+        {\fontsize{12}{14.4}\selectfont\underline{\unidad\ - Bolivia}}\\
+        \vspace{1.2mm}
+
+        {\fontsize{12}{14.4}\selectfont\thedate}
+    \end{center}
+\end{titlepage}
+
+
+%------------------------------------------------------------------------------------------------
+
+\begin{comment}
+
+\newpage
+\begin{center}
+   \textbf{TRIBUNAL EXAMINADOR} 
+
+    \begin{textblock}{5}(2.5,5)
+    \noindent\rule{6.5cm}{0.4pt}
+    \ifdef{\tutor}{\textbf{\\\tutor\\Profesor Guía}\par}{\textbf{\\\tutora\\Profesora Guía}\par}
+    \end{textblock}
+    
+    \begin{textblock}{5}(8.5,5)
+    \noindent\rule{6.5cm}{0.4pt}
+    \ifdef{\relator}{\textbf{\\\relator\\Profesor Relator}\par}{\textbf{\\\relatora\\Profesora Relatora}\par}
+    \end{textblock}
+    
+    \begin{textblock}{5}(2.5,9.5)
+    \noindent\rule{6.5cm}{0.4pt}
+    \ifdef{\director}{\textbf{\\\director\\Director de Carrera}\par}{\textbf{\\\directora\\Directora de Carrera}\par}
+    \end{textblock}
+    
+    \begin{textblock}{5}(8.5,9.5)
+    \noindent\rule{6.5cm}{0.4pt}
+    \ifdef{\rector}{\textbf{\\\rector\\Rector Regional}\par}{\textbf{\\\rectora\\Rectora Regional}\par}
+    \end{textblock}
+
+\end{center}
+
+\end{comment}

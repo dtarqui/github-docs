@@ -1,0 +1,113 @@
+% No modificar estas líneas de código, por favor dirigirse a ANÁLISIS DE RESULTADOS
+%
+% NOTA: capítulo reescrito para "DevOps e IA - Mini-GitHub".
+%   Figuras (carpeta actual): fig_clasif_tipo.png, fig_clasif_severidad.png,
+%   fig_distribucion_clases.png, fig_resumidor_evolucion.png, fig_resumidor_lenguaje.png
+%   (generadas con gen_figuras_metricas.py, con números REALES de los ENTRENAMIENTO.md).
+%   Capturas de producción pendientes -> ver PENDIENTE_IMAGENES.md.
+%
+\newpage
+
+%------------------------
+%
+%       ANÁLISIS DE RESULTADOS
+%
+%------------------------
+
+\section{ANÁLISIS DE RESULTADOS}
+
+Este capítulo presenta los resultados de la evaluación de los dos modelos, el cumplimiento de los requerimientos y la validación del sistema desplegado en producción. Las métricas se obtuvieron sobre el conjunto de prueba (evaluado una única vez, tras la selección por validación) con semilla fija 42 para garantizar reproducibilidad.
+
+\subsection{Cumplimiento de requerimientos}
+
+Los cinco requerimientos funcionales se cumplieron: el sistema clasifica \textit{issues} por tipo y severidad (RF1), genera resúmenes de \textit{commits} (RF2), expone ambos modelos como \acrshort{API} \acrshort{REST} autenticadas (RF3), los integra en el frontend como sugerencias editables (RF4) y automatiza el ciclo de entrenamiento--evaluación--despliegue con un \textit{pipeline} de Airflow (RF5). Los requerimientos no funcionales también se satisfacen: modelos entrenados por el equipo sin preentrenados de terceros (RNF1), inferencia en \acrshort{CPU} (RNF2), evaluación con métricas estándar (RNF3), contenerización reproducible (RNF4) y preservación del bajo acoplamiento (RNF5).
+
+\subsection{Resultados del Modelo 1 — clasificación de \textit{issues}}
+
+El clasificador de \textbf{tipo} alcanzó un \textbf{F1-score macro de 0{,}710} y una exactitud de 0{,}778 sobre el conjunto de prueba, seleccionando la Regresión Logística (0{,}711 en validación) sobre la \textit{SVM} lineal (0{,}707). Como se observa en la Figura~\ref{fig:clasiftipo}, las clases mayoritarias superan 0{,}80 de F1 (\textit{bug} 0{,}815; \textit{feature} 0{,}806), mientras que \textit{question} baja a 0{,}508 por su marcado desbalance (razón $\sim$5:1) y su solapamiento léxico con \textit{bug}. El uso de \texttt{class\_weight=balanced} prioriza el \textit{recall} de la clase minoritaria (0{,}588), comportamiento preferible para un sistema de sugerencias.
+
+\begin{figure}[H]
+    \centering
+    \caption{Clasificador de tipo — precisión, \textit{recall} y F1 por clase (test).}
+    \includegraphics[width=12cm]{fig_clasif_tipo.png}
+
+    \centering{\textit{Nota.} Fuente: Elaboración propia, 2026}
+    \label{fig:clasiftipo}
+\end{figure}
+
+El clasificador de \textbf{severidad} obtuvo un \textbf{F1-score macro de 0{,}442} y exactitud 0{,}685, resultado consistente con la literatura para severidad multiclase (0{,}40--0{,}55), en línea con \cite{Lamkanfi2010}. La Figura~\ref{fig:clasifseveridad} muestra que el modelo es sólido donde más importa —detectar lo \textbf{crítico} (F1 0{,}540, \textit{recall} 0{,}579)— y en la clase mayoritaria \textit{media} (0{,}810), pero las clases \textit{alta} (0{,}225) y \textit{baja} (0{,}193) son genuinamente ambiguas, incluso para anotadores humanos. Este comportamiento se explica por el desbalance del corpus (Figura~\ref{fig:distribucion}): la clase \textit{media} (valor por defecto de Bugzilla) domina el conjunto, y la clase \textit{question} es minoritaria en el dataset de tipo. Coherentemente con el alcance del proyecto, la severidad se presenta como una \textit{sugerencia editable}.
+
+\begin{figure}[H]
+    \centering
+    \caption{Clasificador de severidad — precisión, \textit{recall} y F1 por clase (test).}
+    \includegraphics[width=12cm]{fig_clasif_severidad.png}
+
+    \centering{\textit{Nota.} Fuente: Elaboración propia, 2026}
+    \label{fig:clasifseveridad}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \caption{Distribución de clases en el conjunto de prueba (evidencia del desbalance).}
+    \includegraphics[width=13cm]{fig_distribucion_clases.png}
+
+    \centering{\textit{Nota.} Fuente: Elaboración propia, 2026}
+    \label{fig:distribucion}
+\end{figure}
+
+\subsection{Resultados del Modelo 2 — resumen de \textit{commits}}
+
+El modelo generativo se evaluó con \acrshort{BLEU}-4 y \acrshort{ROUGE}-L, las métricas estándar de la tarea. La incorporación del mecanismo \textit{pointer-generator} sobre el seq2seq base produjo una mejora sustancial (Figura~\ref{fig:resumidorevolucion}): \acrshort{BLEU}-4 pasó de \textbf{6{,}68 a 11{,}62} (+74\%) y \acrshort{ROUGE}-L de \textbf{0{,}209 a 0{,}293} (+40\%), gracias a su capacidad de copiar identificadores del \textit{diff} al mensaje. La Tabla~\ref{tab:resumidor} resume esta evolución.
+
+\begin{table}[H]
+\centering
+\caption{Evolución del resumidor (test, corpus Java)}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Variante} & \textbf{BLEU-4} & \textbf{ROUGE-L} \\
+\hline
+seq2seq base & 6{,}68 & 0{,}209 \\
+\textbf{pointer-generator} & \textbf{11{,}62} & \textbf{0{,}293} \\
+\hline
+\end{tabular}
+
+\centering{\textit{Nota.} Fuente: Elaboración propia, 2026}
+\label{tab:resumidor}
+\end{table}
+
+El modelo desplegado es la variante \textbf{multilenguaje} (v3), reentrenada desde cero sobre Java, Python, JavaScript, C++ y C\#. Alcanzó un \acrshort{BLEU}-4 \textbf{global de 11{,}79}, con desempeño homogéneo ($\sim$12) en los cuatro lenguajes nuevos (Figura~\ref{fig:resumidorlenguaje}). El \textit{trade-off} medido y aceptado fue una caída de 2{,}1 puntos en Java (9{,}52) a cambio de cobertura real en lenguajes antes fuera de dominio. Cabe notar que \acrshort{BLEU} subestima la calidad percibida en esta tarea, al comparar $n$-gramas exactos contra una única referencia en mensajes muy cortos; por ello el sistema se concibe como \textit{asistencia editable} y no como generador autónomo.
+
+\begin{figure}[H]
+    \centering
+    \caption{Efecto del mecanismo de copia: BLEU-4 y ROUGE-L (seq2seq $\rightarrow$ pointer-generator).}
+    \includegraphics[width=12cm]{fig_resumidor_evolucion.png}
+
+    \centering{\textit{Nota.} Fuente: Elaboración propia, 2026}
+    \label{fig:resumidorevolucion}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \caption{BLEU-4 por lenguaje del modelo desplegado.}
+    \includegraphics[width=12cm]{fig_resumidor_lenguaje.png}
+
+    \centering{\textit{Nota.} Fuente: Elaboración propia, 2026}
+    \label{fig:resumidorlenguaje}
+\end{figure}
+
+\subsection{Validación en producción}
+
+Además de la evaluación cuantitativa sobre los conjuntos de prueba, el sistema se validó en el entorno real desplegado en AWS. Con la plataforma en producción, se ejercitaron ambos modelos sobre \textit{issues} y \textit{commits} reales de Mini-GitHub: al crear un \textit{issue}, el clasificador sugiere su tipo y severidad, que se aplican como \textit{labels} editables; y al editar un archivo, el resumidor propone el mensaje del \textit{commit}. Esta validación confirma el funcionamiento de extremo a extremo (frontend $\rightarrow$ servicios de \acrshort{IA} $\rightarrow$ persistencia) con datos reales. La evidencia gráfica de estas ejecuciones se documenta en los apéndices.
+
+\subsection{Síntesis de resultados}
+
+Los resultados evidencian el cumplimiento de los objetivos planteados. Los principales logros cuantificables son:
+
+\begin{itemize}\itemsep=1pt
+    \item Clasificador de tipo con \textbf{F1-macro 0{,}710} (F1 $>$ 0{,}80 en las clases mayoritarias).
+    \item Clasificador de severidad con \textbf{F1-macro 0{,}442}, efectivo en la detección de lo crítico (F1 0{,}540).
+    \item Resumidor con \textbf{BLEU-4 11{,}79} global (multilenguaje), tras una mejora del +74\% por el mecanismo de copia.
+    \item Ambos modelos \textbf{desplegados y validados en producción}, integrados en la plataforma como asistencia editable.
+\end{itemize}
+
+Las limitaciones observadas —severidad modesta en las clases intermedias y \acrshort{BLEU} moderado del resumidor— son consistentes con la literatura y con el alcance académico del proyecto, y no comprometen el valor del sistema como herramienta de asistencia al desarrollador.

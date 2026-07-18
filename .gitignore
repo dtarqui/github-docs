@@ -1,0 +1,32 @@
+# Claude Code (instrucciones y configuración local)
+.claude/
+
+# Artefactos de compilación LaTeX (archivos intermedios)
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.bbl
+*.blg
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.glo
+*.gls
+*.glg
+*.acn
+*.acr
+*.alg
+*.ist
+*.nav
+*.snm
+*.vrb
+
+# Cache de Python (scripts de generación de figuras)
+__pycache__/
+*.pyc
+
+# Nota: los .png (figuras) y los .tex SÍ se versionan.
+#       Los .pdf finales NO se ignoran (déjalos a criterio del equipo).

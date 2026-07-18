@@ -1,0 +1,243 @@
+% No modificar estas líneas de código, por favor dirigirse a INTRODUCCIÓN
+\newpage
+%\addcontentsline{toc}{section}{CAPÍTULO 1 MARCO INTRODUCTORIO}
+%------------------------
+%
+%       INTRODUCCIÓN
+%
+%------------------------
+%
+% NOTA PARA EL EQUIPO:
+%  - Este archivo replica el estilo del documento de referencia (RAN Analytics):
+%    tercera persona, español académico formal, glosario (\acrfull/\acrshort) y citas (\citep/\cite).
+%  - Requiere las entradas de glosario (\newacronym) del archivo Glosario.tex.
+%  - Requiere las entradas .bib citadas (ver bloque \begin{comment} al final del archivo).
+%  - La figura de Ishikawa se genera con gen_ishikawa.py -> "ishikawa_issues_commits.png".
+%  - ALCANCE: dos modelos. (1) Clasificación de issues por TIPO y SEVERIDAD.
+%                          (2) Resumen automático de los cambios de un commit.
+
+
+\section{MARCO INTRODUCTORIO}
+\subsection{Introducción}
+
+En el ámbito del desarrollo de software, las plataformas de alojamiento y colaboración de código se han consolidado como el eje central del trabajo de los equipos de ingeniería. En ellas, la gestión de incidencias (\textit{issues}) y el registro histórico de cambios mediante confirmaciones (\textit{commits}) constituyen dos actividades cotidianas cuya calidad incide directamente en la trazabilidad del proyecto y en la productividad del equipo. Sin embargo, ambas tareas dependen en gran medida del criterio individual de cada usuario, lo que introduce inconsistencias que dificultan la priorización del trabajo y la comprensión del historial de un repositorio \citep{Kallis2019}.
+
+En paralelo, la aplicación de la \acrfull{IA} a la ingeniería de software ha mostrado avances significativos en tareas como la clasificación automática de incidencias, la estimación de su severidad y la generación asistida de artefactos textuales. Diversos trabajos han demostrado que técnicas de \acrfull{ML} y de \acrfull{DL} pueden inferir, a partir del contenido textual de un \textit{issue} o de los cambios de código de un \textit{commit}, información relevante para asistir al desarrollador \citep{Lamkanfi2010, Jiang2017}.
+
+Por tales motivos, el presente proyecto se desarrolla en el contexto de la plataforma \textbf{Mini-GitHub}, una recreación simplificada de un sistema tipo GitHub implementada por el equipo bajo una arquitectura de microservicios. La plataforma gestiona, entre otros dominios, repositorios, archivos, \textit{issues} y \textit{pull requests}, y expone sus servicios mediante \acrfull{API} de tipo \acrfull{REST}. No obstante, en su estado actual la plataforma carece de cualquier capacidad asistida por \acrshort{IA} que apoye al usuario en la gestión de incidencias o en la documentación de los cambios de código.
+
+En respuesta a esta necesidad, y como trabajo final del módulo de \textit{DevOps e Inteligencia Artificial}, el proyecto propone incorporar dos modelos de \acrshort{ML} entrenados por el propio equipo a partir de conjuntos de datos públicos. En primer lugar, un modelo de clasificación que asigna automáticamente a cada \textit{issue}, a partir de su título y descripción, su \textbf{tipo} (error, mejora o pregunta) y su \textbf{nivel de severidad} (crítica, alta, media o baja). En segundo lugar, un modelo de \acrfull{PLN} que produce un \textbf{resumen automático} de los cambios de código (\textit{diff}) de un \textit{commit}. De este modo, la plataforma queda preparada para ofrecer asistencia inteligente en dos puntos críticos del flujo de trabajo del desarrollador.
+
+
+\subsection{Antecedentes}
+
+La aplicación de técnicas de aprendizaje automático a la ingeniería de software ha sido objeto de estudio tanto en la academia como en la industria. En lo relativo a la gestión de incidencias, las investigaciones se han orientado principalmente hacia la clasificación de su tipo y la predicción de su severidad, problemas que se modelan como tareas de aprendizaje supervisado sobre el contenido textual del reporte.
+
+En el contexto de la clasificación por tipo, \cite{Kallis2019} presentaron \textit{Ticket Tagger}, una herramienta basada en aprendizaje automático que clasifica automáticamente los \textit{issues} de GitHub en categorías como error, mejora y pregunta, empleando el título y la descripción como entrada. En esta misma línea, las competencias de herramientas del taller \textit{Natural Language-Based Software Engineering} han consolidado conjuntos de datos de referencia con miles de \textit{issues} etiquetados por tipo, fomentando la comparación reproducible entre enfoques de clasificación \citep{NLBSE2024}.
+
+Respecto a la predicción de severidad, \cite{Lamkanfi2010} demostraron que es posible anticipar la severidad de un defecto reportado a partir de su descripción textual mediante técnicas de minería de texto, estableciendo un antecedente fundamental para el tratamiento de la severidad como un problema de clasificación supervisada.
+
+En cuanto a la generación y el resumen de artefactos textuales, \cite{Jiang2017} propusieron un enfoque basado en \acrfull{NMT} para producir automáticamente mensajes de \textit{commit} a partir de los \textit{diffs}, tratando la tarea como una traducción de los cambios de código a lenguaje natural. De manera complementaria, \cite{See2017} introdujeron las redes generadoras con mecanismo de copia (\textit{pointer-generator}), una arquitectura de aprendizaje profundo que mejora el resumen de texto al permitir copiar términos de la entrada, técnica directamente aplicable al resumen de los cambios de código. En un dominio próximo, \cite{Liu2019} abordaron la generación automática de descripciones de \textit{pull requests} a partir de los mensajes de \textit{commit}, evidenciando la viabilidad de los modelos secuencia a secuencia para resumir cambios de software.
+
+Como antecedente directo del presente proyecto, el equipo desarrolló previamente la plataforma Mini-GitHub bajo una arquitectura de microservicios, así como un perfil técnico inicial orientado a la clasificación de \textit{issues}. Dicho perfil estableció el dominio de aplicación y los conjuntos de datos base, sentando las bases que el presente trabajo retoma, formaliza y amplía con la clasificación por tipo y severidad, y con un segundo modelo orientado al resumen de los \textit{commits}.
+
+A pesar de los avances documentados en la literatura, no se han identificado, en el contexto de la plataforma desarrollada por el equipo, implementaciones que integren de forma conjunta la clasificación automática del tipo y la severidad de los \textit{issues} y el resumen automático de los cambios de los \textit{commits} mediante modelos entrenados por el propio equipo. Por tanto, el presente proyecto busca llenar ese vacío, incorporando ambas capacidades de \acrshort{IA} de manera nativa en la arquitectura existente.
+
+
+\subsection{Identificación del problema}
+
+El problema a resolver se describe a continuación:
+
+\subsubsection{Descripción del objeto de estudio}
+
+El objeto de estudio del presente proyecto se centra en la incorporación de capacidades de inteligencia artificial en la plataforma Mini-GitHub, mediante el desarrollo de dos modelos de aprendizaje automático: un clasificador que asigna a cada \textit{issue} su tipo (error, mejora o pregunta) y su nivel de severidad, y un modelo de resumen automático de los cambios de un \textit{commit} a partir de su \textit{diff}. Ambos modelos se entrenarán a partir de conjuntos de datos públicos, externos al entorno de producción, y se validarán posteriormente sobre los datos reales de la plataforma, integrándose con sus microservicios mediante interfaces \acrshort{REST}.
+
+\subsubsection{Planteamiento y Formulación del Problema}
+
+Aunque la plataforma Mini-GitHub provee las funcionalidades esenciales para la gestión de repositorios, \textit{issues} y \textit{commits}, los usuarios continúan realizando de forma manual la clasificación de las incidencias y la redacción de los mensajes que documentan los cambios de código. En consecuencia, estos procesos resultan inconsistentes, dependientes del criterio individual y propensos a omisiones que degradan la calidad de la información del proyecto.
+
+\paragraph{Situación actual}
+
+Para comprender de manera integral la situación actual del entorno, se presenta el diagrama de Ishikawa (espina de pescado), el cual permite identificar y categorizar sistemáticamente los factores que contribuyen a la problemática, como se muestra en la Figura~\ref{fig:ishikawa_issues_commits}.
+
+\begin{figure}[H]
+    \centering
+    \caption{Diagrama de Ishikawa: Causas del Problema.}
+    \includegraphics[width=14cm]{ishikawa_issues_commits.png}
+
+    \centering{\textit{Nota.} Fuente: Elaboración propia, 2026}
+    \label{fig:ishikawa_issues_commits}
+\end{figure}
+
+Como se visualizó en la figura anterior, la operación actual de la plataforma presenta las siguientes limitaciones:
+
+\begin{itemize}
+    \item Los \textit{issues} se crean sin clasificación automática: ni su tipo (error, mejora o pregunta) ni su nivel de severidad se asignan de forma sistemática.
+
+    \item La clasificación y priorización (\textit{triage}) de las incidencias depende del criterio individual de cada usuario, lo que genera variabilidad en los resultados.
+
+    \item Las incidencias críticas pueden pasar desapercibidas entre tareas de menor prioridad, retrasando su atención y resolución.
+
+    \item Los mensajes de \textit{commit} se redactan manualmente, con calidad y nivel de detalle heterogéneos, incluyendo mensajes vacíos o genéricos (por ejemplo, ``fix'' o ``update'').
+
+    \item La baja calidad de los mensajes de \textit{commit} dificulta la trazabilidad de los cambios y la comprensión del historial de un repositorio.
+
+    \item La redacción de mensajes descriptivos consume tiempo del desarrollador y, con frecuencia, se omite o se posterga.
+
+    \item La plataforma no dispone de ningún mecanismo asistido por \acrshort{IA} que apoye al usuario en la clasificación de los \textit{issues} ni en el resumen de los cambios de los \textit{commits}.
+\end{itemize}
+
+Por estos motivos, un mismo escenario puede recibir clasificaciones distintas según el usuario que lo gestione, y el historial de cambios pierde valor como fuente de trazabilidad del proyecto.
+
+\paragraph{Problema central}
+
+Como resultado de la situación descrita anteriormente, se identifica el siguiente problema central:
+
+\begin{quote}
+\textbf{Dependencia de procesos manuales, sin asistencia de inteligencia artificial, para clasificar el tipo y la severidad de los \textit{issues} y resumir los cambios de los \textit{commits} en la plataforma Mini-GitHub, lo que deriva en inconsistencias y en un historial de cambios de baja trazabilidad.}
+\end{quote}
+
+Esta situación genera demoras en la priorización de incidencias relevantes, inconsistencias en su clasificación y una pérdida progresiva de la calidad documental del repositorio. Según \cite{Lamkanfi2010}, la severidad de un reporte puede inferirse de su contenido textual, lo que evidencia que la clasificación manual desaprovecha información ya presente en los datos. De manera análoga, \cite{Jiang2017} señalan que la redacción manual de mensajes de \textit{commit} es una tarea repetitiva y frecuentemente descuidada, pese a su importancia para el mantenimiento del software. En ausencia de modelos que asistan estas tareas, el proceso permanece sujeto al criterio individual y susceptible de inconsistencias entre usuarios.
+
+\paragraph{Formulación de la pregunta problema}
+
+¿Cómo se pueden incorporar modelos de aprendizaje automático, entrenados por el equipo a partir de conjuntos de datos públicos, en la plataforma Mini-GitHub para asistir a los usuarios en la clasificación automática del tipo y la severidad de los \textit{issues} y en el resumen de los cambios de los \textit{commits}, de manera integrada con los microservicios existentes?
+
+
+\subsection{Objetivos}
+
+Dentro del presente trabajo se persiguen los siguientes objetivos.
+
+\subsubsection{Objetivo general}
+
+Desarrollar e integrar dos modelos de aprendizaje automático en la plataforma Mini-GitHub —un clasificador del tipo y la severidad de los \textit{issues} y un modelo de resumen automático de los cambios de los \textit{commits}—, entrenados por el equipo a partir de conjuntos de datos públicos, para asistir a los usuarios en el \textit{triage} de incidencias y en la documentación de los cambios de código, validando su funcionamiento con datos reales de la plataforma.
+
+\subsubsection{Objetivos específicos}
+
+    \begin{itemize}
+        \item Recolectar y preparar los conjuntos de datos de entrenamiento de \textit{issues} etiquetados por tipo y por severidad, y de pares \textit{diff}--resumen de \textit{commit}, para disponer de datos consistentes que alimenten ambos modelos, mediante análisis exploratorio, limpieza, tokenización y particionamiento en subconjuntos de entrenamiento, validación y prueba.
+
+        \item Entrenar y validar el modelo de clasificación de \textit{issues}, para asignar automáticamente a cada incidencia su tipo (error, mejora o pregunta) y su nivel de severidad, mediante vectorización del texto (\textit{Term Frequency--Inverse Document Frequency}) y algoritmos de aprendizaje automático supervisado, evaluando su desempeño con la métrica F1-score macro.
+
+        \item Entrenar y validar el modelo de resumen de \textit{commits}, para producir un resumen en lenguaje natural a partir de los cambios de código (\textit{diff}), mediante un modelo secuencia a secuencia de aprendizaje profundo, evaluando su desempeño con las métricas BLEU y ROUGE.
+
+        \item Integrar ambos modelos como microservicios \acrshort{REST} en la arquitectura de Mini-GitHub, para que sus predicciones sean consumidas por los servicios de \textit{issues} y de archivos, validando su funcionamiento mediante pruebas con datos reales de la plataforma.
+    \end{itemize}
+
+
+\subsection{Justificación}
+
+El desarrollo del presente proyecto se justifica desde cuatro perspectivas fundamentales que sustentan su pertinencia y valor.
+
+\subsubsection{Justificación técnica}
+
+Desde el punto de vista técnico, el proyecto integrará en una arquitectura de microservicios dos modelos de aprendizaje automático expuestos como servicios independientes mediante \acrshort{API} \acrshort{REST}, manteniendo el bajo acoplamiento característico del sistema. El desarrollo abarcará múltiples áreas de la ingeniería de software y de la ciencia de datos: la preparación y el procesamiento de datos textuales, la aplicación de técnicas de \acrshort{ML} y de \acrfull{PLN}, el entrenamiento de modelos de aprendizaje supervisado y de aprendizaje profundo, y la construcción de servicios de inferencia con \textit{FastAPI} y su contenerización con Docker. Adicionalmente, el proyecto aplicará prácticas básicas de \acrfull{MLOps}, como el versionado de los artefactos del modelo y su despliegue reproducible, alineando el componente de inteligencia artificial con el enfoque de \textit{DevOps} del módulo.
+
+\subsubsection{Justificación operativa}
+
+A nivel operativo, el proyecto responderá a limitaciones concretas en el uso de la plataforma Mini-GitHub. La clasificación automática del tipo y la severidad reducirá el esfuerzo manual de \textit{triage} y mejorará la priorización de las incidencias, mientras que el resumen automático de los cambios de los \textit{commits} reducirá el esfuerzo de redacción y elevará la calidad y consistencia del historial de cambios. En conjunto, ambas capacidades mejorarán la experiencia del usuario y la trazabilidad de los proyectos alojados en la plataforma.
+
+\subsubsection{Justificación académica}
+
+Desde la perspectiva académica, el proyecto contribuirá a la formación profesional al integrar, en un caso de aplicación real, los conocimientos del módulo de \textit{DevOps e Inteligencia Artificial}: la construcción de modelos de \acrshort{ML} como producto, su evaluación rigurosa mediante métricas estándar y su despliegue e integración en una arquitectura de software existente. Asimismo, el proyecto generará documentación técnica que podrá servir como referencia para futuros desarrollos similares.
+
+\subsubsection{Justificación metodológica}
+
+En términos metodológicos, el proyecto adoptará el marco \textit{CRISP-DM} (\textit{Cross-Industry Standard Process for Data Mining}) para guiar el ciclo de vida de los modelos —comprensión del problema y de los datos, preparación, modelado, evaluación y despliegue—, complementado con entregas incrementales que permitirán validar avances de forma continua. Este enfoque garantizará que el desarrollo de los modelos siga un proceso sistemático, reproducible y orientado a la evaluación objetiva de los resultados.
+
+
+\subsection{Alcances}
+
+\begin{itemize}
+  \item El proyecto contemplará el desarrollo de dos modelos: (1) un clasificador de \textit{issues} por tipo (error, mejora o pregunta) y por severidad (crítica, alta, media o baja), y (2) un modelo de resumen automático de los cambios de un \textit{commit} a partir de su \textit{diff}.
+
+  \item El entrenamiento de ambos modelos se realizará de forma \textit{offline} a partir de conjuntos de datos públicos, externos al entorno de producción de la plataforma.
+
+  \item Cada modelo se empaquetará y desplegará como un microservicio de inferencia mediante \textit{FastAPI} y Docker, exponiendo sus capacidades a través de \acrshort{API} \acrshort{REST} documentadas.
+
+  \item Los modelos se integrarán con los microservicios de \textit{issues} y de archivos de Mini-GitHub, persistiendo los resultados relevantes (por ejemplo, el tipo y la severidad estimados de cada incidencia).
+
+  \item El desempeño de los modelos se evaluará con métricas estándar: F1-score macro para la clasificación, y BLEU y ROUGE para el resumen de texto.
+
+  \item La validación final se realizará en el entorno de la plataforma, contrastando las predicciones de los modelos con datos reales de \textit{issues} y \textit{commits}.
+
+  \item El procesamiento se centrará en el contenido textual: título y descripción de los \textit{issues}, y representación textual de los \textit{diffs} de los \textit{commits}.
+\end{itemize}
+
+\subsection{Límites}
+
+\begin{itemize}
+  \item Los modelos serán entrenados por el equipo como producto final del proyecto; no se emplearán modelos de lenguaje de gran escala (\textit{Large Language Models}) de terceros mediante servicios externos de propósito general.
+
+  \item El modelo de resumen se limitará a los cambios de un \textit{commit} individual; no abarcará el resumen de varios \textit{commits}, la generación de descripciones completas de \textit{pull requests} ni la generación de código.
+
+  \item El sistema funcionará como herramienta de asistencia: las sugerencias de tipo, severidad y resumen podrán ser aceptadas o modificadas por el usuario, recayendo la decisión final en su criterio.
+
+  \item No se implementará un sistema de reentrenamiento automático y continuo en producción; el reentrenamiento de los modelos se realizará de forma manual y periódica.
+
+  \item El proyecto no abordará otras funcionalidades de inteligencia artificial fuera de las dos descritas (por ejemplo, búsqueda semántica, recomendación de repositorios o detección de duplicados).
+
+  \item El procesamiento se limitará a contenido textual; no contemplará el análisis de archivos binarios, imágenes ni recursos no textuales.
+
+  \item Los textos se procesarán principalmente en idioma inglés, en concordancia con los conjuntos de datos públicos utilizados.
+
+  \item No se realizará evaluación económica ni estudio de retorno de inversión del desarrollo.
+\end{itemize}
+
+
+\begin{comment}
+% ---------------------------------------------------------------------------
+% ENTRADAS .bib SUGERIDAS PARA LAS CITAS UTILIZADAS EN ESTE CAPÍTULO
+% (verificar/ajustar datos antes de la entrega; las URLs fueron confirmadas)
+% ---------------------------------------------------------------------------
+@inproceedings{Kallis2019,
+  author    = {Kallis, Rafael and Di Sorbo, Andrea and Canfora, Gerardo and Panichella, Sebastiano},
+  title     = {Ticket Tagger: Machine Learning Driven Issue Classification},
+  booktitle = {IEEE International Conference on Software Maintenance and Evolution (ICSME)},
+  year      = {2019}
+}
+
+@inproceedings{Lamkanfi2010,
+  author    = {Lamkanfi, Ahmed and Demeyer, Serge and Giger, Emanuel and Goethals, Bart},
+  title     = {Predicting the Severity of a Reported Bug},
+  booktitle = {7th IEEE Working Conference on Mining Software Repositories (MSR)},
+  year      = {2010}
+}
+
+@inproceedings{Jiang2017,
+  author    = {Jiang, Siyuan and Armaly, Ameer and McMillan, Collin},
+  title     = {Automatically Generating Commit Messages from Diffs using Neural Machine Translation},
+  booktitle = {32nd IEEE/ACM International Conference on Automated Software Engineering (ASE)},
+  year      = {2017}
+}
+
+@inproceedings{See2017,
+  author    = {See, Abigail and Liu, Peter J. and Manning, Christopher D.},
+  title     = {Get To The Point: Summarization with Pointer-Generator Networks},
+  booktitle = {55th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  year      = {2017}
+}
+
+@inproceedings{Liu2019,
+  author    = {Liu, Zhongxin and Xia, Xin and Treude, Christoph and Lo, David and Li, Shanping},
+  title     = {Automatic Generation of Pull Request Descriptions},
+  booktitle = {34th IEEE/ACM International Conference on Automated Software Engineering (ASE)},
+  year      = {2019},
+  note      = {arXiv:1909.06987}
+}
+
+@misc{NLBSE2024,
+  author       = {{NLBSE}},
+  title        = {{NLBSE'24} Tool Competition on Issue Report Classification},
+  year         = {2024},
+  howpublished = {\url{https://github.com/nlbse2024/issue-report-classification}}
+}
+
+@misc{Anthropic2026,
+  author       = {{Anthropic}},
+  title        = {Claude (Opus 4.8) [Modelo de lenguaje extenso]},
+  year         = {2026},
+  howpublished = {\url{https://claude.ai}}
+}
+% ---------------------------------------------------------------------------
+\end{comment}

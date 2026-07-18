@@ -1,0 +1,56 @@
+% No modificar estas líneas de código, por favor dirigirse a RECOMENDACIONES
+%
+% NOTA: capítulo reescrito para "DevOps e IA - Mini-GitHub".
+%
+\newpage
+\phantomsection\addcontentsline{toc}{section}{RECOMENDACIONES}
+
+%------------------------
+%
+%       RECOMENDACIONES
+%
+%------------------------
+
+\section*{RECOMENDACIONES}
+
+Con base en los resultados obtenidos y las limitaciones identificadas, se presentan recomendaciones orientadas a mejorar los modelos, fortalecer las prácticas de operación y proyectar líneas de trabajo futuras.
+
+\vspace{0.5em}
+
+\textbf{Recomendaciones para mejorar los modelos:}
+
+\begin{itemize}\itemsep=1pt
+    \item \textbf{Severidad:} incorporar señales adicionales al texto (metadatos del reporte), aplicar técnicas de aumento de datos o remuestreo para las clases minoritarias (\textit{alta}, \textit{baja}), y evaluar un conjunto de datos de severidad proveniente de GitHub para reducir el cambio de dominio respecto a Bugzilla.
+    \item \textbf{Resumidor:} explorar las técnicas señaladas en la literatura (CoDiSum/CoreGen para un codificador más rico, o CoRec para fusionar recuperación y generación), todas sin modelos preentrenados externos, así como ampliar el cómputo de entrenamiento.
+    \item \textbf{\textit{Diff} real en el editor:} el frontend construye actualmente un \textit{diff} aproximado de ``archivo nuevo''; se recomienda generar el \textit{diff} real contra la versión previa para mejorar la pertinencia del resumen.
+    \item \textbf{Confianza de severidad:} exponer también el nivel de confianza de la severidad (hoy sólo se muestra el del tipo), empleando un clasificador con estimación de probabilidad.
+\end{itemize}
+
+\vspace{0.5em}
+
+\textbf{Recomendaciones de operación (DevOps / MLOps):}
+
+\begin{itemize}\itemsep=1pt
+    \item \textbf{Ejecutar los \textit{pipelines} con datos reales:} correr los \textit{DAG} de Airflow sobre los datasets completos para producir y versionar los artefactos y las métricas en el registro de modelos, consolidando la trazabilidad del ciclo de vida.
+    \item \textbf{Integración y entrega continua de la infraestructura:} incorporar un \textit{pipeline} de integración y entrega continua (CI/CD) al repositorio de infraestructura (hoy el despliegue es manual) y automatizar la construcción y publicación de imágenes.
+    \item \textbf{Observabilidad y \textit{drift}:} instrumentar los servicios de \acrshort{IA} con métricas y \textit{health checks}, y monitorear la deriva de datos para programar reentrenamientos periódicos.
+    \item \textbf{Retroalimentación del usuario:} registrar las correcciones que el usuario hace sobre las sugerencias (tipo, severidad, mensaje) para construir un conjunto de datos propio y reentrenar los modelos con datos del dominio real.
+\end{itemize}
+
+\vspace{0.5em}
+
+\textbf{Recomendaciones metodológicas y de documentación:}
+
+\begin{itemize}\itemsep=1pt
+    \item Mantener el enfoque \textit{contract-first} y el bajo acoplamiento entre los servicios de \acrshort{IA} y la plataforma, que facilitó la integración sin modificar los servicios de negocio.
+    \item Añadir a los \textit{notebooks} de entrenamiento la exportación de figuras de diagnóstico (matrices de confusión y curvas de entrenamiento) para enriquecer la evidencia.
+    \item Sincronizar la documentación de infraestructura con el estado real del despliegue, evitando discrepancias entre lo documentado y lo implementado.
+\end{itemize}
+
+\vspace{0.5em}
+
+\textbf{Cierre integrador:}
+
+\vspace{0.3em}
+
+La implementación de estas recomendaciones fortalecería la solución en sus dos dimensiones: por el lado de la \acrshort{IA}, mejorando la calidad de las predicciones y cerrando el ciclo con retroalimentación del usuario; y por el lado de \textit{DevOps}, consolidando un ciclo de vida plenamente automatizado, observable y reproducible. En conjunto, estas líneas transformarían el sistema de un prototipo académico funcional a una plataforma de asistencia inteligente sostenible en el tiempo.

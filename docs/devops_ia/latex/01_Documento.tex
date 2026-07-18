@@ -1,0 +1,718 @@
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                                                                   %%%
+%%%  PLANTILLA DE TRABAJOS DE GRADO UNIVERSIDAD CATÓLICA BOLIVIANA    %%% 
+%%%                                                                   %%%
+%%%       AUTOR PRINCIPAL TEMPLATE:   RODOLFO JESÚS PRIETO MALDONADO  %%%
+%%%       E-MAIL                  :   rodolfo.jp.13@gmail.com         %%%
+%%%       AUTOR GUÍA/APOYO        :   EDWIN CALLA DURANDAL            %%%
+%%%       E-MAIL                  :   ecalla.d@ucb.edu.bo             %%%
+%%%                                   edwin.calla@gmail.com           %%%
+%%%       GESTIÓN ELABORACIÓN     :   2 - 2018                        %%%
+%%%       COMPILADOR              :   XeLateX                         %%%
+%%%     ÚLTIMA ACTUALIZACIÓN      :   06 de Junio de 2020             %%%
+%%%                                    Horas 21:00                    %%%
+%%%                                                                   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Junto a las modalidades de titulación y el objetivo que persigue la carrera de Ing. Mecatrónica de formar profesionales íntegros y de alto nivel, se dispone al estudiante el Template de Latex para la elaboración del documento de titulación de la carrera, como también para presentar cualquier tipo de trabajo dentro de la misma.
+% 
+% IMPORTANTE
+% El compilador (Compiler) a ser utilizado debe ser XeLateX
+%
+% IMPORTANTE
+% Los espacios a ser modificados serán identificados de la siguiente forma:
+
+%------------------------
+%
+%       DEDICATORIA
+%
+%------------------------
+
+% Los demás espacios y códigos son parte del formato, si se desea modificar los mismos, es bajo la responsabilidad del editor, siendo que podrá alterar el formato de la institución. 
+% Caso usted encuentre algún problema de formato u otro tipo, usted encontrará un formulario para reportar cualquier bug (error) en la página web donde se descargo el presente Template. 
+
+% Para comenzar a editar y trabajar, por favor dirigirse a la línea de código del presente archivo número 494 y llenar los espacios necesarios, posterior a esto, dirigirse a dedicatoria, resumen, introducción, marco teórico, marco metodológico, conclusiones, anexos y apéndices. Usted podrá modificar los mismos según sus necesidades. 
+
+%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%%%% NO MODIFICAR %%%%%%%%
+%%%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%% NO TOCAR %%%%%
+%%%%%% NO MODIFICAR %%%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%
+%%%%%%%%%%% NO TOCA R%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%%% NO TOCAR %%%%%
+
+% Inicio código formato
+%   Condiciones generales   |   tamaño de hoja, tamaño de letra en general
+\documentclass[letterpaper,12pt]{article}   % carta, letra 12
+
+%---------- PAQUETES --------------
+
+%  Márgenes
+\usepackage[left=3.5cm,right=3cm,top=3cm,bottom=3cm]{geometry}
+
+%% Básicos
+\usepackage[spanish]{babel}         % Idioma (silabación y gestión de palabras)
+\usepackage{csquotes}               % Reglas del lenguaje
+
+\usepackage{fontspec}               % Fuente Times New Roman
+\setmainfont{Arial}
+\usepackage{silence}                % Remueve Warnings
+\WarningsOff[transparent]
+
+\usepackage{enumitem}               % Habilita enumeración
+\usepackage{fancyhdr}               % Cabeceras y pies de página 
+\usepackage[table,xcdraw]{xcolor}   % Habilita cambios de color (texto, hoja, etc)
+\usepackage{titling}                % Títulos y nombres en el documento
+\usepackage{titlesec}               % Edición de formato de secciones
+\usepackage{tocloft}                % Índice
+\usepackage{setspace}               % Interlineado
+\usepackage{lscape}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage[linktocpage=true,hidelinks]{hyperref}           % Habilita hipervínculos 
+
+\usepackage{multicol}                                       % MULTIPLE COLUMNAS
+\usepackage{multirow}                                       % MULTIPLES FILAS
+\usepackage[absolute]{textpos}
+\usepackage[acronym,xindy]{glossaries}
+
+\usepackage{array}
+\usepackage{makecell}                                       % Eol on tables
+
+\usepackage{svg}
+%\usepackage[outline]{contour}
+
+\usepackage{xifthen}                                        % Provides \isempty test
+\usepackage{minted}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstdefinestyle{mypy}{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  numbers=left, numberstyle=\tiny, numbersep=6pt,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  captionpos=t,
+  xleftmargin=2em,
+  keywordstyle=\color{blue}\bfseries,
+  stringstyle=\color{teal!60!black},
+  commentstyle=\color{gray!70}\itshape
+}
+
+% Definición manual de JavaScript
+\lstdefinelanguage{JavaScript}{
+  morekeywords={typeof,new,true,false,catch,function,return,null,
+    switch,var,if,in,while,do,else,case,break,import,from,export,default},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class,export,boolean,throw,implements,import,this},
+  ndkeywordstyle=\color{magenta}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{green!50!black}\ttfamily,
+  stringstyle=\color{red!70!black}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstdefinestyle{javascript}{
+  language=JavaScript,
+  basicstyle=\ttfamily\small,
+  numbers=left,
+  numberstyle=\tiny,
+  frame=single,
+  breaklines=true,
+  showstringspaces=false
+}
+
+
+
+
+
+
+%% Matemáticos
+\usepackage{amsmath, amsthm, amssymb, amsfonts, upgreek}
+\spanishdecimal{.}
+
+%% Pseudo algoritmos
+\usepackage[]{algorithmic,algorithm}
+\renewcommand{\algorithmicrequire}{\textbf{Inicio}}
+\renewcommand{\algorithmicensure}{\textbf{Fin}}
+\usepackage[algo2e,boxed,linesnumbered,ruled,vlined]{algorithm2e}
+\floatname{algorithm}{Algoritmo}
+
+%% Código Matlab
+\usepackage{listings}
+\lstset{language=Matlab, breaklines=true, basicstyle=\footnotesize}
+\lstset{numbers=left, numberstyle=\tiny, stepnumber=1, numbersep=-2pt}
+
+\lstset{literate=
+  {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+  {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+  {à}{{\`a}}1 {è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+  {À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1
+  {ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+  {Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+  {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1
+  {Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1
+  {Ã}{{\~A}}1 {ã}{{\~a}}1 {Õ}{{\~O}}1 {õ}{{\~o}}1
+  {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1
+  {ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1
+  {ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1
+  {€}{{\euro}}1 {£}{{\pounds}}1 {«}{{\guillemotleft}}1
+  {»}{{\guillemotright}}1 {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{?`}}1
+}
+
+%% Imágenes
+\usepackage{graphicx}           % Inclusión de imágenes
+\usepackage{wrapfig}            % Optimiza texto alrededor de las imágenes
+\usepackage{float}              % Ubicación inteligente de imágenes 
+\usepackage[justification=raggedright,singlelinecheck=false]{caption}           % Habilita edición de títulos de figuras
+\usepackage{subfig}             % Habilita edición de sub-figuras
+
+\usepackage{pdfpages}           % Introduce pdf (anexos)
+\usepackage{longtable}
+
+
+%% Extras
+\usepackage{verbatim}           % Habilita big-comment y ambientes especiales
+\usepackage{lipsum} 
+\usepackage{array} 
+\usepackage{multirow}
+\usepackage{afterpage}          % obliga a una tabla a estar en su lugar
+                                %   \afterpage{\clearpage}  usa esto antes de la tabla
+
+% Gestión de bibliografía
+\usepackage[backend=biber, style=apa]{biblatex}
+\DeclareLanguageMapping{spanish}{spanish-apa}
+\addbibresource{bibliografia.bib}
+
+%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%%%% NO MODIFICAR %%%%%%%%
+%%%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%% NO TOCAR %%%%%
+%%%%%% NO MODIFICAR %%%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%
+%%%%%%%%%%% NO TOCA R%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%%% NO TOCAR %%%%%
+
+%------- FORMATO ------------------
+
+%grosor fijo de las columnas en las tablas
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{J}[1]{>{\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+% eol onsie tables
+\renewcommand\theadalign{bc}
+\renewcommand\theadfont{\bfseries}
+\renewcommand\theadgape{\Gape[4pt]}
+\renewcommand\cellgape{\Gape[4pt]}
+
+%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%%%% NO MODIFICAR %%%%%%%%
+%%%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%% NO TOCAR %%%%%
+%%%%%% NO MODIFICAR %%%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%
+%%%%%%%%%%% NO TOCA R%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%%% NO TOCAR %%%%%
+
+% --------- Formato de Índices ---------
+\renewcommand{\cftdotsep}{0.5}
+
+% Sangrías
+\renewcommand{\cftsubsecindent}{0em}
+\renewcommand{\cftsubsubsecindent}{0em}
+\renewcommand{\cftparaindent}{0em}
+
+% Puntos de conexión (líderes)
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftfigleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cfttableader}{\cftdotfill{\cftdotsep}}
+
+% Puntos tras número
+\renewcommand{\cftsecaftersnum}{.}
+\renewcommand{\cftsubsecaftersnum}{.}
+\renewcommand{\cftsubsubsecaftersnum}{.}
+\renewcommand{\cftparaaftersnum}{.}
+\renewcommand{\cftsubparaaftersnum}{.}
+
+% Título centrado y en mayúsculas
+\renewcommand{\cfttoctitlefont}{\hspace*{\fill}\normalsize\bfseries\MakeUppercase}
+\renewcommand{\cftaftertoctitle}{\hspace*{\fill}}
+\renewcommand{\cftlottitlefont}{\hspace*{\fill}\normalsize\bfseries\MakeUppercase}
+\renewcommand{\cftafterlottitle}{\hspace*{\fill}}
+\renewcommand{\cftloftitlefont}{\hspace*{\fill}\normalsize\bfseries\MakeUppercase}
+\renewcommand{\cftafterloftitle}{\hspace*{\fill}}
+
+% Espaciado antes de cada nivel
+\setlength{\cftbeforesecskip}{4pt}
+\setlength{\cftbeforesubsecskip}{2pt}
+\setlength{\cftbeforesubsubsecskip}{1pt}
+\setlength{\cftbeforeparaskip}{1pt}
+\setlength{\cftbeforesubparaskip}{1pt}
+\setlength{\cftbeforefigskip}{2pt}
+\setlength{\cftbeforetabskip}{2pt}
+
+% Formato de fuente por nivel
+\renewcommand{\cftsecfont}{\normalfont}              % Secciones en negrita
+\renewcommand{\cftsubsecfont}{\normalfont}           % Subsecciones normal
+\renewcommand{\cftsubsubsecfont}{\normalfont}        % Subsubsecciones normal
+\renewcommand{\cftparafont}{\normalfont\itshape}     % Párrafos en cursiva
+\renewcommand{\cftsubparafont}{\normalfont\itshape}  % Subpárrafos en cursiva
+
+% Números de página en texto normal
+\renewcommand{\cftsecpagefont}{\normalfont}
+
+% Personalización de figuras y tablas
+\cftsetindents{figure}{0em}{5em}
+\renewcommand{\cftfigpresnum}{\bfseries Figura }
+
+\cftsetindents{table}{0em}{4.6em}
+\renewcommand{\cfttabpresnum}{\bfseries Tabla }
+
+%-----------Referenciación-------------------------
+\hypersetup{
+    colorlinks=false, %set true if you want colored links
+    linktoc=all,      %set to all if you want both sections and subsections linked
+    linkcolor=black,  %choose some color if you want links to stand out
+}
+
+%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%%%% NO MODIFICAR %%%%%%%%
+%%%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%% NO TOCAR %%%%%
+%%%%%% NO MODIFICAR %%%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%
+%%%%%%%%%%% NO TOCA R%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%%% NO TOCAR %%%%%
+
+%-------------Comandos de citación-----------------------
+\newbibmacro*{cite:labelyear+extrayear}{%
+\iffieldundef{labelyear}
+{}
+{\printtext[bibhyperref]{%
+\printfield{labelyear}%
+\printfield{extrayear}}}}
+
+\newbibmacro*{cite:authoryear}{%
+\printnames[][-\value{listtotal}]{labelname}
+\setunit*{\printdelim{nameyeardelim}}%
+\printtext[bibhyperlink]{%
+\usebibmacro{cite:labelyear}}}
+
+\newbibmacro*{cite:authoryear2}{%
+Cf. \printnames[][-\value{listtotal}]{labelname}
+\setunit*{\printdelim{nameyeardelim}}%
+\printtext[bibhyperlink]{%
+\usebibmacro{cite:labelyear}}}
+
+\newbibmacro*{cite:authoryear3}{%
+\printnames[][-\value{listtotal}]{labelname}
+\printtext[bibhyperlink]{%
+(\usebibmacro{cite:labelyear}}}
+
+\newbibmacro*{cite:authoryear4}{%
+\printnames[][-\value{listtotal}]{labelname}
+\printtext[bibhyperlink]{%
+\usebibmacro{cite:labelyear}}}
+
+\DeclareCiteCommand{\cite}[]
+  {\usebibmacro{prenote}}
+  {\usebibmacro{citeindex}%
+   \printtext[bibhyperref]{\usebibmacro{cite:authoryear3}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote})}
+
+\DeclareCiteCommand*{\cite}[]
+  {\usebibmacro{prenote}}
+  {\usebibmacro{citeindex}%
+   \printtext[bibhyperref]{\usebibmacro{cite:authoryear3}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+  
+  \DeclareCiteCommand{\citel}[]
+  {\usebibmacro{prenote}}
+  {\usebibmacro{citeindex}%
+   \printtext[bibhyperref]{\usebibmacro{cite:authoryear4}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
+\DeclareCiteCommand*{\citel}[]
+  {\usebibmacro{prenote}}
+  {\usebibmacro{citeindex}%
+   \printtext[bibhyperref]{\usebibmacro{cite:authoryear4}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
+\DeclareCiteCommand{\citep}[\mkbibparens]
+  {\usebibmacro{prenote}}
+  {\usebibmacro{citeindex}%
+   \printtext[bibhyperref]{\usebibmacro{cite:authoryear}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
+\DeclareCiteCommand*{\citep}[\mkbibparens]
+  {\usebibmacro{prenote}}
+  {\usebibmacro{citeindex}%
+   \printtext[bibhyperref]{\usebibmacro{cite:authoryear}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+  
+  \DeclareCiteCommand{\citecf}[\mkbibparens]
+  {\usebibmacro{prenote}}
+  {\usebibmacro{citeindex}%
+   \printtext[bibhyperref]{\usebibmacro{cite:authoryear2}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
+\DeclareCiteCommand*{\citecf}[\mkbibparens]
+  {\usebibmacro{prenote}}
+  {\usebibmacro{citeindex}%
+   \printtext[bibhyperref]{\usebibmacro{cite:authoryear2}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+  
+    \renewcommand*{\postnotedelim}{\addcolon\addspace}
+    \DeclareFieldFormat{postnote}{#1}
+    \DeclareFieldFormat{multipostnote}{#1}
+
+%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%%%% NO MODIFICAR %%%%%%%%
+%%%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%% NO TOCAR %%%%%
+%%%%%% NO MODIFICAR %%%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%
+%%%%%%%%%%% NO TOCA R%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%%% NO TOCAR %%%%%
+
+%---------------Formato de títulos------------------------------------
+\titleformat{\section}
+{\normalsize\bfseries}{\thesection.}{1em}{}
+
+\titleformat{\subsection}
+{\normalsize\bfseries}{\thesubsection.}{1em}{}
+
+\titleformat{\subsubsection}
+{\normalsize\bfseries\itshape}{\thesubsubsection.}{1em}{}
+
+\setcounter{tocdepth}{4}%
+\setcounter{secnumdepth}{5}%
+
+\titleformat{\paragraph}
+{\normalsize\itshape}{\theparagraph.}{1em}{}
+
+\titleformat{\subparagraph}
+{\normalsize\itshape}{\thesubparagraph.}{1em}{}
+
+\titlespacing*{\section}
+{0pt}{0pt}{0pt}
+\titlespacing*{\subsection}
+{0pt}{0pt}{0pt}
+\titlespacing*{\subsubsection}
+{0pt}{0pt}{0pt}
+\titlespacing*{\paragraph}
+{0pt}{0pt}{0pt}
+\titlespacing*{\subparagraph}
+{0pt}{0pt}{0pt}
+
+%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%%%% NO MODIFICAR %%%%%%%%
+%%%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%% NO TOCAR %%%%%
+%%%%%% NO MODIFICAR %%%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%
+%%%%%%%%%%% NO TOCA R%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%%% NO TOCAR %%%%%
+
+%--------Formato de Figuras----------
+\graphicspath{ {Figuras/} }     % Buscar figuras en la carpeta Figuras
+
+                    
+\captionsetup[figure]           % Formato de figura
+{labelfont={bf},labelformat={default},labelsep=newline,name={Figura}}
+
+    \newcommand{\figura}[4][width=\textwidth]       % comando figura
+    {
+        \begin{figure}[!htb]                        % si la fig se mueve usar [h]
+            \centering                              % centrado
+            \caption{#3}                   % titulo de la fig
+            \includegraphics[#1]{#2}                % figura
+            \par
+            \centering{\textbf{Fuente:} #4}                  % fuente
+            \label{fig:#2}                          % referencia
+        \end{figure}
+    }
+    
+\begin{comment}
+
+\begin{figure}[hpt]
+    \centering
+    
+    % Título de figura
+    \caption{Título Figura}
+        % imagen 1
+        %           Título                              Tamaño              nombre img
+        \subfloat[titulo de img 1]{\includegraphics[width=0.4\columnwidth]{nombre_img_1}}
+        
+        % separaciones | agregar una de las opciones entre cada par de imágenes
+            \qquad      % figuras en la misma linea
+            \par        % siguiente línea
+            
+        % imagen 2
+        %           Título                              Tamaño              nombre img
+        \subfloat[título de img 2]{\includegraphics[width=0.4\columnwidth]{nombre_img_2}}
+        
+        % Se pueden agregar cuantas imágenes hagan falta
+    
+    %                           fuente
+    \centering{\textbf{Fuente:} Fuente de la información}
+    
+    %               referencia
+    \label{fig:nombre_de_referencia}
+\end{figure}
+
+\end{comment}
+
+%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%%%% NO MODIFICAR %%%%%%%%
+%%%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%% NO TOCAR %%%%%
+%%%%%% NO MODIFICAR %%%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%
+%%%%%%%%%%% NO TOCA R%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%%% NO TOCAR %%%%%
+
+%--------Formato de Ecuaciones----------
+
+%\captionsetup[equation]           % Formato de ecuación
+%{labelfont={bf},labelformat={default},labelsep=newline,name={Figura}}
+
+\addtolength{\belowdisplayskip}{-20pt} \setlength{\belowdisplayshortskip}{0pt}
+\addtolength{\abovedisplayskip}{-20pt} \setlength{\abovedisplayshortskip}{0pt}  % Espacio superior e
+                                                                                % Inferior a ecuación
+\setlength{\jot}{5mm}                       % Espacio entre ecuaciones en split y align
+
+\newenvironment{eq}[1][]
+    { \begin{equation} 
+        \def\temp{#1}\ifx\temp\empty
+          %<EMPTY>%
+        \else
+            \label{eqn:#1}
+        \fi
+    }
+    { \end{equation} }
+
+%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%%%% NO MODIFICAR %%%%%%%%
+%%%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%% NO TOCAR %%%%%
+%%%%%% NO MODIFICAR %%%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%
+%%%%%%%%%%% NO TOCA R%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%%% NO TOCAR %%%%%
+
+%--------Formato de Tablas----------
+
+\captionsetup[table]{labelfont={bf},labelformat=simple,labelsep=newline,name={Tabla}}
+
+\newenvironment{tabla}[3][]
+    { \begin{table}[!htb]
+      \begin{center}
+      \caption{#2}
+            \ifthenelse{\isempty{#1}}%
+            {\label{tab:#2}}           % if #1 is empty
+            {\label{tab:#1}}           % if #1 is not empty
+      \pushQED{\textbf{Fuente:} #3}   }
+    { \par
+      \vspace{2mm}
+      \popQED
+      \end{center} 
+      \end{table}}
+    
+%------------------------------------
+
+    \newcommand{\fig}[1]{\hyperref[fig:#1]{Figura \ref*{fig:#1}}}
+    \newcommand{\eqn}[1]{\hyperref[eqn:#1]{ecuación (\ref*{eqn:#1})}}
+    \newcommand{\tab}[1]{\hyperref[tab:#1]{Tabla \ref*{tab:#1}}}
+    \newcommand{\anx}[1]{\hyperref[anx:#1]{\ref*{anx:#1}}}
+    \newcommand{\apx}[1]{\hyperref[apx:#1]{\ref*{apx:#1}}}
+    
+%-------------------------------------
+
+% Reduce itemize space
+\let\olditemize\itemize
+\def\itemize{\olditemize\itemsep=-1pt }
+\setlist[itemize]{noitemsep, topsep=-1pt}
+
+% Evita que imágenes menores a 80% del total de la hoja se queden solas
+\renewcommand{\floatpagefraction}{.8}%
+
+%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%%%% NO MODIFICAR %%%%%%%%
+%%%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%% NO TOCAR %%%%%
+%%%%%% NO MODIFICAR %%%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%
+%%%%%%%%%%% NO TOCA R%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%%% NO TOCAR %%%%%
+
+%---------------------Formato de glosario-------------------------
+
+% \newacronym{gcd}{GCD}{Greatest Common Divisor}
+% \acrlong{gcd} -> Greatest Common Divisor
+% \acrshort{gcd} -> GCD
+% \acrfull{lcm} -> Greatest Common Divisor (GCD)
+
+%\setglossarystyle{long}% puede cambiar
+\newglossary[slg]{symbols}{not}{ntn}{Symbols}   %crea el tipo symbols en los glosarios
+\makeglossaries
+\input{Glosario.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DATOS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼%
+
+%-------------------------Personales--------------------------------
+
+% Título del Tema  
+\begin{comment}
+\title{Diseño e implementación de un sistema web para el control de KPIs en redes 3G y 4G, con validación automática de parámetros de configuración QoS, según los criterios de homologación interna de la empresa O-TLKM}  
+
+\title{Implementación de un sistema web para el monitoreo de KPIs y la validación de parámetros de configuración QoS en redes 3G y 4G, según criterios de homologación interna de la empresa O-TLKM}
+\end{comment}
+
+\title{Aplicación de modelos de aprendizaje automático orientados a la clasificación de issues y a la generación automática de sugerencias de commits dentro de la plataforma Mini-GitHub.}
+
+% Autor
+\author{David Hugo Rivas Gutiérrez\\Harold Joseph Sanchez Nogales\\Juan Jonas Maidana Alvarado\\Daniel Mauricio Tarqui Apaza}
+
+% Tutor             
+\newcommand{\tutor}{Mgr. Edwin Calla Durandal}     % Si es mujer cambiar \tutor por \tutora (funciona con todo el comité)
+
+% Relator
+\newcommand{\relator}{Ph.D. Jheser Guzman}
+
+% Director de Carrera
+\newcommand{\director}{Mgr. José Luis Dorado Ponce de León}
+
+% Rector Regional
+\newcommand{\rector}{Mgr. Ruth Tania Riskowsky Arraya}
+
+%-------------------------Académicos--------------------------------
+% universidad
+\newcommand{\universidad}{Universidad Católica Boliviana “San Pablo”}
+
+% Unidad Académica
+\newcommand{\unidad}{La Paz}
+
+% facultad 
+\newcommand{\facultad}{Facultad de Ingeniería}
+
+% departament
+\newcommand{\departamento}{Departamento de Ingeniería de Sistemas}
+
+% Diplomado
+
+\newcommand{\diplomado}{Devops e Inteligencia Artificial}
+
+% Tipo de titulación
+\newcommand{\titulacion}{Proyecto Final}
+
+% Grado Académico
+\newcommand{\grado}{Seminario de desarrollo FullStack}
+
+% Fecha
+\date{Marzo de 2026}
+
+
+%----------------Comentarios y Sugerencias---------------------------- 
+        \begin{comment}
+        
+            Múltiples autores se colocan como:
+                \author{Nombre 1\\Nombre 2\\Nombre 3}
+                
+            Tipos de titulación
+                - Tesis de Grado
+                - Proyecto de Grado
+                - Trabajo Dirigido
+            
+            Departamentos
+                - Departamento  de  Ingeniería  y  Ciencias  Exactas    
+                - Departamento  de  Administración,  Economía  y  Finanzas
+                - Departamento  de  Ciencias  Sociales  y  Humanas
+                - Facultad  de  Enfermería  Elizabeth  Seton 
+                - Facultad  de Teología
+                
+        \end{comment}
+        
+
+%▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲%
+%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%%%% NO MODIFICAR %%%%%%%%
+%%%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%% NO TOCAR %%%%%
+%%%%%% NO MODIFICAR %%%%%%%% NO MODIFICAR %%%%%%%%%% NO MODIFICAR %%%%%%% NO MODIFICAR %%%%%%%%%
+%%%%%%%%%%% NO TOCA R%%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%% NO TOCAR %%%%%%%%%%%%%% NO TOCAR %%%%%
+
+%-------------------- CONTENIDO ----------------------
+
+\begin{document}
+
+    % Espacios de pie y encabezado    
+        \fancyhf{}
+        \renewcommand{\headrulewidth}{0pt}
+        \renewcommand{\footrulewidth}{0pt}
+        \rfoot{\thepage}
+        \pagestyle{empty}       % Oculta el número de pagina
+
+
+    \input{02_Caratula.tex}
+    %\input{03_Dedicatorias.tex}
+    
+        
+    % Espaciados de hoja
+        \setlength{\parindent}{0em}     % Sangría
+        \setlength{\parskip}{3mm}       % Entre párrafos
+        \spacing{1.5}                   % Interlineado
+    
+    
+    %\input{04_Resumen.tex}
+    
+  
+    % Índice General
+        \setcounter{tocdepth}{4}            % Profundidad de índice
+        \renewcommand{\contentsname}{ÍNDICE} 
+        \addtocontents{toc}{\protect\thispagestyle{empty}}
+        \newpage\tableofcontents
+        
+  
+  
+    % Índice de figuras
+        \renewcommand{\listfigurename}{ÍNDICE DE FIGURAS}
+        \addtocontents{lof}{\protect\thispagestyle{empty}}
+        \newpage\listoffigures
+
+  
+    % Índice de tablas                                  BORRAR SI NO SE USARA
+        \renewcommand{\listtablename}{ÍNDICE DE TABLAS}
+        \addtocontents{lot}{\protect\thispagestyle{empty}}
+        \newpage\listoftables
+
+\begin{comment} 
+ 
+    % Lista de pseudocódigos                                  BORRAR SI NO SE USARA
+        \renewcommand{\listalgorithmname}{\centerline{ÍNDICE DE ALGORITMOS}}
+        \newpage\listofalgorithms
+        \thispagestyle{empty}
+        
+    % Índice de símbolos                                    BORRAR SI NO SE USARA
+        \newpage
+        %\glsaddall      % BORRAR PARA SOLO MOSTRAR EN GLOSARIO VALORES UTILIZADOS
+        \printglossary[type=symbols, title={\normalsize\centerline{\textbf{ÍNDICE DE SÍMBOLOS}}}]
+        \thispagestyle{empty}
+
+
+    %Glosario de acrónimos                                  BORRAR SI NO SE USARA
+        \newpage
+        \printglossary[type=\acronymtype, title={\normalsize\centerline{\textbf{GLOSARIO DE ACRÓNIMOS}}}]
+        \thispagestyle{empty}
+\end{comment}
+
+    % Estilo de hoja
+        \setcounter{page}{0}
+        \pagestyle{fancy}
+        
+    \input{05_Introduccion.tex}
+    \input{08_Marco_Practico.tex}
+    \input{09_Analisis_Resultados.tex}
+    \input{10_Conclusiones.tex}
+    \input{11_Recomendaciones.tex}
+
+    % Bibliografía
+        \newpage
+        \begingroup
+        \setstretch{0.8}
+        \setlength{\bibhang}{0pt}
+        \setlength\bibitemsep{12pt}
+%        \nocite{*}  % Adicionar para mostrar mostrar todas las bibliografías siempre
+        \printbibliography[heading=bibintoc,title={BIBLIOGRAFÍA}]
+        \endgroup
+
+    \input{Apendices.tex}
+    
+\end{document}

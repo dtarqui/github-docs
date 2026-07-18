@@ -1,0 +1,92 @@
+% No modificar estas líneas de código, por favor dirigirse a APÉNDICE más abajo.
+
+\newpage
+\addtocontents{toc}{\setlength{\cftbeforesecskip}{9pt} \protect\renewcommand{\protect\cftsecfont}{\bfseries}}
+\addtocontents{toc}{\cftpagenumbersoff{section}}
+\phantomsection\addcontentsline{toc}{section}{\normalfont APÉNDICES}
+\addtocontents{toc}{\cftpagenumberson{section}}
+
+% Portadilla de apéndice (título centrado en su propia página)
+\newcommand{\apendiceportada}[1]{%
+  \clearpage
+  \thispagestyle{fancy}%
+  \null\vfill
+  \begin{center}
+    {\sffamily\bfseries\LARGE Apéndice \thesection}\\[0.8cm]
+    {\sffamily\bfseries\large #1}
+  \end{center}
+  \vfill
+}
+
+% Apéndice en PDF: portadilla + contenido (sirve para cualquier nº de páginas)
+\newcommand{\apendicepdf}[3]{%
+  \refstepcounter{section}%
+  \phantomsection%
+  \label{#1}%
+  \addcontentsline{toc}{section}{Apéndice \thesection: #2}%
+  \markboth{Apéndice \thesection: #2}{}%
+  \apendiceportada{#2}%
+  \includepdf[
+    pages=-,
+    pagecommand={\thispagestyle{fancy}},
+    scale=0.9,
+    offset=0 -0.5cm
+  ]{PDFs/#3}%
+}
+
+\appendix
+\renewcommand{\thesection}{\Alph{section}}
+\addtocontents{toc}{
+    \protect\renewcommand{\protect\cftsecfont}{\normalfont}%
+    \protect\renewcommand{\protect\cftsecpresnum}{Apéndice }%
+    \setlength{\cftsecnumwidth}{2.3cm}%
+    \setlength{\cftbeforesecskip}{-8pt}%
+}
+\setcounter{page}{1}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\captionsetup{list=no}
+
+
+%------------------------
+%
+%       APÉNDICES
+%
+%------------------------
+
+% Apéndice A — Metodología (CRISP-DM) aplicada
+\apendicepdf{apendice:metodologia}{Metodología (CRISP-DM) aplicada}{Apendice_A_Metodologia.pdf}
+
+% Apéndice B — Modelos y entrenamiento (detalle)
+\apendicepdf{apendice:modelos}{Modelos y entrenamiento (detalle)}{Apendice_B_Modelos.pdf}
+
+% Apéndice C — Microservicios de inferencia
+\apendicepdf{apendice:microservicios}{Microservicios de inferencia}{Apendice_C_Microservicios.pdf}
+
+% Apéndice D — MLOps y despliegue
+\apendicepdf{apendice:mlops}{MLOps y despliegue}{Apendice_D_MLOps_Despliegue.pdf}
+
+% Apéndice E — Integración en el frontend
+\apendicepdf{apendice:frontend}{Integración en el frontend}{Apendice_E_Frontend.pdf}
+
+% Apéndice F — Evidencia de funcionamiento en producción
+\apendicepdf{apendice:evidencia}{Evidencia de funcionamiento en producción}{Apendice_F_Evidencia.pdf}
+
+
+% Apéndice G — Glosario de Acrónimos (generado con \printglossary)
+\refstepcounter{section}
+\phantomsection
+\label{apendice:acronimos}
+\addcontentsline{toc}{section}{Apéndice \thesection: Glosario de Acrónimos}
+\markboth{Apéndice \thesection: Glosario de Acrónimos}{}
+\apendiceportada{Glosario de Acrónimos}
+\clearpage
+
+\begingroup
+  \renewcommand{\glossarypreamble}{}          % sin texto adicional
+  \renewcommand{\glossarysection}[2][]{}      % suprime encabezado (1º arg OPCIONAL -> sin ] suelto)
+  \setglossarystyle{list}
+  \printglossary[type=\acronymtype, nonumberlist, title={}, toctitle={}]
+\endgroup
+
+\thispagestyle{fancy}
